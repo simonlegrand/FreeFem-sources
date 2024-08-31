@@ -15,7 +15,7 @@ namespace PETSc {
 
 template<typename P, typename MeshBemtool>
 struct HtoolCtx {
-    htool::VirtualGenerator<PetscScalar>* generator;
+    htool::VirtualGeneratorInUserNumbering<PetscScalar>* generator;
     bemtool::Dof<P>* dof;
     MeshBemtool* mesh;
     bemtool::Geometry* node;
@@ -46,12 +46,12 @@ static PetscErrorCode DestroyHtoolCtx(void *ctx) {
 }
 
 template<template<typename P, typename MeshBemtool> class Gen, typename P, typename MeshBemtool, typename std::enable_if< std::is_same< HtoolCtx<P, MeshBemtool>, Gen<P, MeshBemtool> >::value >::type* = nullptr>
-htool::VirtualGenerator<PetscScalar>* get_gen(Gen<P, MeshBemtool>* generator) {
+htool::VirtualGeneratorInUserNumbering<PetscScalar>* get_gen(Gen<P, MeshBemtool>* generator) {
     return generator->generator;
 }
 
 template<template<typename P, typename MeshBemtool> class Gen, typename P, typename MeshBemtool, typename std::enable_if< !std::is_same< HtoolCtx<P, MeshBemtool>, Gen<P, MeshBemtool> >::value >::type* = nullptr>
-htool::VirtualGenerator<PetscScalar>* get_gen(Gen<P, MeshBemtool>* generator) {
+htool::VirtualGeneratorInUserNumbering<PetscScalar>* get_gen(Gen<P, MeshBemtool>* generator) {
     return generator;
 }
 

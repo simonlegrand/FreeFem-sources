@@ -1171,7 +1171,7 @@ bemtool::PotKernelEnum whatTypeEnum(BemPotential *P) {
 
 
 template <class K, typename P, class MMesh>
-void ff_BIO_Generator(htool::VirtualGenerator<K>*& generator, BemKernel *typeKernel, bemtool::Dof<P>& dof, Complex alpha) {
+void ff_BIO_Generator(htool::VirtualGeneratorInUserNumbering<K>*& generator, BemKernel *typeKernel, bemtool::Dof<P>& dof, Complex alpha) {
     
     bemtool::BIOpKernelEnum ker1 = whatTypeEnum(typeKernel,0), ker2 = whatTypeEnum(typeKernel,1);;
     double kappaRe1 = typeKernel->wavenum[0].real(), kappaRe2 = typeKernel->wavenum[1].real();
@@ -1466,13 +1466,13 @@ void ff_BIO_Generator(htool::VirtualGenerator<K>*& generator, BemKernel *typeKer
 }
 
 template <class K, class mesh>
-void ff_BIO_Generator_Maxwell(htool::VirtualGenerator<K>*& generator, BemKernel *typeKernel, bemtool::Dof<bemtool::RT0_2D>& dof, Complex alpha) {
+void ff_BIO_Generator_Maxwell(htool::VirtualGeneratorInUserNumbering<K>*& generator, BemKernel *typeKernel, bemtool::Dof<bemtool::RT0_2D>& dof, Complex alpha) {
     cout << " mettre un msg d erreur pour dire que cette combi n existe pas" << endl;
     return;
 }
 
 template <class K>
-void ff_BIO_Generator_Maxwell(htool::VirtualGenerator<K>*& generator, BemKernel *typeKernel, bemtool::Dof<bemtool::RT0_2D>& dof, Complex alpha) {
+void ff_BIO_Generator_Maxwell(htool::VirtualGeneratorInUserNumbering<K>*& generator, BemKernel *typeKernel, bemtool::Dof<bemtool::RT0_2D>& dof, Complex alpha) {
 
     bemtool::BIOpKernelEnum ker1 = whatTypeEnum(typeKernel,0), ker2 = whatTypeEnum(typeKernel,1);;
     double kappaRe1 = typeKernel->wavenum[0].real(), kappaRe2 = typeKernel->wavenum[1].real();
@@ -1498,7 +1498,7 @@ void ff_BIO_Generator_Maxwell(htool::VirtualGenerator<K>*& generator, BemKernel 
 }
 
 template <class R, typename P, typename MeshBemtool, class MMesh>
-void ff_POT_Generator(htool::VirtualGenerator<R>*& generator,BemPotential *typePot, bemtool::Dof<P> &dof, MeshBemtool &mesh, bemtool::Geometry &node_output) {
+void ff_POT_Generator(htool::VirtualGeneratorInUserNumbering<R>*& generator,BemPotential *typePot, bemtool::Dof<P> &dof, MeshBemtool &mesh, bemtool::Geometry &node_output) {
     
     bemtool::PotKernelEnum pot = whatTypeEnum(typePot);
     double kappaRe = typePot->wavenum.real(),kappaIm = typePot->wavenum.imag();
@@ -1546,13 +1546,13 @@ void ff_POT_Generator(htool::VirtualGenerator<R>*& generator,BemPotential *typeP
 }
 
 template <class R, typename P, typename MeshBemtool >
-void ff_POT_Generator_Maxwell(htool::VirtualGenerator<R>*& generator,BemPotential *typePot, bemtool::Dof<P> &dof, MeshBemtool &mesh, bemtool::Geometry &node_output ){
+void ff_POT_Generator_Maxwell(htool::VirtualGeneratorInUserNumbering<R>*& generator,BemPotential *typePot, bemtool::Dof<P> &dof, MeshBemtool &mesh, bemtool::Geometry &node_output ){
     cout << " mettre un msg d erreur pour dire que cette combi n existe pas" << endl;
     return;
 }
 
 template <class R, typename P>
-void ff_POT_Generator_Maxwell(htool::VirtualGenerator<R>*& generator,BemPotential *typePot, bemtool::Dof<P> &dof, bemtool::Mesh2D &mesh, bemtool::Geometry &node_output ) {
+void ff_POT_Generator_Maxwell(htool::VirtualGeneratorInUserNumbering<R>*& generator,BemPotential *typePot, bemtool::Dof<P> &dof, bemtool::Mesh2D &mesh, bemtool::Geometry &node_output ) {
     
     bemtool::PotKernelEnum pot = whatTypeEnum(typePot);
     double kappaRe = typePot->wavenum.real(),kappaIm = typePot->wavenum.imag();

@@ -76,7 +76,7 @@ double KappaGrid_eval(KappaGrid *const &a, const double &xi, const double &yi, c
 }
 
 //////////////////////////// used for the volume integral ////////////////////////////
-class Generator_Volume: public VirtualGenerator<double>{
+class Generator_Volume: public VirtualGeneratorInUserNumbering<double>{
 public:
     const Mesh3& Th;
     KN<int> heade,nexte;
@@ -87,7 +87,7 @@ public:
     const int e2[10][2] = {{ 0,0},{ 0,1},{ 0,2},{ 0,3}, {1,1}, {1,2}, {1,3}, {2,2},{2,3}, {3,3}};
 
     Generator_Volume(pmesh3 pth3, KappaGrid* k):
-    VirtualGenerator<double>(pth3->nv,pth3->nv), Th(*pth3), kappa0(k),
+    VirtualGeneratorInUserNumbering<double>(), Th(*pth3), kappa0(k),
         edges(pth3->nt*3+pth3->nv,pth3->nv), heade(), nexte(pth3->nt*10) {
         // pour i,j -> liste de tet de sommet i,j
         // i,j -> liste des tet contenant i et j  ??
@@ -196,14 +196,14 @@ public:
     ~Generator_Volume(){}
 };
 
-VirtualGenerator<double>** init_Generator_Volume(VirtualGenerator<double>** const &  ppf, 
+VirtualGeneratorInUserNumbering<double>** init_Generator_Volume(VirtualGeneratorInUserNumbering<double>** const &  ppf, 
                                                  pmesh3 const & pTh, KappaGrid * const & kappa0) {
-    *ppf = dynamic_cast<VirtualGenerator<double>*> (new Generator_Volume(pTh,kappa0));
+    *ppf = dynamic_cast<VirtualGeneratorInUserNumbering<double>*> (new Generator_Volume(pTh,kappa0));
     return ppf;
 }
 
 //////////////////////////// used for the boundary integral ////////////////////////////
-class Generator_Boundary: public VirtualGenerator<double>{
+class Generator_Boundary: public VirtualGeneratorInUserNumbering<double>{
 public:
     const Mesh3 & Th3;
     const MeshS & ThS;
@@ -212,7 +212,7 @@ public:
     KN<int> headv, nextv;
 
     Generator_Boundary(pmesh3 pth3, pmeshS pthS, KN_<double> see, KappaGrid* k):
-    VirtualGenerator<double>(pth3->nv,pthS->nv), Th3(*pth3), ThS(*pthS), seeface(see),
+    VirtualGeneratorInUserNumbering<double>(), Th3(*pth3), ThS(*pthS), seeface(see),
         kappa0(k), headv(pthS->nv,-1), nextv(pthS->nt*3) {
 
         for(int k=0; k<ThS.nt; ++k)
@@ -287,10 +287,10 @@ public:
     ~Generator_Boundary(){}
 };
 
-VirtualGenerator<double> **init_Generator_Boundary(VirtualGenerator<double>** const &  ppf,
+VirtualGeneratorInUserNumbering<double> **init_Generator_Boundary(VirtualGeneratorInUserNumbering<double>** const &  ppf,
     pmesh3 const & pth3, pmeshS const & pthS, KN<double>* const & seeface,
     KappaGrid * const & kappa0) {
-    *ppf = dynamic_cast<VirtualGenerator<double>*> (new Generator_Boundary(pth3,pthS,*seeface,kappa0));
+    *ppf = dynamic_cast<VirtualGeneratorInUserNumbering<double>*> (new Generator_Boundary(pth3,pthS,*seeface,kappa0));
     return ppf;
 }
 
@@ -355,9 +355,9 @@ static void Init_RT() {
     Dcl_Type< KappaGrid * >(InitP< KappaGrid >, Destroy< KappaGrid >);
     zzzfff->Add("KappaGrid", atype< KappaGrid * >( ));
 
-    TheOperators->Add("<-", new OneOperator3_<VirtualGenerator<double> **, VirtualGenerator<double> **,
+    TheOperators->Add("<-", new OneOperator3_<VirtualGeneratorInUserNumbering<double> **, VirtualGeneratorInUserNumbering<double> **,
     pmesh3, KappaGrid *>(init_Generator_Volume));
-    TheOperators->Add("<-", new OneOperator5_<VirtualGenerator<double> **, VirtualGenerator<double> **,
+    TheOperators->Add("<-", new OneOperator5_<VirtualGeneratorInUserNumbering<double> **, VirtualGeneratorInUserNumbering<double> **,
     pmesh3, pmeshS, KN<double>*, KappaGrid *>(init_Generator_Boundary));
 
     TheOperators->Add(
