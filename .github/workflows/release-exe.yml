@@ -1,9 +1,14 @@
 name: Release Windows
+
+# Reusable workflow, to be called by release.yml
 on:
-  workflow_run:
-    workflows: ['Release']
-    types:
-      - completed
+  workflow_call:
+
+# on:
+#   workflow_run:
+#     workflows: ['Release']
+#     types:
+#       - completed
 
 jobs:
   windows:
@@ -66,7 +71,7 @@ jobs:
           ./reconfigure
 
       - name: Build
-        run: make -j2
+        run: make -j 4
 
       - name: Check
         continue-on-error: true

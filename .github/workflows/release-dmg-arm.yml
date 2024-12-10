@@ -1,14 +1,19 @@
 name: Release MacOS ARM64
+
+# Reusable workflow, to be called by release.yml
 on:
-  workflow_run:
-    workflows: ['Release']
-    types:
-      - completed
+  workflow_call:
+
+# on:
+#   workflow_run:
+#     workflows: ['Release']
+#     types:
+#       - completed
 
 jobs:
   macos:
     name: DMG release
-    runs-on: macos-latest
+    runs-on: macos-14
 
     env:
       CC: clang
@@ -21,10 +26,10 @@ jobs:
       - uses: actions/checkout@main
 
       - name: Install
-        run: brew install gcc coreutils
+        run: brew install gcc coreutils m4 git flex bison cmake wget autoconf automake
 
       - name: Symlink GCC & Fortran
-        run: ./etc/actions/macos/link_fortran.sh "$ARCH"
+        run: ./etc/actions/macos/link_fortran.sh "$(uname -p)"
 
       - name: Version
         id: version
@@ -68,7 +73,7 @@ jobs:
       - name: Build
         run: |
           ./reconfigure
-          make -j2
+          make -j 3
 
       - name: Check
         continue-on-error: true

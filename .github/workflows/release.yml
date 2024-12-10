@@ -1,8 +1,10 @@
+# This workflow creates a Github Release
 name: Release
 on:
   push:
     branches:
       - master
+      - 'releases/**'
 
 jobs:
   create:
@@ -37,3 +39,19 @@ jobs:
           body: ${{ steps.changelog.outputs.release_notes }}
           draft: false
           prerelease: true
+
+  # release-deb-2404:
+  #   uses: ./.github/workflows/release-deb-2404.yml
+
+  release-deb-2204:
+    uses: ./.github/workflows/release-deb-2204.yml
+
+  release-exe:
+    uses: ./.github/workflows/release-exe.yml
+
+  release-dmg-arm:
+    uses: ./.github/workflows/release-dmg-arm.yml
+
+  release-dmg:
+    uses: ./.github/workflows/release-dmg.yml
+    
