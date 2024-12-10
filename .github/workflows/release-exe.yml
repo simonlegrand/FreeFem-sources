@@ -66,7 +66,7 @@ jobs:
           ./reconfigure
 
       - name: Build
-        run: make -j2
+        run: make -j 4
 
       - name: Check
         continue-on-error: true

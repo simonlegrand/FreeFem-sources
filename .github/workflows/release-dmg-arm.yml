@@ -8,7 +8,7 @@ on:
 jobs:
   macos:
     name: DMG release
-    runs-on: macos-latest
+    runs-on: macos-14
 
     env:
       CC: clang
@@ -24,7 +24,7 @@ jobs:
         run: brew install gcc coreutils
 
       - name: Symlink GCC & Fortran
-        run: ./etc/actions/macos/link_fortran.sh "$ARCH"
+        run: ./etc/actions/macos/link_fortran.sh "$(uname -p)"
 
       - name: Version
         id: version
@@ -68,7 +68,7 @@ jobs:
       - name: Build
         run: |
           ./reconfigure
-          make -j2
+          make -j 3
 
       - name: Check
         continue-on-error: true
