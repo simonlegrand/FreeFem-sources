@@ -264,7 +264,7 @@ int mylex::EatCommentAndSpace(string *data)
         ffassert(count++<100);
         eatspaces();
         // eat markdown <CR>~~~ or comment
-        if(ifblock('~')==1 ||ifblock('`')==1 ) {
+        if(incomment==1 && (ifblock('~')==1 ||ifblock('`')==1 )) {
             LineNumber();// eat CR ???
             incomment=3;// in markdown
             cnl=1; // starting line !!
