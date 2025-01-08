@@ -118,11 +118,12 @@ if [ "0$FFnp" -gt 0 ] ; then
 else
 	FLAGS_FFPP_B="${FLAGS_FFPP}"
 fi
-export MPIEXEC_TIMEOUT=300
+export MPIEXEC_TIMEOUT=50
 test -z "${COMMONPROGRAMFILES+x}" -a -z "${WINDIR+x}" && ulimit -t 60
 ${TEST_FFPP} ${FLAGS_FFPP_B}  "$@" ${FLAGS_FFPP_A}>$log_file 2>&1
 estatus=$?
-FAIL_CPU_LIMIT=`tail -100 $log_file|egrep -i 'Cputime limit exceeded|MPIEXEC_TIMEOUT|Timeout after'|wc -l`
+echo "status " $estatus >>$log_file 
+FAIL_CPU_LIMIT=`tail -100 $log_file|egrep -i 'Cputime limit exceeded|MPIEXEC_TIMEOUT|APPLICATION TIMED OUT|Timeout after'|wc -l`
 fi
 
 ## Add an error suffix in order to extract errored tests only
