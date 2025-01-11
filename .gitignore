@@ -328,7 +328,7 @@ src/mpi/compositeFESpace.cpp
 *test-driver
 examples/eigen/modes.txt
 examples/plugin/ffmaster
-examples/plugin/ffmaster.dSYM/
+examples/plugin/ffmaster.dSYM
 examples/plugin/toto.dt
 examples/tutorial/A.txt
 examples/tutorial/toto.Th
@@ -381,6 +381,8 @@ mdate-sh
 ylwrap
 py-compile
 texinfo.tex
+md2edp
+md2edp.dSYM
 # Local Variables:
 # mode:conf
 # ispell-local-dictionary:"british"
