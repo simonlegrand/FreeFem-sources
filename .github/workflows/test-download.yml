@@ -1,0 +1,24 @@
+name: Test download dependencies
+
+on:
+  push:
+    branches:
+      - develop
+      - master
+      - test-mirrors
+
+  workflow_dispatch:
+
+  pull_request:
+    branches:
+      - develop
+jobs:
+  build:
+    runs-on: macos-14
+
+    steps:
+      - name: Download from ljll server
+        run: curl -L https://www.ljll.fr/hecht/pkg/metis-5.1.0.tar.gz --output metis-5.1.0.tar.gz -v
+      - name: Download for Pierre server
+        run: curl -L https://joliv.et/freefem/pkg/metis-5.1.0.tar.gz --output metis-5.1.0.tar.gz -v
+
