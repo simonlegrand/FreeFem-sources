@@ -48,7 +48,7 @@ diff --color -Naur petsc-3.22.3/config/BuildSystem/config/packages/PTScotch.py p
 diff --color -Naur petsc-3.22.3/config/BuildSystem/config/packages/SuiteSparse.py petsc-3.22.3-p1/config/BuildSystem/config/packages/SuiteSparse.py
 --- petsc-3.22.3/config/BuildSystem/config/packages/SuiteSparse.py	2024-03-30 01:34:11
 +++ petsc-3.22.3-p1/config/BuildSystem/config/packages/SuiteSparse.py	2024-06-06 12:00:43
-@@ -56,4 +56,12 @@
+@@ -56,4 +56,10 @@
      args.append('-DSUITESPARSE_USE_OPENMP:BOOL='+('ON' if self.openmp.found else 'OFF'))
      args.append('-DSUITESPARSE_USE_64BIT_BLAS:BOOL='+('ON' if self.blasLapack.has64bitindices else 'OFF'))
  
@@ -58,8 +58,6 @@ diff --color -Naur petsc-3.22.3/config/BuildSystem/config/packages/SuiteSparse.p
 +        args = self.rmArgsStartsWith(args,['-DCMAKE_CXX_COMPILER','-DCMAKE_C_COMPILER'])
 +        args.append('-DCMAKE_C_COMPILER="'+mpicc.split(None, 1)[0]+'"')
 +        args.append('-DCMAKE_CXX_COMPILER="'+mpicxx.split(None, 1)[0]+'"')
-+        if self.setCompilers.isDarwin(self.log):
-+            args.append('-DCMAKE_SHARED_LINKER_FLAGS="-Wl,-ld_classic -Wl,-commons,use_dylibs"')
      return args
 diff --color -Naur petsc-3.22.3/config/BuildSystem/config/packages/SuperLU.py petsc-3.22.3-p1/config/BuildSystem/config/packages/SuperLU.py
 --- petsc-3.22.3/config/BuildSystem/config/packages/SuperLU.py	2024-03-30 01:34:11
@@ -108,14 +106,3 @@ diff --color -Naur petsc-3.22.3/config/BuildSystem/config/packages/mmg.py petsc-
      if self.getDefaultIndexSize() == 64:
        int64_t = '''
  #if !(defined(PETSC_HAVE_STDINT_H) && defined(PETSC_HAVE_INTTYPES_H) && defined(PETSC_HAVE_MPI_INT64_T))
-diff --color -Naur petsc-3.22.3/config/BuildSystem/config/setCompilers.py petsc-3.22.3-p1/config/BuildSystem/config/setCompilers.py
---- petsc-3.22.3/config/BuildSystem/config/setCompilers.py	2024-04-26 15:24:11
-+++ petsc-3.22.3-p1/config/BuildSystem/config/setCompilers.py	2024-06-06 12:00:52
-@@ -1991,7 +1991,6 @@
-                   'not supported','is unsupported and will be skipped','illegal option',
-                   'invalid option','invalid suboption',
-                   'unbekannte option',
--                  'warning: -commons use_dylibs is no longer supported, using error treatment instead',
-                   'warning: -bind_at_load is deprecated on macOS',
-                   'no se reconoce la opci','non reconnue','warning: unsupported linker arg:','ignoring unknown option')
-     outlo = output.lower()

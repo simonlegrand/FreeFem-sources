@@ -67,7 +67,7 @@ ifeq ($(FF_generic_petsc), yes)
 FLAGS_MTUNE := -mtune=generic
 endif
 unexport MAKEFLAGS
-COMMON_FLAGS := --with-debugging=0 COPTFLAGS='-O3 $(FLAGS_MTUNE)' CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' FOPTFLAGS='-O3 $(FLAGS_MTUNE)' --with-ssl=0 --with-x=0 --with-fortran-bindings=0 --with-cudac=0 --with-tau-perfstubs=0 \
+COMMON_FLAGS := --with-debugging=0 COPTFLAGS='-O3 $(FLAGS_MTUNE)' CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' FOPTFLAGS='-O3 $(FLAGS_MTUNE)' --with-ssl=0 --with-x=0 --with-fortran-bindings=0 --with-syclc=0 --with-hipc=0 --with-cudac=0 --with-tau-perfstubs=0 \
 		--download-slepc --download-hpddm
 
 ifneq ($(wildcard ~/.petsc_pkg),)
@@ -82,10 +82,10 @@ endif
 
 ifeq ($(MPICC)$(MPICXX),)
 ifeq ($(WIN32DLLTARGET),)
-PETSC_DOWNLOAD += --with-cc='$(CC)' --with-cxx='$(CXX)' --download-mpich=https://www.mpich.org/static/downloads/4.3.0rc3/mpich-4.3.0rc3.tar.gz
+PETSC_DOWNLOAD += --with-cc='$(CC)' --with-cxx='$(CXX)' --download-mpich=https://www.mpich.org/static/downloads/4.3.0rc4/mpich-4.3.0rc4.tar.gz
 PETSC_DOWNLOAD_C += --with-mpi-dir=$(DIR_INSTALL_REAL)
 ifeq ($(DARWIN),Darwin)
-PETSC_DOWNLOAD += --download-mpich-device=ch4:ofi 'LDFLAGS=-Wl,-ld_classic -Wl,-commons,use_dylibs'
+PETSC_DOWNLOAD += --download-mpich-device=ch4:ofi
 endif
 ifneq ($(FC),)
 PETSC_DOWNLOAD += --with-fc='$(FC)'
