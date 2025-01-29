@@ -44,6 +44,7 @@ Name: "{app}\idp"; Permissions: everyone-full
 IFMPI Name: "{app}\examples\mpi"; Permissions: everyone-full
 IFMPI Name: "{app}\examples\hpddm"; Permissions: everyone-full
 IFMPI Name: "{app}\examples\ffddm"; Permissions: everyone-full
+IFMPI Name: "{app}\examples\bem"; Permissions: everyone-full
 
 ; PETSc
 IFPETSC Name: "{app}\ff-petsc"; Permissions: everyone-full
@@ -145,6 +146,7 @@ Source: "examples\3dCurve\*.edp"; DestDir: "{app}\examples\3dCurve"
 IFMPI Source: "examples\mpi\ff*.txt"; DestDir: "{app}\examples\mpi"
 IFMPI Source: "examples\mpi\*.edp"; DestDir: "{app}\examples\mpi"
 IFMPI Source: "examples\hpddm\*.edp"; DestDir: "{app}\examples\hpddm"
+IFMPI Source: "examples\bem\*.edp"; DestDir: "{app}\examples\bem"
 ;Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples\load"
 ;Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples\tutorial"
 ;Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples\examples"
@@ -181,6 +183,8 @@ Name: "{group}\Examples\3dSurf"; Filename: "{app}\examples\3dSurf"
 Name: "{group}\Examples\3dCurve"; Filename: "{app}\examples\3dCurve"
 IFMPI Name: "{group}\Examples\mpi"; Filename: "{app}\examples\mpi"
 IFMPI Name: "{group}\Examples\hpddm"; Filename: "{app}\examples\hpddm"
+IFMPI Name: "{group}\Examples\bem"; Filename: "{app}\examples\bem"
+
 Name: "{group}\Uninstall FreeFem++ VERSION"; Filename: "{uninstallexe}"
 
 ; Desktop
