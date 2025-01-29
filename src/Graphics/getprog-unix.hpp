@@ -245,6 +245,7 @@ check_plugin=0; // no pluging to check ..
 
     for (i = l - 1; i >= 0; i--)
       if (edpfilenamearg[i] == sepdir) break;
+      else if (edpfilenamearg[i] == '/') break; // jav 2025 FH: add for case with the 2 sepdir / and \
 
     if (i > 0) {
       char *dir = new char[l + 1];
@@ -252,7 +253,12 @@ check_plugin=0; // no pluging to check ..
       strcpy(fn,  edpfilenamearg+i+1);
       dir[i] = 0;
       int err = 0;
-      if (verbosity > 1)
+      if( edpfilenamearg[i] != sepdir && verbosity)
+      {
+          cout << " Warning:  dirsep of path is not "<< sepdir << endl;
+          cout << " path : "<<edpfilenamearg<< endl;
+      }
+      if (verbosity > 1 )
         cout << " chdir '" << dir << "'" << endl;
       // FFCS: mingw64 API change
       err = chdir(dir);
