@@ -760,15 +760,18 @@ const Fem2D::Mesh *  BuildMesh(Stack stack,const  Fem2D::MeshL **ppmshL , int nb
   else
   {
       Gh->AfterRead();
-      int nbtx= nbvmax ? nbvmax :  (Gh->nbv*Gh->nbv)/9 +1000;
-      if(verbosity> 99) cout << " ** Gh = " << endl << *Gh << endl << " *** " <<endl; ;
+      
+     double nbx  = min(((double) nbvmax*(double)nbvmax)/9.+1000,0.5e9);
+     int nbvx = nbvmax ? nbvmax : (int) nbx ;
+    //  int nbtx= nbvmax ? nbvmax :  (Gh->nbv*Gh->nbv)/9 +1000;
+      if(verbosity> 99) cout << " ** Gh = " << endl << *Gh << endl << " *** " <<nbvx<<endl; ;
       Triangles *Th = 0;
       try {
-      Th =new Triangles( nbtx ,*Gh);
+      Th =new Triangles( nbvx ,*Gh);
           if(SplitEdgeWith2Boundary)
           {
               long nbs=1,nbc=0;
-              while (nbs >0 && nbc++ <2 && Th->nbt < nbtx-1 )
+              while (nbs >0 && nbc++ <2 && Th->nbv < nbv-1 )
               {
                 nbs=  Th->SplitInternalEdgeWithBorderVertices();
                 if(verbosity>1)  cout << "BuildMesh: SplitInternalEdgeWithBorderVertices:  count ="<< nbc << " " << nbs << endl;
@@ -1139,7 +1142,7 @@ const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool jus
           if(SplitEdgeWith2Boundary)
           {
               long nbs=1,nbc=0;
-              while (nbs >0 && nbc++ <2 && Th->nbt < nbtx-1 )
+              while (nbs >0 && nbc++ <2 && Th->nbv < nbtx-1 )
               {
                 nbs=  Th->SplitInternalEdgeWithBorderVertices();
                 if(verbosity>1)  cout << "BuildMesh: SplitInternalEdgeWithBorderVertices:  count ="<< nbc << " " << nbs << endl;
@@ -1420,7 +1423,9 @@ const Fem2D::Mesh *  buildmeshbamg( string * const & s, int nbvxin) {
   using bamg::Triangles;
   using bamg::Geometry;
   Geometry Gh(s->c_str());
-  int nbvx = nbvxin ? nbvxin : ((Gh.nbv*Gh.nbv)/9 +1000);
+  double nbx  = min(((double) Gh.nbv*(double) Gh.nbv)/9.+1000,0.5e9);
+    
+  int nbvx = nbvxin ? nbvxin : (int) nbx ;
   Triangles * bTh=  new Triangles(nbvx,Gh);
   const Fem2D::Mesh * m=bamg2msh(bTh,false);// no renum
   delete bTh;

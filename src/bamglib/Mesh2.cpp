@@ -3076,6 +3076,8 @@ namespace bamg {
     name = fname;
     warning = 0;
     if (inbvx) {
+        if(verbosity>4) 
+        cout <<"nbvx,nbtx " <<  inbvx << " " << nbtx <<endl;
       vertices = new Vertex[nbvx];
       assert(vertices);
       ordre = new Vertex *[nbvx];
