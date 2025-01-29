@@ -48,12 +48,15 @@ $(SRCDIR)/tag-tar:
 
 
 clean:
+	-rm ../lib/WHERE.mshmet $(SRCDIR)/$(INSTALL)/lib/libmshmet.a
+	-rm $(SRCDIR)/$(INSTALL)/include/mshmetlib.h $(MSHMET_OBJDIR)/libmshmet.a
+	cd  src; make clean
 	-rm ff-flags
 #	FFCS - make sure that all directories are cleaned. Thisis especially important under Windows because there is no
 #	compilation dependencies control there (see
 #	[[file:c:/cygwin/home/alh/ffcs/dist/configure.ac::dependency_tracking]])
 	-rm -rf mshmet.????.??.??
-	-rm FAIT $(FAIRE) 
+	-rm FAIT src/FAIT $(FAIRE) 
 
 ff-flags: ../Makefile 
 	grep 'abs_top_builddir *=' ../Makefile >> ff-flags
