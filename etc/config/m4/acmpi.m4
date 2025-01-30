@@ -65,6 +65,8 @@ if test "ff_mpi" != "no" ; then
  ff_mpi_option=""
  ff_okkk=`"$MPIRUN"  -np 2 --oversubscribe echo ff__okkk 2>/dev/null| grep ff__okkk |wc -l`
  if test "$ff_okkk" -eq 2 ; then ff_mpi_option="--oversubscribe" ; fi 
+ ff_okkk=`"$MPIRUN"  -np 1 --timeout=60 echo ff__okkk 2>/dev/null| grep ff__okkk |wc -l`
+ if test "$ff_okkk" -eq 1 ; then ff_mpi_option="$ff_mpi_option --timeout=60" ; fi 
  AC_MSG_RESULT($ff_mpi_option)
 fi
 
