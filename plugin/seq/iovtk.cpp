@@ -1413,7 +1413,7 @@ Mesh *VTK_Load(const string &filename, bool bigEndian, KN<KN<double> >* pfields)
     exit(1);
   }
 
-  char buffer[256], buffer2[256];
+  char buffer[256], buffer2[256], buffer3[256];
 
   res = fgets(buffer, sizeof(buffer), fp);    // version line
   res = fgets(buffer, sizeof(buffer), fp);    // title
@@ -1528,6 +1528,8 @@ Mesh *VTK_Load(const string &filename, bool bigEndian, KN<KN<double> >* pfields)
   int *firstCell = new int[numElements + 1];
   int *TypeCells = new int[numElements];
   int numIntCells = 0;
+  bool loadlabs = 0;
+  int *LabCells = 0;
 
   for (unsigned int i = 0; i < numElements; i++) {
     int numVerts, n[100];
@@ -1639,6 +1641,75 @@ Mesh *VTK_Load(const string &filename, bool bigEndian, KN<KN<double> >* pfields)
     }
   }
 
+  int nbp=0,nbf=0, err=0;
+  if (fscanf(fp, "%s %d", buffer, &nbp) != 2) {
+    cout << "error in reading vtk files pfields" << endl;
+    err++;
+  }
+  int startdatapoint=0;
+  if(err==0) {
+    int nf=-1;
+    /*
+    CELL_DATA 209726
+    Scalars  Label int 1
+    LOOKUP_TABLE FreeFempp_table
+    ....
+    LOOKUP_TABLE FreeFempp_table 7
+    4*7 value
+    */
+    if (strcmp(buffer, "CELL_DATA")) { // read region number if exist
+      if (strcmp(buffer, "POINT_DATA")) {
+        cout << "VTK reader can only read CELL_DATA or POINT_DATA datasets:  not " << buffer<< " " << nbp<<  endl;
+        err=1;
+      }
+      else startdatapoint=1;
+    }
+    else {
+      if ((!err) &&(fscanf(fp, "%s %s %s %d\n", buffer, buffer2,buffer3,&nbf) != 4)) {
+        cout << "error in reading vtk files FIELD FieldData" << endl;
+        err++;
+      }
+    }
+    loadlabs = !strcmp(buffer2, "Label");
+    if (loadlabs && err==0)
+      LabCells = new int[numElements];
+    if (strcmp(buffer3, "int") !=0) // not integer
+      err++;
+    if ((!err) &&(fscanf(fp, "%s %s\n", buffer, buffer2) != 2))
+      err++;
+    // read nbf
+    //cout << " err= " << err << " read nbp "<< nbp << endl;
+    if(err==0)
+      for( nf=0 ; nf < nbp; nf++) {
+        int ii[1];
+        if (binary) {
+          if (fread(ii, sizeof(int), 1, fp) != 1) err++;
+          if (!bigEndian) FreeFEM::SwapBytes((char *)&ii[0], sizeof(int), 1);
+        }
+        else {
+          if (fscanf(fp, "%d", ii) != 1) err++;
+        }
+        if (loadlabs)
+          LabCells[nf] = ii[0];
+        if(err) break;
+      }
+    if(err) cout << " err reading CELL_DATA  at " << nf << endl;
+    if ((!err) &&(fscanf(fp, "%s %s %d\n", buffer, buffer2,&nbf) != 3 ) ) err++;
+    nf =-1;
+    if(err==0)
+      for( nf=0 ; nf < nbf; nf++) {
+        float f[4];
+        char cc[4];
+        if (binary) {
+          if (fread(cc, sizeof(char), 4, fp) != 4) err++;}
+        else {
+          if (fscanf(fp, "%f %f %f %fa",f+0,f+1,f+2,f+3) != 4) err++;}
+        if(err) break;
+      }
+    if(err&& nf>=0) cout << " err LOOKUP_TABLE FreeFempp_table at " << nf << " " << err << endl;
+    startdatapoint=0;
+  }
+
   if(pfields) {
     if(verbosity>1)   cout << " try  reading POINT_DATA  " << endl;
          
@@ -1739,7 +1810,7 @@ Mesh *VTK_Load(const string &filename, bool bigEndian, KN<KN<double> >* pfields)
   for (unsigned int i = 0; i < numElements; i++) {
     int type = TypeCells[i];
     int iv[3];
-    int label = 1;
+    int label = loadlabs ? LabCells[i] : 1;
 
     switch (type) {
       case 1:    // Vertex
@@ -1776,8 +1847,13 @@ Mesh *VTK_Load(const string &filename, bool bigEndian, KN<KN<double> >* pfields)
   delete[] IntCells;
   delete[] firstCell;
   delete[] TypeCells;
+  if (loadlabs) delete[] LabCells;
 
   Mesh *pTh = new Mesh(nv, nt, nbe, vff, tff, bff);
+
+  R2 Pn,Px;
+  pTh->BoundingBox(Pn,Px);
+  pTh->quadtree=new Fem2D::FQuadTree(pTh,Pn,Px,pTh->nv);
   return pTh;
 }
 
