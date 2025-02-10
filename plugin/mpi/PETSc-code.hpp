@@ -3137,7 +3137,12 @@ namespace PETSc {
           MatGetLocalSize(ptA->_petsc, &m, NULL);
           if (c != 4) {
             Storage< PetscScalar >* ptIn = GetAny< Storage< PetscScalar >* >((*(E[j].second))(stack));
-            if (!inverse) ffassert(ptIn->N() == ptA->_A->getDof());
+            if (!inverse) {
+              ffassert(ptIn->N() == ptA->_A->getDof());
+              if (j == 0 && ptIn->M() != ptOut->M())
+                PETSc::resize(ptOut, ptOut->N(), ptIn->M());
+            }
+            ffassert(ptIn->M() == ptOut->M());
             if (c != 2) {
               if (inverse) ffassert(ptOut->N() == m);
               changeNumbering_func(ptA->_num, ptA->_first, ptA->_last, m, ptA->_A->getDof(),
@@ -3145,14 +3150,17 @@ namespace PETSc {
             } else {
               sum += m;
               if (ptOut->N() < sum && !inverse) {
-                ffassert(ptIn->M() == 1);
-                ffassert(ptOut->M() == 1);
                 PETSc::resize(ptOut, sum, ptIn->M());
                 pt = *ptOut + sum - m;
               }
-              KN_< PetscScalar > ptOutShift(pt, m);
-              changeNumbering_func(ptA->_num, ptA->_first, ptA->_last, m, ptA->_A->getDof(),
-                                   1, ptIn, &ptOutShift, inverse);
+              else if (inverse && ptIn->N() != ptA->_A->getDof())
+                  PETSc::resize(ptIn, ptA->_A->getDof(), ptIn->M());
+              for (int i = 0; i < ptIn->M(); ++i) {
+                KN_< PetscScalar > ptOutShift(pt + i * ptOut->N(), m);
+                KN_< PetscScalar > ptInShift(*ptIn + i * ptIn->N(), ptA->_A->getDof());
+                changeNumbering_func(ptA->_num, ptA->_first, ptA->_last, m, ptA->_A->getDof(),
+                                     1, &ptInShift, &ptOutShift, inverse);
+              }
             }
             if (inverse && nargs[1] && GetAny< bool >((*nargs[1])(stack))) {
               for(int i = 0; i < ptIn->M(); ++i)
@@ -5357,6 +5365,7 @@ namespace PETSc {
     Global.Add("ChangeNumbering", "(", new PETSc::changeNumbering< Dmat, KN >(1, 1));
     Global.Add("ChangeNumbering", "(", new PETSc::changeNumbering< Dmat, KN >(1, 1, 1));
     Global.Add("ChangeNumbering", "(", new PETSc::changeNumbering< Dmat, KNM >( ));
+    Global.Add("ChangeNumbering", "(", new PETSc::changeNumbering< Dmat, KNM >(1, 1));
     Global.Add("ChangeNumbering", "(", new PETSc::changeNumbering< Dmat, KNM >(1, 1, 1, 1));
     Global.Add("MatMult", "(",
                new OneOperator3_< long, Dmat*, KN< PetscScalar >*, KN< PetscScalar >* >(
