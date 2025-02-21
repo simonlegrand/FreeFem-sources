@@ -516,7 +516,8 @@ public:
 	{
 	  if (what[i]==0) nn[i]=1;
 	  else if (what[i]==1) nn[i]=GetAny<KN_<RR> >(v[i]).size();
-          n += nn[i];
+      if (nn[i]) n += nn[i];
+      else what[i] = 2; // do not go through empty arrays
 	}
         if(verbosity>10000)cout << " InitArrayfromArray  aa = " <<aa << " n="<< n << endl;
         KN_<RR> a =set(aa,pa,n);
