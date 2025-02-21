@@ -388,10 +388,11 @@ AnyType SetRestrict(Stack stack,Expression einj,Expression erest)
     FESpace * pVFh = **pFVh;
     FESpace & VCh = *pVCh;
     FESpace & VFh = *pVFh;
-    long neC = VCh.NbOfElements   ;
-    long neF = VFh.NbOfElements   ;
-    long ndfC = VCh.NbOfDF   ;
-    long ndfF = VFh.NbOfDF   ;
+    long neC = pVCh ? VCh.NbOfElements : 0;
+    long neF = pVFh ? VFh.NbOfElements : 0;
+    long ndfC = pVCh ? VCh.NbOfDF : 0;
+    long ndfF = pVFh ? VFh.NbOfDF : 0;
+    if (!neC || !neF) neC = neF = ndfC = ndfF = 0;
 
     KN_<long> nc2f= ncf;
     if(INIT==0)
@@ -401,7 +402,7 @@ AnyType SetRestrict(Stack stack,Expression einj,Expression erest)
     inj = -1; // un set ..
     if( verbosity>9) cout<< " ne =" << neC << " " << neF << endl;
 
-    for(int kc=0; kc <VCh.NbOfElements; kc++)
+    for(int kc=0; kc <neC; kc++)
     {
 
         int kf = nc2f(kc);

@@ -1681,9 +1681,11 @@ namespace PETSc {
     PetscInt bs = nargs[1] ? GetAny< long >((*nargs[1])(stack)) : 1;
     int dof = 0;
     MatriceMorse< upscaled_type<PetscScalar> >* mA = nullptr;
-    if (c == 0 || c == 2)
+    if (c == 0 || c == 2) {
       mA = static_cast< MatriceMorse< upscaled_type<PetscScalar> >* >(
         &(*GetAny< Matrice_Creuse< upscaled_type<PetscScalar> >* >((*K)(stack))->A));
+      if (c == 2) ffassert(mA);
+    }
     else
       dof = GetAny< long >((*K)(stack));
     MPI_Comm* comm = nargs[0] ? (MPI_Comm*)GetAny< pcommworld >((*nargs[0])(stack)) : 0;
