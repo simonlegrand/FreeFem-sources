@@ -3925,24 +3925,17 @@ void  init_lgmat()
   Global.Add("interpolate","(",new MatrixInterpolation<pfesS,pfesS>(1,1));
   Global.Add("interpolate","(",new MatrixInterpolation<pfesL,pfesL>);
   Global.Add("interpolate","(",new MatrixInterpolation<pfesL,pfesL>(1,1));
-    
+    // warning  the case MatrixInterpolation<fe1,fe2> (1,1) not use fe2 ..
+    // so remove case (1,1) to remove  ambiguity Polymorphic Find 4
   Global.Add("interpolate","(",new MatrixInterpolation<pfesS,pfes3>);
-  Global.Add("interpolate","(",new MatrixInterpolation<pfesS,pfes3>(1,1));
   Global.Add("interpolate","(",new MatrixInterpolation<pfesL,pfes>);
-  Global.Add("interpolate","(",new MatrixInterpolation<pfesL,pfes>(1,1));
   Global.Add("interpolate","(",new MatrixInterpolation<pfesL,pfesS>);
-  Global.Add("interpolate","(",new MatrixInterpolation<pfesL,pfesS>(1,1));
   Global.Add("interpolate","(",new MatrixInterpolation<pfesS,pfesL>);
-  Global.Add("interpolate","(",new MatrixInterpolation<pfesS,pfesL>(1,1));
   Global.Add("interpolate","(",new MatrixInterpolation<pfesS,pfes>);
-  Global.Add("interpolate","(",new MatrixInterpolation<pfesL,pfes>(1,1));
   
   Global.Add("interpolate","(",new MatrixInterpolation<pfes,pfesL>);
-  Global.Add("interpolate","(",new MatrixInterpolation<pfes,pfesL>(1,1));
   Global.Add("interpolate","(",new MatrixInterpolation<pfes,pfesS>);
-  Global.Add("interpolate","(",new MatrixInterpolation<pfes,pfesS>(1,1));
   Global.Add("interpolate","(",new MatrixInterpolation<pfes,pfes3>);
-  Global.Add("interpolate","(",new MatrixInterpolation<pfes,pfes3>(1,1));
     
   Global.Add("interplotematrix","(",new  OneOperatorCode<PrintErrorCompileIM>);
   zzzfff->Add("mapmatrix",atype<map< pair<int,int>, double> *>());

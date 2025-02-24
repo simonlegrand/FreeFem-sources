@@ -202,7 +202,7 @@ class R2close {
     // double x = p[0], y=p[offset];
     //double eps = EPSILON ;
     Point *q = 0;
-    int kk[9] = {}, k = 0, nc;
+    int kk[10] = {}, k = 0, nc;
 
     for (int i = -1; i < 2; ++i) {
       for (int j = -1; j < 2; ++j) {
@@ -226,14 +226,14 @@ class R2close {
     if (k > 9) {
       cout << "   ClosePoints R2.: Bug ??? : " << k << " : ";
 
-      for (int i = 0; i < k; ++i) {
+      for (int i = 0; i < max(k,10); ++i) {
         cout << " " << kk[i];
       }
 
       cout << endl;
     }
 
-    assert(k < 9);
+    assert(k <= 9);
 
     for (int i = 0; i < k; ++i) {
       q = Exist(x, y, kk[i]);

@@ -23,3 +23,5 @@ TOOL_DYLIB_scalapack=@TOOL_DYLIB_scalapack@
 TOOL_DYLIB_mumps=@TOOL_DYLIB_mumps@
 TOOL_DYLIB_parmmg=@TOOL_DYLIB_parmmg@
 TOOL_DYLIB_mmg=@TOOL_DYLIB_mmg@
+LDFLAGS=@LDFLAGS@
+
