@@ -23,7 +23,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
--
+ Add support for ChangeNumbering with array of Mat and KNM
 
 ### Changed
 -
@@ -35,9 +35,21 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Fixed
--
+    - pass LDFLAGS=@LDFLAGS@ to petsc  configure
+    - correct wrong assert in ClosePoints.cpp  (k<9) => (k<=9)
+    - correct  in interpolate(Vh,xx,yy,zz) du to copy past error :
+         Warning ambiguity Polymorphic Find 4
+    - Do not go through empty arrays to avoid false-positive assertion in: 
 
----
+>  real[int] a(2), b; real[int] c = [b, a, b, b];  assert(c.n == 2); 
+
+    - correct integer overflow in computation of nbvx in some big case in bluidmesh 
+    - correct chdir on windows if mix / and \ in path
+    - correct in ff-c++ the check of mpi
+    - Add `bem example` in Windows distrib
+    - correct windows install  (cf WindowsPackage.m4)
+    - correct in scan.cpp in case empty markdown section
+
 
 ## [4.15]
 
