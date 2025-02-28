@@ -6850,6 +6850,11 @@ void init_lgfem( ) {
   TheOperators->Add("<-", new OpMatrixtoBilinearFormVG< double >(1));     // 
   TheOperators->Add("<-", new OpMatrixtoBilinearFormVG< Complex >(1));    // 
 
+ // affectation d'une matrice à partir d'une forme bilinéaire dans le cas composite FESpace.
+    // missing FH ..
+    TheOperators->Add("=", new OpMatrixtoBilinearFormVG< double >());     //
+    TheOperators->Add("=", new OpMatrixtoBilinearFormVG< Complex >());    //
+
   // construction of an array with an linear form in composite FESpace.
   TheOperators->Add("<-", 
     new OpArraytoLinearFormVG< double >(atype< KN< double > * >( ), true, true),

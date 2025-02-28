@@ -49,7 +49,8 @@ varf Stokes ( [u1,u2,p], [v1,v2,q] )
 + int2d(Th) ( [f1,f2]'*[v1,v2] )
 + on(1,2,3,4,u2=g2) + on(1,3,u1=g1);
 
-matrix A = Stokes(Vh,Vh);
+matrix A ;//= Stokes(Vh,Vh);  Modif FH feb. 25 to  check op "="
+A = Stokes(Vh,Vh); // check if Op =  is OK not useful !!!
 real[int] b1 = Stokes(0,Vh);
 real[int] sol = A^(-1)*b1;
 ~~~
