@@ -1302,6 +1302,9 @@ KNM< R > *mult(KNM< R > *a, Mult< KNM< R > * > bc) {
     cout << lsa << " " << lsb << " " << lsc << " init " << init << endl;
     cout << lda << " " << ldb << " " << ldc << endl;
   }
+    ffassert( C00 != A00);
+    ffassert( C00 != B00);
+
   M = C.N();
   N = C.M();
   K = bc.ta == 0 ? A.M() : A.N();
