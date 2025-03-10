@@ -3118,7 +3118,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
         fmin= Min(fmin,old->fminT);
     }
 
-    z0= fminT +(fmaxT-fminT)*0.01;
+    z0= fminT -(fmaxT-fminT)*0.01;
     if((debug > 2)) cout << "               data bound: " << PminT << " " << PmaxT
         << " fmin == " << fminT << "  " << fmaxT
         << " z0 " << z0 <<  endl;
@@ -3482,7 +3482,7 @@ void ThePlot::DrawIsoTfill(const R2 Pt[3],const R ff[3],const R * Viso,int NbIso
                     R  xlam=(fi-xf)/(fi-fj);
                     z[im] =  ff[i] * (1.F-xlam)  +  ff[j]* xlam;
                     PQ[im++]   = Pt[i] * (1.F-xlam)  +  Pt[j]* xlam;
-
+                    if(verbosity>999) cout << im-1 << " PQ " << PQ[im-1] << endl;
                 }
             }
             xf = xxfh;
