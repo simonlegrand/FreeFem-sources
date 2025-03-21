@@ -25,6 +25,8 @@ if (prmesh#isincomm)
       one=1.;
       prmesh#RihP1[0]=one;
       prmesh#DP1[0]=1.;
+      prmesh#partloc.resize(partdof.n);
+      prmesh#partloc = partdof;
     }
     else 
     for(int ii=0;ii<prmesh#npart;++ii)
@@ -65,6 +67,10 @@ if (prmesh#isincomm)
       ENDIFMACRO
 
       prmesh#Thi = trunc(overlapName, suppSmooth > 0.001, split=ssplit);
+      IFMACRO(prmesh#partcubes,1)
+      real[int] bbg(6);
+      boundingbox(overlapName,bbg);
+      ENDIFMACRO
       overlapName = trunc(overlapName, suppSmooth > 0.001, label=9999);
 
       supp = supp;
@@ -75,22 +81,11 @@ if (prmesh#isincomm)
 
         IFMACRO(prmesh#partcubes,1)
         prmesh#Thi=trunc(overlapName, abs(part - ii) < 0.1, label = 9999);
-        real lx, ly, lz, ux, uy, uz;
-        lx = ly = lz = 1e+30;
-        ux = uy = uz = -1.e+30;
+        real[int] bb(6);
+        boundingbox(prmesh#Thi,bb);
+
         int[int] labs(6), labsi(6);
         labs = 0;
-
-        for (int ii=0; ii<prmesh#Thi.nbe; ii++) {
-          for (int jj=0; jj < dimension; jj++){
-            lx = min(lx,prmesh#Thi.be(ii)[jj].x); ux = max(ux,prmesh#Thi.be(ii)[jj].x);
-            ly = min(ly,prmesh#Thi.be(ii)[jj].y); uy = max(uy,prmesh#Thi.be(ii)[jj].y);
-            IFMACRO(dimension,3)
-            lz = min(lz,prmesh#Thi.be(ii)[jj].z); uz = max(uz,prmesh#Thi.be(ii)[jj].z);
-            ENDIFMACRO
-          }
-        }
-
         int samex, samey, samez;
 
         for (int ii=0; ii<prmesh#Thi.nbe; ii++) {
@@ -104,16 +99,17 @@ if (prmesh#isincomm)
           samez = (prmesh#Thi.be(ii)[0].z == prmesh#Thi.be(ii)[1].z) && (prmesh#Thi.be(ii)[1].z == prmesh#Thi.be(ii)[2].z);
           ENDIFMACRO
           if (prmesh#Thi.be(ii).label != 9999) {
-                 if (samex && prmesh#Thi.be(ii)[0].x == lx) labs[0] = prmesh#Thi.be(ii).label;
-            else if (samex && prmesh#Thi.be(ii)[0].x == ux) labs[1] = prmesh#Thi.be(ii).label;
-            else if (samey && prmesh#Thi.be(ii)[0].y == ly) labs[2] = prmesh#Thi.be(ii).label;
-            else if (samey && prmesh#Thi.be(ii)[0].y == uy) labs[3] = prmesh#Thi.be(ii).label;
+                 if (samex && prmesh#Thi.be(ii)[0].x == bb[0]) labs[0] = prmesh#Thi.be(ii).label;
+            else if (samex && prmesh#Thi.be(ii)[0].x == bb[1]) labs[1] = prmesh#Thi.be(ii).label;
+            else if (samey && prmesh#Thi.be(ii)[0].y == bb[2]) labs[2] = prmesh#Thi.be(ii).label;
+            else if (samey && prmesh#Thi.be(ii)[0].y == bb[3]) labs[3] = prmesh#Thi.be(ii).label;
             IFMACRO(dimension,3)
-            else if (samez && prmesh#Thi.be(ii)[0].z == lz) labs[4] = prmesh#Thi.be(ii).label;
-            else if (samez && prmesh#Thi.be(ii)[0].z == uz) labs[5] = prmesh#Thi.be(ii).label;
+            else if (samez && prmesh#Thi.be(ii)[0].z == bb[4]) labs[4] = prmesh#Thi.be(ii).label;
+            else if (samez && prmesh#Thi.be(ii)[0].z == bb[5]) labs[5] = prmesh#Thi.be(ii).label;
             ENDIFMACRO
           }
         }
+
         IFMACRO(dimension,2)
         real p0x = prmesh#Thi(prmesh#Thi[0][0]).x, p0y = prmesh#Thi(prmesh#Thi[0][0]).y;
         real p1x = prmesh#Thi(prmesh#Thi[0][1]).x, p1y = prmesh#Thi(prmesh#Thi[0][1]).y;
@@ -129,35 +125,39 @@ if (prmesh#isincomm)
 
         h /= ffddmsplit;
 
-        lx -= h*sizeoverlaps*(!labs[0]); ly -= h*sizeoverlaps*(!labs[2]); lz -= h*sizeoverlaps*(!labs[4]);
-        ux += h*sizeoverlaps*(!labs[1]); uy += h*sizeoverlaps*(!labs[3]); uz += h*sizeoverlaps*(!labs[5]);
+        bb[0] -= h*sizeoverlaps*(!labs[0]); bb[2] -= h*sizeoverlaps*(!labs[2]); bb[4] -= h*sizeoverlaps*(!labs[4]);
+        bb[1] += h*sizeoverlaps*(!labs[1]); bb[3] += h*sizeoverlaps*(!labs[3]); bb[5] += h*sizeoverlaps*(!labs[5]);
+        bb[0] = max(bb[0],bbg[0]); bb[2] = max(bb[2],bbg[2]); bb[4] = max(bb[4],bbg[4]);
+        bb[1] = min(bb[1],bbg[1]); bb[3] = min(bb[3],bbg[3]); bb[5] = min(bb[5],bbg[5]);
 
         labsi = labs ? labs : ffddmcubelabels;
 
         IFMACRO(dimension,2)
         int[int] L = [labsi[2],labsi[1],labsi[3],labsi[0]];
-        prmesh#Thi = square(rint((ux-lx)/h),rint((uy-ly)/h),[x*(ux-lx)+lx,y*(uy-ly)+ly],label=L);
+        prmesh#Thi = square(rint((bb[1]-bb[0])/h),rint((bb[3]-bb[2])/h),[x*(bb[1]-bb[0])+bb[0],y*(bb[3]-bb[2])+bb[2]],label=L);
         ENDIFMACRO
         IFMACRO(dimension,3)
         include "cube.idp"
-        int[int] NN=[rint((ux-lx)/h), rint((uy-ly)/h), rint((uz-lz)/h)];
-        real [int,int] BB=[[lx,ux],[ly,uy],[lz,uz]];
+        int[int] NN=[rint((bb[1]-bb[0])/h), rint((bb[3]-bb[2])/h), rint((bb[5]-bb[4])/h)];
+        real [int,int] BB=[[bb[0],bb[1]],[bb[2],bb[3]],[bb[4],bb[5]]];
         int [int,int] L=[[labsi[0],labsi[1]],[labsi[2],labsi[3]],[labsi[4],labsi[5]]];
         prmesh#Thi = Cube(NN,BB,L);
         ENDIFMACRO
 
-        lx -= h*(!labs[0]); ly -= h*(!labs[2]); lz -= h*(!labs[4]);
-        ux += h*(!labs[1]); uy += h*(!labs[3]); uz += h*(!labs[5]);
+        bb[0] -= h*(!labs[0]); bb[2] -= h*(!labs[2]); bb[4] -= h*(!labs[4]);
+        bb[1] += h*(!labs[1]); bb[3] += h*(!labs[3]); bb[5] += h*(!labs[5]);
+        bb[0] = max(bb[0],bbg[0]); bb[2] = max(bb[2],bbg[2]); bb[4] = max(bb[4],bbg[4]);
+        bb[1] = min(bb[1],bbg[1]); bb[3] = min(bb[3],bbg[3]); bb[5] = min(bb[5],bbg[5]);
 
         labsi = labs ? labs : (abs(ffddminterfacelabel) + 1) * 100;
 
         IFMACRO(dimension,2)
         int[int] Lb = [labsi[2],labsi[1],labsi[3],labsi[0]];
-        borderName = square(rint((ux-lx)/h),rint((uy-ly)/h),[x*(ux-lx)+lx,y*(uy-ly)+ly],label=Lb);
+        borderName = square(rint((bb[1]-bb[0])/h),rint((bb[3]-bb[2])/h),[x*(bb[1]-bb[0])+bb[0],y*(bb[3]-bb[2])+bb[2]],label=Lb);
         ENDIFMACRO
         IFMACRO(dimension,3)
-        int[int] NNb=[rint((ux-lx)/h), rint((uy-ly)/h), rint((uz-lz)/h)];
-        real [int,int] BBb=[[lx,ux],[ly,uy],[lz,uz]];
+        int[int] NNb=[rint((bb[1]-bb[0])/h), rint((bb[3]-bb[2])/h), rint((bb[5]-bb[4])/h)];
+        real [int,int] BBb=[[bb[0],bb[1]],[bb[2],bb[3]],[bb[4],bb[5]]];
         int [int,int] Lb=[[labsi[0],labsi[1]],[labsi[2],labsi[3]],[labsi[4],labsi[5]]];
         borderName = Cube(NNb,BBb,Lb);
         ENDIFMACRO
@@ -172,7 +172,7 @@ if (prmesh#isincomm)
 
         overlapName = prmesh#Thi;
         supp = abs(part - ii) < 0.1;
-        suppSmooth = 0;
+        suppSmooth = suppSmooth;
 
         parti = part;
         prmesh#partloc.resize(Phii.ndof);
@@ -194,10 +194,14 @@ if (prmesh#isincomm)
       
       prmesh#VhiP1 khi;
       if (sizeoverlaps > 0) {
-        khi = max(suppSmooth*2 - 1.0, 0.) ;
-        if(usedARGV("-steep") != -1)
-        khi = khi > 0.001 ? 1.0 : 0.0;
-
+        khi = max(suppSmooth*2 - 1.0, 0.);
+        if(usedARGV("-whatname") != -1) {
+          supp = abs(part - ii) < 0.1;
+          AddLayers(overlapName, supp[], (sizeoverlaps == 0) + max(sizeoverlaps-1,1), suppSmooth[]);
+          khi = suppSmooth;
+        }
+        else if(usedARGV("-steep") != -1)
+          khi = khi > 0.001 ? 1.0 : 0.0;
         else if (usedARGV("-raspart") != -1) {
           VhGlobalff phir;
           PhGlobalff suppP0 = abs(ii - part) < 0.1;
@@ -236,7 +240,11 @@ if (prmesh#isincomm)
           AddLayers(overlapName, suppPartition[], sizeoverlaps, phi[]);
           phibase[] = phi[];
 
-          if(usedARGV("-steep") != -1)
+          if(usedARGV("-whatname") != -1) {
+            suppPartition = abs(arrayIntersectioni[i] - part) < 0.1;
+            AddLayers(overlapName, suppPartition[], max(sizeoverlaps-1,1), phi[]);
+          }
+          else if(usedARGV("-steep") != -1)
             phi = phi > 0.001 ? 1.0 : 0.0;
           else if (usedARGV("-raspart") != -1) {
             VhGlobalff phir;
@@ -752,7 +760,7 @@ NewMacro prfe#mplot(u,s)
         if (ffddmbmedit)
         medit(s,prmsh#Thglob,solplot);
         if (ffddmbffplot)
-        plot(solplot,dim=3,wait=0,cmm=s, value =1,fill=1,nbiso=ffddmnbiso);     
+        plot(solplot,dim=3,wait=0,cmm=s,value=1,fill=1,nbiso=ffddmnbiso);
       }
     }
   }
@@ -854,35 +862,26 @@ if (prmsh#isincomm && !prmsh#excluded)
             Phii parti;
             parti[] = prmsh#partloc;
             prmsh#meshN meshIntersection = trunc(prmsh#Thi, abs(parti - prmsh#arrayIntersection[i]) < 0.1);
-            real lx, ly, lz, ux, uy, uz;
-            lx = ly = lz = 1e+30;
-            ux = uy = uz = -1.e+30;
-            for (int ii=0; ii < meshIntersection.nbe; ii++)
-            for (int jj=0; jj < dimension; jj++){
-              lx = min(lx,meshIntersection.be(ii)[jj].x); ux = max(ux,meshIntersection.be(ii)[jj].x);
-              ly = min(ly,meshIntersection.be(ii)[jj].y); uy = max(uy,meshIntersection.be(ii)[jj].y);
-              IFMACRO(dimension,3)
-              lz = min(lz,meshIntersection.be(ii)[jj].z); uz = max(uz,meshIntersection.be(ii)[jj].z);
-              ENDIFMACRO
-            }
+            real[int] bb(6);
+            boundingbox(meshIntersection,bb);
 
             IFMACRO(dimension,2)
             real p0x = prmsh#Thi(prmsh#Thi[0][0]).x, p0y = prmsh#Thi(prmsh#Thi[0][0]).y;
             real p1x = prmsh#Thi(prmsh#Thi[0][1]).x, p1y = prmsh#Thi(prmsh#Thi[0][1]).y;
             real p2x = prmsh#Thi(prmsh#Thi[0][2]).x, p2y = prmsh#Thi(prmsh#Thi[0][2]).y;
             real h = min(sqrt((p1x-p0x)^2+(p1y-p0y)^2),sqrt((p2x-p0x)^2+(p2y-p0y)^2));
-            lx -= h*prmsh#overlap; ly -= h*prmsh#overlap;
-            ux += h*prmsh#overlap; uy += h*prmsh#overlap;
-            meshIntersection = trunc(prmsh#Thi, (x>=lx)&&(x<=ux)&&(y>=ly)&&(y<=uy), new2old = n2o, label=9999);
+            bb[0] -= h*prmsh#overlap; bb[2] -= h*prmsh#overlap;
+            bb[1] += h*prmsh#overlap; bb[3] += h*prmsh#overlap;
+            meshIntersection = trunc(prmsh#Thi, (x>=bb[0])&&(x<=bb[1])&&(y>=bb[2])&&(y<=bb[3]), new2old = n2o, label=9999);
             ENDIFMACRO
             IFMACRO(dimension,3)
             real p0x = prmsh#Thi(prmsh#Thi.be(0)[0]).x, p0y = prmsh#Thi(prmsh#Thi.be(0)[0]).y, p0z = prmsh#Thi(prmsh#Thi.be(0)[0]).z;
             real p1x = prmsh#Thi(prmsh#Thi.be(0)[1]).x, p1y = prmsh#Thi(prmsh#Thi.be(0)[1]).y, p1z = prmsh#Thi(prmsh#Thi.be(0)[1]).z;
             real p2x = prmsh#Thi(prmsh#Thi.be(0)[2]).x, p2y = prmsh#Thi(prmsh#Thi.be(0)[2]).y, p2z = prmsh#Thi(prmsh#Thi.be(0)[2]).z;
             real h = min(sqrt((p1x-p0x)^2+(p1y-p0y)^2+(p1z-p0z)^2), sqrt((p2x-p0x)^2+(p2y-p0y)^2+(p2z-p0z)^2));
-            lx -= h*prmsh#overlap; ly -= h*prmsh#overlap; lz -= h*prmsh#overlap;
-            ux += h*prmsh#overlap; uy += h*prmsh#overlap; uz += h*prmsh#overlap;
-            meshIntersection = trunc(prmsh#Thi, (x>=lx)&&(x<=ux)&&(y>=ly)&&(y<=uy)&&(z>=lz)&&(z<=uz), new2old = n2o, label=9999);
+            bb[0] -= h*prmsh#overlap; bb[2] -= h*prmsh#overlap; bb[4] -= h*prmsh#overlap;
+            bb[1] += h*prmsh#overlap; bb[3] += h*prmsh#overlap; bb[5] += h*prmsh#overlap;
+            meshIntersection = trunc(prmsh#Thi, (x>=bb[0])&&(x<=bb[1])&&(y>=bb[2])&&(y<=bb[3])&&(z>=bb[4])&&(z<=bb[5]), new2old = n2o, label=9999);
             ENDIFMACRO
 
             ENDIFMACRO

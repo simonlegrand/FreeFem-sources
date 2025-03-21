@@ -32,6 +32,7 @@ TESTS_HPDDM = diffusion-2d-thirdlevelgeneo.edp \
 	diffusion-3d-simple.edp \
 	Helmholtz-2d-HPDDM-BGMRES.edp \
 	Helmholtz-2d-simple.edp \
+	Helmholtz-2d-ORAS-recursive.edp \
 	Helmholtz-3d-simple.edp \
 	Maxwell-3d-simple.edp \
 	natural_convection_3D_obstacle.edp \

@@ -222,6 +222,9 @@ pr#Tmatrix<preffe#K> pr#Aglobal;
 matrix<preffe#K>[int] pr#aRd(preffe#prmesh#npart);      /* local Dirichlet matrices for parallel matrix vector product */
 matrix<preffe#K> pr#matN;
 
+matrix<preffe#K> pr#matdirect;
+pr#matdirect.resize(1,1);
+
 IFMACRO((pr#withhpddm)|(pr#withpetsc))
 if (!bpara){
 	if (mpiRank(preffe#prmesh#mpicomm) == 0)
@@ -295,6 +298,10 @@ ENDIFMACRO
 ENDIFMACRO
 
 ffddmgenerateOperatorfunctions(pr,preffe)
+
+IFMACRO(pr#superwithchunk)
+ffddmsetupOperatorinit(pr#chunk,pr#chunk,pr#chunk)
+ENDIFMACRO
 
 ffddmsetupPrecondinit(pr)
 
@@ -427,6 +434,7 @@ if (preffe#prmesh#isincomm)
         pr#petscOP = mat;
         ENDIFMACRO
       }
+      pr#matdirect.resize(1,1);
     }
     
   }
@@ -541,6 +549,15 @@ if (pr#prfe#prmesh#isincomm)
 		
   pr#prfe#prmesh#toc(pr#tfactoi,"",pr#tfacto)
 }
+//EOM
+
+macro ffddmsetupPrecondchunk(pr,VarfPrec)
+if (ffddmprecond != "oras") {
+	cout << "Error in ffddmsetupPrecondchunk: only works with oras for now" << endl;
+	assert(0);
+}
+pr#prec = ffddmprecond;
+ffddmsetupOperator(pr#chunk,pr#chunk,VarfPrec)
 //EOM
 
 macro ffddmsetup(pr,preffe,Varf,VarfPrec)

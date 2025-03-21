@@ -1,4 +1,4 @@
-macro ffddmbuildSuper(pr,Th,nsup,scalar,def,init,Pk)
+macro ffddmbuildSuperEdge(pr,Th,nsup,scalar,def,init,Pk,defpart,initpart,Pkpart)
 
 int pr#nsuper = nsup;
 
@@ -86,33 +86,62 @@ ENDIFMACRO
 int backexclude = ffddmexclude;
 ffddmexclude = 0;
 
+IFMACRO(pr#partcubes)
+NewMacro pr#super#partcubes()1 EndMacro
+ENDIFMACRO
 ffddmbuildDmesh(pr#super,Th,pr#commsuper)
 
 ffddmexclude = backexclude;
 
-ffddminitDfespacef(pr#super,pr#super,scalar,def,init,Pk,def,init,Pk)
+ffddminitDfespacef(pr#super,pr#super,scalar,def,init,Pk,defpart,initpart,Pkpart)
+
+IFMACRO(pr#superwithchunk)
+mpiGroup grpchunk(pr#insuperinterior);
+mpiComm pr#commchunk(mpiCommWorld,grpchunk);
+
+broadcast(processor(0,pr#commchunk),pr#super#Thi);
+ENDIFMACRO
+
+fespace pr#Phsuperovl(pr#super#Thi,P0);
+
+pr#Phsuperovl partchunki;
 
 if (pr#issuper){
-  pr#super#meshN Thsuper = trunc(Th,partsuper == pr#mysuperrank);
-  int[int] mylpart(Thsuper.nt);
-  if (pr#superchunksize > 1 )
-    metisdual(mylpart,Thsuper,pr#superchunksize);
+  partchunki[] = pr#super#partloc;
+  pr#super#meshN Thsuper = trunc(pr#super#Thi, partchunki == pr#mysuperrank);
+
+  IFMACRO (!pr#chunk#simple)
+  int[int] mylpart(pr#super#Thi.nt);
+  if (pr#superchunksize > 1)
+    metisdual(mylpart,pr#super#Thi,pr#superchunksize);
   else
     mylpart = 0;
-  
-  fespace Phsuper(Thsuper,P0);
-  Phsuper partsuper;
 
-  for(int i=0;i<mylpart.n;++i)
-  partsuper[][i]=pr#insuperinterior[mylpart[i]];
-  
-  matrix Rsuper = interpolate(Phsuper,pr#Phglob);
+  for(int i=0;i<partchunki[].n;++i)
+    partchunki[][i]=mylpart[i];
+  ENDIFMACRO
+
+  IFMACRO (pr#chunk#simple)
+  pr#chunk#simple(pr#Phsuperovl, partchunki, pr#commchunk)
+  ENDIFMACRO
+
+  fespace pr#Phsuper(Thsuper,P0);
+  pr#Phsuper partsuperi;
+
+  partsuperi = partchunki;
+  for [i, bi : partsuperi[]] bi = pr#insuperinterior[bi];
+
+  matrix Rsuper = interpolate(pr#Phsuper,pr#Phglob);
   pr#Phglob tmp;
-  tmp[] = Rsuper'*partsuper[];
+  tmp[] = Rsuper'*partsuperi[];
   mpiReduce(tmp[], part[], processor(0,pr#commsuper), mpiSUM);
 }
 
 broadcast(processor(0,mpiCommWorld),part[]);
+
+int ffddmpartitionerbackup = ffddmpartitioner;
+
+ffddmpartitioner = 0;
 
 IFMACRO(!pr#simple)
 NewMacro pr#simple(Phglob, upart, comm)
@@ -124,12 +153,54 @@ int backpCS = ffddmpCS;
 ffddmpCS = nsup;
 ffddmnpart = mpisize-ffddmexclude*nsup;
 
-ffddmbuild(pr,Th,scalar,def,init,Pk,mpiCommWorld)
+ffddmbuildDmesh(pr,Th,mpiCommWorld)
+ffddmbuildDfespaceEdge(pr,pr,scalar,def,init,Pk,defpart,initpart,Pkpart)
 
 ffddmpCS = backpCS;
 
 NewMacro pr#minexactgeneoCS()1 EndMacro
 pr#binexactCS = 1;
+
+IFMACRO(pr#superwithchunk)
+broadcast(processor(0,pr#commchunk),partchunki[]);
+
+ffddmnpart = pr#superchunksize;
+
+IFMACRO(!pr#chunksimple)
+NewMacro pr#chunksimple(Phglob, upart, comm)
+upart = partchunki;
+EndMacro
+ENDIFMACRO
+
+IFMACRO(pr#partcubes)
+NewMacro pr#chunk#partcubes()1 EndMacro
+ENDIFMACRO
+
+int bnoGlobbackup = bnoGlob;
+bnoGlob = 0;
+ffddmbuildDmesh(pr#chunk,pr#super#Thi,pr#commchunk)
+ffddmbuildDfespaceEdge(pr#chunk,pr#chunk,scalar,def,init,Pk,defpart,initpart,Pkpart)
+bnoGlob = bnoGlobbackup;
+
+ffddmpartitioner = ffddmpartitionerbackup;
+
+matrix pr#super#chunkinterp = interpolate(pr#Vhi,pr#chunkVhi);
+pr#super#chunkinterp.thresholding(1e-10);
+
+scalar[int] pr#chunksuperDk(pr#Vhi.ndof);
+{
+  ffddmbuildDfespaceEdge(pr#super,pr#super,scalar,def,init,Pk,defpart,initpart,Pkpart)
+  pr#super#Vhi<scalar> def(truePoU);
+
+  if (mpiRank(pr#commchunk) == 0)
+    truePoU[] = pr#superDk[mpiRank(pr#commsuper)];
+
+  broadcast(processor(0,pr#commchunk),truePoU[]);
+
+  matrix R = interpolate(pr#Vhi,pr#super#Vhi);
+  pr#chunksuperDk = R*truePoU[];
+}
+ENDIFMACRO
 
 int[int] pr#listofsupers(pr#arrayIntersection.n+1);
 {
@@ -142,7 +213,7 @@ int[int] pr#listofsupers(pr#arrayIntersection.n+1);
   pr#listofsupers.sort;
 }
 
-int[int] pr#neighborsofsuper(1000);
+int[int] pr#neighborsofsuper(10000);
 int[int] pr#insuperwithoverlap(0);
 
 /* equivalent de pr#superrestrictionIntersection, mais juste les ranks, pas les dofs*/
@@ -212,6 +283,10 @@ int[int] pr#superlocalnuminv(0);
 NewMacro pr#superalgebraic()1 EndMacro
 ffddmsetupinit(pr#super,preffe#super)
 // EOM 
+
+macro ffddmbuildSuper(pr,Th,nsup,scalar,def,init,Pk)
+ffddmbuildSuperEdge(pr,Th,nsup,scalar,def,init,Pk,def,init,Pk)
+// EOM
 
 macro ffddmsetupsuper(pr)
 
@@ -362,7 +437,7 @@ macro ffddmgeneosetupsuper(pr)
   int[int]inisuperwithoverlapsize(pr#prfe#prmesh#listofsupers.n);
   inisuperwithoverlapsize = 0;
   for (int i=0; i<inisuperwithoverlap.n; i++)
-    inisuperwithoverlap[i].resize(1000);
+    inisuperwithoverlap[i].resize(10000);
   
   mpiRequest[int] rq(2*(pr#prfe#prmesh#listofsupers.n-pr#prfe#prmesh#issuper)+2*pr#prfe#prmesh#issuper*(pr#prfe#prmesh#insuperwithoverlap.n-!pr#prfe#prmesh#excluded));
   int cpt = 0;
@@ -415,7 +490,7 @@ macro ffddmgeneosetupsuper(pr)
   int[int][int] tabarrayIntersection(pr#prfe#prmesh#insuperwithoverlap.n);
   if (pr#prfe#prmesh#issuper)
   for (int i=!pr#prfe#prmesh#excluded; i<pr#prfe#prmesh#insuperwithoverlap.n; i++)
-    tabarrayIntersection[i].resize(1000);
+    tabarrayIntersection[i].resize(10000);
   
   mpiRequest[int] rqt(2*(pr#prfe#prmesh#listofsupers.n-pr#prfe#prmesh#issuper)+2*pr#prfe#prmesh#issuper*(pr#prfe#prmesh#insuperwithoverlap.n-!pr#prfe#prmesh#excluded));
   

@@ -92,19 +92,20 @@ func preffe#K[int] pr#directsolve(preffe#K[int]& rhs)
       res = pr#Aglobal^-1*rhs;
     }
     else if (!preffe#prmesh#excluded) {
-      matrix<preffe#K> matloc;
-      if (preffe#prmesh#overlap > 0) {
-        matloc = preffe#Dih[mpiRank(preffe#prmesh#commddm)]*pr#aRd[mpiRank(preffe#prmesh#commddm)];
-        matloc = preffe#Rih[mpiRank(preffe#prmesh#commddm)]'*matloc;
+      if (pr#matdirect.n == 1) {
+        if (preffe#prmesh#overlap > 0) {
+          pr#matdirect = preffe#Dih[mpiRank(preffe#prmesh#commddm)]*pr#aRd[mpiRank(preffe#prmesh#commddm)];
+          pr#matdirect = preffe#Rih[mpiRank(preffe#prmesh#commddm)]'*pr#matdirect;
+        }
+        else
+          pr#matdirect = preffe#Rih[mpiRank(preffe#prmesh#commddm)]'*pr#matN;
+        pr#matdirect = pr#matdirect*preffe#Rih[mpiRank(preffe#prmesh#commddm)];
+        set(pr#matdirect,solver = sparsesolver,commworld=preffe#prmesh#commddm,master=-1);
       }
-      else
-        matloc = preffe#Rih[mpiRank(preffe#prmesh#commddm)]'*pr#matN;
-      matloc = matloc*preffe#Rih[mpiRank(preffe#prmesh#commddm)];
-      set(matloc,solver = sparsesolver,commworld=preffe#prmesh#commddm,master=-1);
       preffe#K[int] scaledrhs = preffe#Dih[mpiRank(preffe#prmesh#commddm)]*rhs;
       preffe#K[int] scaledrhsg(preffe#Vhglob.ndof);
       scaledrhsg = preffe#Rih[mpiRank(preffe#prmesh#commddm)]'*scaledrhs;
-      preffe#K[int] resg = matloc^-1*scaledrhsg;
+      preffe#K[int] resg = pr#matdirect^-1*scaledrhsg;
       res = preffe#Rih[mpiRank(preffe#prmesh#commddm)]*resg;
     }
   }
@@ -399,6 +400,7 @@ func preffe#K[int] pr#PREC1(preffe#K[int] &l, int mrhs)
       s = l;
     }
     else {
+      IFMACRO(!pr#superwithchunk)
       if (!bpara) {
         assert(mrhs == 1);
         for(int i=0; i<preffe#prmesh#npart; ++i)  {
@@ -430,6 +432,34 @@ func preffe#K[int] pr#PREC1(preffe#K[int] &l, int mrhs)
           }
         }       
       }
+      ENDIFMACRO
+      IFMACRO(pr#superwithchunk)
+      preffe#K[int] chunkl(pr#superchunkinterp.m);
+      if(pr#prec == "soras") {
+        preffe#K[int] lD = l .* pr#chunksuperDk;
+        chunkl = pr#superchunkinterp'*lD;
+      }
+      else
+        chunkl = pr#superchunkinterp'*l;
+
+      pr#chunkupdate(chunkl,true);
+
+      preffe#K[int] chunku(chunkl.n);
+      chunku = 0;
+
+      chunku = pr#chunkfGMRES(chunku, chunkl, ffddmtol, ffddmmaxit, ffddmvariant);
+      /* chunku = pr#chunkdirectsolve(chunkl); */
+
+      chunku = chunku .* pr#chunkDk[mpiRank(pr#chunkcommddm)];
+
+      preffe#K[int] s = pr#superchunkinterp*chunku;
+
+      if(pr#prec != "asm")
+        s = s .* pr#chunksuperDk;
+
+      pr#prfe#update(s,false);
+      return s;
+      ENDIFMACRO
     }
     preffe#prmesh#toc(pr#tpreci,"",pr#tprec)
   }
@@ -439,7 +469,7 @@ func preffe#K[int] pr#PREC1(preffe#K[int] &l, int mrhs)
 func preffe#K[int] pr#PREC1(preffe#K[int] &l)
 {
   int mrhs = 1;
-  if (preffe#prmesh#isincomm) {
+  if (preffe#prmesh#isincomm && !preffe#prmesh#excluded) {
     int ndof = bpara ? preffe#Dk[mpiRank(preffe#prmesh#commddm)].n : preffe#Vhglob.ndof;
     assert(l.n%ndof == 0);
     mrhs = l.n/ndof;
