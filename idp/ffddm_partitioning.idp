@@ -528,13 +528,12 @@ NewMacro prmesh#meshinit()1 EndMacro
 ENDIFMACRO
 // EOM
 
-macro ffddmpartf(prmesh,Th,res)
+macro ffddmpartf(prmesh,Th,sizeoverlaps,res)
 {
   prmesh#tic(prmesh#tdecompi)
   
   fespace prmesh#Ph0(Th,P0);
   prmesh#Ph0 upart;                                  /* piecewise constant function */
-  int[int] lpart(prmesh#Ph0.ndof);                       /* giving the decomposition */
   
   if (bpara){
     if (!prmesh#excluded && mpiRank(prmesh#commddm)==0 && (prmesh#npart != mpiSize(prmesh#commddm))) {
@@ -550,19 +549,63 @@ macro ffddmpartf(prmesh,Th,res)
     else if(ffddmpartitioner != 0) {
       if(ffddmpartitioner == 2) {
         if (mpiRank(prmesh#commddm) == 0) {
+          int[int] lpart(prmesh#Ph0.ndof);
           scotch(lpart,Th,prmesh#npart);
           for(int i=0;i<lpart.n;++i)
           upart[][i]=lpart[i];    
         }   
-        broadcast(processor(0, prmesh#commddm), upart[]);
       }
       else {
         if (mpiRank(prmesh#commddm) == 0) {
+          int[int] lpart(prmesh#Ph0.ndof);
           metisdual(lpart,Th,prmesh#npart);
           for(int i=0;i<lpart.n;++i)
           upart[][i]=lpart[i];
         }   
+      }
+      int nomesh = (Th.nt == 0);
+      int[int] nomeshtab(mpiSize(prmesh#commddm));
+      mpiAllgather(nomesh,nomeshtab,prmesh#commddm);
+      if (!nomeshtab.max)
         broadcast(processor(0, prmesh#commddm), upart[]);
+      else {
+        assert(bnoGlob);
+        if (mpiRank(prmesh#commddm) == 0) {
+          prmesh#Ph0 supp;
+          fespace prmesh#Ph1(Th,P1);
+          prmesh#Ph1 suppSmooth;
+          mpiRequest[int] rq(2*nomeshtab.sum + (prmesh#npart-nomeshtab.sum-1));
+          int cpt = 0;
+          for (int i=1; i<mpiSize(prmesh#commddm); i++)
+          if (nomeshtab[i]) {
+            supp = abs(upart - i) < 0.1;
+            AddLayers(Th, supp[], (sizeoverlaps == 0) + sizeoverlaps * 2, suppSmooth[]);
+            int[int] n2o(1);
+            prmesh#meshN Thiovl = trunc(Th, suppSmooth > 0.001, label=9999, new2old = n2o);
+            Isend(processor(i,prmesh#commddm,rq[cpt]),Thiovl);
+            mpiWait(rq[cpt++]);
+            fespace prmesh#Ph0i(Thiovl,P0);
+            int[int] renum = restrict(prmesh#Ph0i, prmesh#Ph0, n2o);
+            prmesh#Ph0i uparti;
+            uparti[] = upart[](renum);
+            Isend(processor(i,prmesh#commddm,rq[cpt]),uparti[]);
+            mpiWait(rq[cpt++]);
+          }
+          else {
+            Isend(processor(i,prmesh#commddm,rq[cpt]),upart[]);
+            mpiWait(rq[cpt++]);
+          }
+        }
+        else {
+          mpiRequest[int] rq(2);
+          if (!Th.nt) {
+            Irecv(processor(0,prmesh#commddm,rq[0]),Th);
+            mpiWait(rq[0]);
+            upart = 0;
+          }
+          Irecv(processor(0,prmesh#commddm,rq[1]),upart[]);
+          mpiWait(rq[1]);
+        }
       }
     }
     else {
@@ -1150,7 +1193,7 @@ ENDIFMACRO
 
 {
   real[int] locpartition;
-  ffddmpartf(prmesh,Th,locpartition)
+  ffddmpartf(prmesh,Th,ffddmoverlap,locpartition)
   
   IFMACRO(prmesh#buildAug,1)
   ffddmbuildDmeshf(prmesh#Aug,Th,locpartition,(ffddmoverlap+1))
@@ -1211,7 +1254,7 @@ ENDIFMACRO
 
 {
   real[int] partition;
-  ffddmpartf(prmesh,Thc,partition)
+  ffddmpartf(prmesh,Thc,ffddmoverlap,partition)
   ffddmbuildDmeshf(prmesh#Coarse,Thc,partition,ffddmoverlap)
   ffddmbuildDmeshf(prmesh,Thc,partition,ffddmoverlap)
 }
