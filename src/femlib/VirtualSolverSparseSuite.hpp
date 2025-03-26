@@ -654,7 +654,7 @@ public:
         for(int k=0,oo=0; k<N;++k, oo+= A->n)
         {
             double * xx = (double *) (void*) x+oo,  *bb = (double *) (void*) b+oo, *zx=0;;
-            status= umfpack_zl_solve (UMFPACK_A, Ap, Ai, Ax,Az, xx,zx, bb, zx , Numeric, 0, 0) ;
+            status= umfpack_zl_solve (ts, Ap, Ai, Ax,Az, xx,zx, bb, zx , Numeric, 0, 0) ;
             CheckUmfpackStatus(status);
             //if(status) cout << " Error umfpack_di_solve  status  " << status << endl;
         }
