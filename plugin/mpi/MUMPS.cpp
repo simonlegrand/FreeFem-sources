@@ -321,10 +321,20 @@ public:
             MPI_Reduce( (void *) b,(void *)  x  , nN , MPI_TYPE<R>::TYPE(),MPI_SUM,0,comm);
         }
         else if(mpirank==0)  std::copy(b,b+nN,x);
+
+        if (trans && is_same<R,Complex>::value) // for tA x = b MUMPS does not conjugate, so we conjugate b and x
+        for (int k = 0; k < nN; ++k)
+            x[k] = RNM::conj(x[k]);
+
         id.rhs = (MR *)(void *)(R *)x;
         id.job = JOB_SOLVE;    // performs the analysis. and performs the factorization.
         SetVerb();
         mumps_c(&id);
+
+        if (trans && is_same<R,Complex>::value) // for tA x = b MUMPS does not conjugate, so we conjugate b and x
+        for (int k = 0; k < nN; ++k)
+            x[k] = RNM::conj(x[k]);
+
         Check("MUMPS_mpi dosolver");
         if(distributed) // send the solution ...
             MPI_Bcast(reinterpret_cast<void*> (x),nN, MPI_TYPE<R>::TYPE(), 0,comm);

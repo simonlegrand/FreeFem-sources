@@ -226,10 +226,20 @@ class SolveMUMPS_seq : public VirtualSolver< int, R > {
     id.nrhs = N;
     id.lrhs = id.n;
     myscopy(id.n, b, x);
+
+    if (trans && is_same<R,Complex>::value) // for tA x = b MUMPS does not conjugate, so we conjugate b and x
+    for (int k = 0; k < N*id.n; ++k)
+        x[k] = RNM::conj(x[k]);
+
     id.rhs = (MR *)(void *)(R *)x;
     id.job = JOB_SOLVE;    // performs the analysis. and performs the factorization.
     SetVerb( );
     mumps_c(&id);
+
+    if (trans && is_same<R,Complex>::value) // for tA x = b MUMPS does not conjugate, so we conjugate b and x
+    for (int k = 0; k < N*id.n; ++k)
+        x[k] = RNM::conj(x[k]);
+
     Check("MUMPS_seq dosolver");
 
     if (verb > 9) {
