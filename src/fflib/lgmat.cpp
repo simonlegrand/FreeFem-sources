@@ -2881,10 +2881,10 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
              cout << "  Add  Block S " << i << "," << j << " =  at " << Oi(i) << " x " << Oj(j) << " conj = " << cnjij(i,j) << endl;
              HashMatrix<int,R> & mmij=*Aij;
              const list<tuple<R,MatriceCreuse<R>*,bool> >  &lM=*Bij(i,j);
-             bool ttrans=false;
+             bool ttrans=false; // transpose flag already in lM
              int ii00=Oi(i);
              int jj00=Oj(j);
-             bool cnj=cnjij(i,j);
+             bool cnj=false; // transpose flag already in lM
             BuildCombMat(mmij,lM,ttrans,ii00,jj00,cnj);
 
 
