@@ -145,6 +145,10 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
     return res;
   }   
 
+  IFMACRO (pr#myQ)
+  pr#myQ
+  ENDIFMACRO
+  IFMACRO (!pr#myQ)
   func preffe#K[int] pr#Q(preffe#K[int] &l, int mrhs)      /* Q = Z*E^-1*Z^T */
   {
     preffe#K[int] res(l.n);
@@ -230,7 +234,7 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
       }
       else{
         
-        preffe#K[int] vaux(pr#ncoarsespace), zaux(pr#ncoarsespace);
+        preffe#K[int] vaux(pr#ncoarsespace), zaux(pr#ncoarsespace), zauxg(pr#sg);
         
         /* Z^T l */
         if (!bpara) {
@@ -243,6 +247,10 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
               cpt++;
             }
           }
+          /* global deflation vectors */
+          for (int jj=0; jj<pr#sg; jj++)
+            vaux[cpt]=pr#Z[cpt++]'*l;
+
           zaux=pr#E^-1*vaux;
           cpt = 0;
           /* the 2 fors loop over the columns of Z subdomainwise */
@@ -254,6 +262,9 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
             cpt++; /* keeps track of the global numbering of the columns of Z */
             /* we multiply 'column by element' */
           }
+          /* global deflation vectors */
+          for (int jj=0; jj<pr#sg; jj++)
+            res += zaux[cpt]*pr#Z[cpt++];
         }
         else {
           preffe#K[int] tmp(pr#si);
@@ -269,6 +280,9 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
             IFMACRO(!pr#CSwithpetsc)
             mpiGatherv(tmp,vaux,processor(0,preffe#prmesh#mpicomm),pr#sizelgworld,pr#offsetiworld);
             /* mpiGatherv puts together inside vaux the local vectors (whose sizes are in sizelg) */
+            for (int ii=0; ii < pr#sg; ii++)
+              vaux[pr#ncoarsespace-pr#sg+ii] = pr#prfe#scalprod(pr#Z[ii+pr#si], l);
+
             if (mpiRank(preffe#prmesh#mpicomm) < preffe#prmesh#pCS) {
               preffe#prmesh#tic(pr#tcsi)
               if (mpiRank(preffe#prmesh#mpicomm) == 0)
@@ -280,6 +294,13 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
               preffe#prmesh#toccomm(pr#tcsi,"",pr#tcs,preffe#prmesh#commCS)
             }
             mpiScatterv(zaux,tmp,processor(0,preffe#prmesh#mpicomm),pr#sizelgworld,pr#offsetiworld);
+
+            if (pr#sg > 0) {
+              if (mpiRank(preffe#prmesh#mpicomm) == 0)
+                zauxg = zaux(pr#ncoarsespace-pr#sg:pr#ncoarsespace-1);
+              broadcast(processor(0,preffe#prmesh#mpicomm),zauxg);
+            }
+
             ENDIFMACRO
             /* inverse of mpiGatherv, cut the global zaux into the local tmp[i] */
             for (int i=0;i<pr#si;i++) {
@@ -369,11 +390,16 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
             ;
           }
           pr#prfe#update(res,false); /* recover the Z_j zaux_j (in the overlap) computed by neighbouring subdomains */
+
+          if (!pr#prfe#prmesh#excluded)
+          for (int i=0;i<pr#sg;i++)
+            res += zauxg[i]*pr#Z[pr#si+i];
         }
       }
     }
     return res;
-}
+  }
+  ENDIFMACRO
 
 func preffe#K[int] pr#Q(preffe#K[int] &l)      /* Q = Z*E^-1*Z^T */
 {

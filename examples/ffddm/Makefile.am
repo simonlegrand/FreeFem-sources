@@ -38,7 +38,8 @@ TESTS_HPDDM = diffusion-2d-thirdlevelgeneo.edp \
 	natural_convection_3D_obstacle.edp \
 	natural_convection.edp \
 	Richards-2d.edp \
-	heat-torus-3d-surf.edp
+	heat-torus-3d-surf.edp \
+	elasticity-3d-deflateRBMs.edp
 # elasticity-3d-simple.edp <- deadlock on freefem-dev-2-windows10-vm2
 # elasticity-3d-thirdlevelgeneo.edp <- assertion failure on freefem-dev-2-windows10-vm2
 

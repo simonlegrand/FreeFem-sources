@@ -46,7 +46,7 @@ matrix<pr#prfe#K> pr#E;
 pr#prfe#K[int,int] pr#E0(1,1);
 matrix<pr#prfe#K> pr#ZCM,pr#ZCMi,pr#ECM;
 
-int pr#si;
+int pr#si, pr#sg=0;
 
 int[int] pr#sizelg(pr#prfe#prmesh#npart), pr#offseti(pr#prfe#prmesh#npart);
 
