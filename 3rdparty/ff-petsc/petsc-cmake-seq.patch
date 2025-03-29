@@ -1,54 +1,21 @@
-diff --color -Naur petsc-3.22.3/config/BuildSystem/config/packages/PTScotch.py petsc-3.22.3-p1/config/BuildSystem/config/packages/PTScotch.py
---- petsc-3.22.3/config/BuildSystem/config/packages/PTScotch.py	2024-04-26 15:24:11
-+++ petsc-3.22.3-p1/config/BuildSystem/config/packages/PTScotch.py	2024-06-06 12:00:43
-@@ -9,6 +9,8 @@
-     self.download         = ['git://https://gitlab.inria.fr/scotch/scotch.git',
-                              'https://gitlab.inria.fr/scotch/scotch/-/archive/'+self.gitcommit+'/scotch-'+self.gitcommit+'.tar.gz',
-                              'https://web.cels.anl.gov/projects/petsc/download/externalpackages/scotch-'+self.gitcommit+'.tar.gz']
-+    self.download_macos   = ['https://gitlab.inria.fr/scotch/scotch/-/archive/v6.1.2/scotch-v6.1.2.tar.gz',
-+                             'http://web.cels.anl.gov/projects/petsc/download/externalpackages/scotch-v6.1.2.tar.gz']
-     self.downloaddirnames = ['scotch','petsc-pkg-scotch']
-     self.liblist          = [['libptesmumps.a','libptscotchparmetisv3.a','libptscotch.a','libptscotcherr.a','libesmumps.a','libscotch.a','libscotcherr.a'],['libptesmumps.a','libptscotchparmetis.a','libptscotch.a','libptscotcherr.a','libesmumps.a','libscotch.a','libscotcherr.a'],
-                              ['libptesmumps.a','libptscotchparmetis.a','libptscotch.a','libptscotcherr.a','libesmumps.a','libscotch.a','libscotcherr.a']]
-@@ -31,13 +33,18 @@
-     self.odeps          = [self.pthread,self.zlib,self.bison]
-     return
+diff --color -Naur petsc-3.23.0/config/BuildSystem/config/packages/PTScotch.py petsc-3.23.0-p1/config/BuildSystem/config/packages/PTScotch.py
+--- petsc-3.23.0/config/BuildSystem/config/packages/PTScotch.py	2025-03-26 15:00:03
++++ petsc-3.23.0-p1/config/BuildSystem/config/packages/PTScotch.py	2025-03-26 17:06:45
+@@ -63,4 +63,10 @@
  
-+  def configureLibrary(self):
-+    if not self.bison.haveBison3plus:
-+      self.download = self.download_macos
-+    config.package.Package.configureLibrary(self)
-+
-   def Install(self):
-     import os
- 
-     if not hasattr(self.programs, 'flex'):
-       self.programs.getExecutable('flex', getFullPath = 1)
-     if not hasattr(self.programs, 'flex'): raise RuntimeError('PTScotch needs flex installed')
--    if not self.bison.found or not self.bison.haveBison3plus: raise RuntimeError('PTScotch needs Bison version 3.0 or above, use --download-bison')
-+    if not self.bison.found: raise RuntimeError('PTScotch needs Bison, use --download-bison')
- 
-     self.log.write('Creating PTScotch '+os.path.join(os.path.join(self.packageDir,'src'),'Makefile.inc')+'\n')
- 
-@@ -94,8 +101,12 @@
-     g.write('MKDIR    = '+self.programs.mkdir+'\n')
-     g.write('MV       = '+self.programs.mv+'\n')
-     g.write('RANLIB   = '+self.setCompilers.RANLIB+'\n')
--    g.write('FLEX     = '+self.programs.flex+'\n')
--    g.write('BISON    = '+getattr(self.bison,self.bison.executablename)+' -y\n')
-+    if not self.bison.haveBison3plus:
-+      g.write('LEX      = '+self.programs.flex+'\n')
-+      g.write('YACC     = '+getattr(self.bison,self.bison.executablename)+' -y\n')
-+    else:
-+      g.write('FLEX     = '+self.programs.flex+'\n')
-+      g.write('BISON    = '+getattr(self.bison,self.bison.executablename)+' -y\n')
-     g.close()
- 
-     self.popLanguage()
-diff --color -Naur petsc-3.22.3/config/BuildSystem/config/packages/SuiteSparse.py petsc-3.22.3-p1/config/BuildSystem/config/packages/SuiteSparse.py
---- petsc-3.22.3/config/BuildSystem/config/packages/SuiteSparse.py	2024-03-30 01:34:11
-+++ petsc-3.22.3-p1/config/BuildSystem/config/packages/SuiteSparse.py	2024-06-06 12:00:43
-@@ -56,4 +56,10 @@
+     args.append('-DBUILD_FORTRAN:BOOL=OFF')
+     args.append('-DENABLE_TESTS:BOOL=OFF')
++    mpicc = self.framework.getMakeMacro('MPICC_SHOW')
++    mpicxx = self.framework.getMakeMacro('MPICXX_SHOW')
++    if mpicc and mpicxx:
++        args = self.rmArgsStartsWith(args,['-DCMAKE_CXX_COMPILER','-DCMAKE_C_COMPILER'])
++        args.append('-DCMAKE_C_COMPILER="'+mpicc.split(None, 1)[0]+'"')
++        args.append('-DCMAKE_CXX_COMPILER="'+mpicxx.split(None, 1)[0]+'"')
+     return args
+diff --color -Naur petsc-3.23.0/config/BuildSystem/config/packages/SuiteSparse.py petsc-3.23.0-p1/config/BuildSystem/config/packages/SuiteSparse.py
+--- petsc-3.23.0/config/BuildSystem/config/packages/SuiteSparse.py	2025-03-26 15:00:03
++++ petsc-3.23.0-p1/config/BuildSystem/config/packages/SuiteSparse.py	2025-03-26 17:07:16
+@@ -70,4 +70,10 @@
      args.append('-DSUITESPARSE_USE_OPENMP:BOOL='+('ON' if self.openmp.found else 'OFF'))
      args.append('-DSUITESPARSE_USE_64BIT_BLAS:BOOL='+('ON' if self.blasLapack.has64bitindices else 'OFF'))
  
@@ -59,10 +26,10 @@ diff --color -Naur petsc-3.22.3/config/BuildSystem/config/packages/SuiteSparse.p
 +        args.append('-DCMAKE_C_COMPILER="'+mpicc.split(None, 1)[0]+'"')
 +        args.append('-DCMAKE_CXX_COMPILER="'+mpicxx.split(None, 1)[0]+'"')
      return args
-diff --color -Naur petsc-3.22.3/config/BuildSystem/config/packages/SuperLU.py petsc-3.22.3-p1/config/BuildSystem/config/packages/SuperLU.py
---- petsc-3.22.3/config/BuildSystem/config/packages/SuperLU.py	2024-03-30 01:34:11
-+++ petsc-3.22.3-p1/config/BuildSystem/config/packages/SuperLU.py	2024-06-06 12:00:43
-@@ -53,5 +53,11 @@
+diff --color -Naur petsc-3.23.0/config/BuildSystem/config/packages/SuperLU.py petsc-3.23.0-p1/config/BuildSystem/config/packages/SuperLU.py
+--- petsc-3.23.0/config/BuildSystem/config/packages/SuperLU.py	2025-03-20 05:44:35
++++ petsc-3.23.0-p1/config/BuildSystem/config/packages/SuperLU.py	2025-03-26 17:07:16
+@@ -54,5 +54,11 @@
        if item.find('CMAKE_C_FLAGS') >= 0 or item.find('CMAKE_CXX_FLAGS') >= 0:
          args[place]=item[:-1]+' '+mangledef+'"'
  
@@ -74,9 +41,9 @@ diff --color -Naur petsc-3.22.3/config/BuildSystem/config/packages/SuperLU.py pe
 +        args.append('-DCMAKE_CXX_COMPILER="'+mpicxx.split(None, 1)[0]+'"')
      return args
  
-diff --color -Naur petsc-3.22.3/config/BuildSystem/config/packages/metis.py petsc-3.22.3-p1/config/BuildSystem/config/packages/metis.py
---- petsc-3.22.3/config/BuildSystem/config/packages/metis.py	2024-04-26 15:24:11
-+++ petsc-3.22.3-p1/config/BuildSystem/config/packages/metis.py	2024-06-06 12:00:43
+diff --color -Naur petsc-3.23.0/config/BuildSystem/config/packages/metis.py petsc-3.23.0-p1/config/BuildSystem/config/packages/metis.py
+--- petsc-3.23.0/config/BuildSystem/config/packages/metis.py	2025-03-08 23:51:15
++++ petsc-3.23.0-p1/config/BuildSystem/config/packages/metis.py	2025-03-26 17:07:16
 @@ -44,6 +44,12 @@
      if self.framework.argDB['download-metis-use-doubleprecision']:
        args.append('-DMETIS_USE_DOUBLEPRECISION=1')
@@ -90,10 +57,10 @@ diff --color -Naur petsc-3.22.3/config/BuildSystem/config/packages/metis.py pets
      return args
  
    def configureLibrary(self):
-diff --color -Naur petsc-3.22.3/config/BuildSystem/config/packages/mmg.py petsc-3.22.3-p1/config/BuildSystem/config/packages/mmg.py
---- petsc-3.22.3/config/BuildSystem/config/packages/mmg.py	2024-03-30 01:34:11
-+++ petsc-3.22.3-p1/config/BuildSystem/config/packages/mmg.py	2024-06-06 12:00:43
-@@ -28,6 +28,12 @@
+diff --color -Naur petsc-3.23.0/config/BuildSystem/config/packages/mmg.py petsc-3.23.0-p1/config/BuildSystem/config/packages/mmg.py
+--- petsc-3.23.0/config/BuildSystem/config/packages/mmg.py	2025-03-26 15:00:03
++++ petsc-3.23.0-p1/config/BuildSystem/config/packages/mmg.py	2025-03-26 17:07:16
+@@ -29,6 +29,12 @@
      args.append('-DUSE_VTK=OFF')
      args.append('-DMMG_INSTALL_PRIVATE_HEADERS=ON')
      args.append('-DSCOTCH_DIR:STRING="'+self.ptscotch.directory+'"')
