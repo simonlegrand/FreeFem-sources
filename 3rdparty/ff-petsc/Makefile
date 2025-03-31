@@ -48,7 +48,7 @@ PETSC_DOWNLOAD_C := --with-metis-dir=$(DIR_INSTALL_REAL) \
 		--with-suitesparse-dir=$(DIR_INSTALL_REAL) \
 		--with-parmetis-dir=$(DIR_INSTALL_REAL) \
 		--with-tetgen-dir=$(DIR_INSTALL_REAL)
-PETSC_DOWNLOAD := --download-metis --download-bison --download-ptscotch \
+PETSC_DOWNLOAD := --download-metis --download-ptscotch \
 		--download-hypre --download-parmetis \
 		--download-superlu --download-suitesparse --download-tetgen
 ifneq ($(TOOL_DYLIB_mmg),)
@@ -82,7 +82,7 @@ endif
 
 ifeq ($(MPICC)$(MPICXX),)
 ifeq ($(WIN32DLLTARGET),)
-PETSC_DOWNLOAD += --with-cc='$(CC)' --with-cxx='$(CXX)' --download-mpich=https://www.mpich.org/static/downloads/4.3.0/mpich-4.3.0.tar.gz
+PETSC_DOWNLOAD += --with-cc='$(CC)' --with-cxx='$(CXX)'
 PETSC_DOWNLOAD_C += --with-mpi-dir=$(DIR_INSTALL_REAL)
 ifeq ($(DARWIN),Darwin)
 PETSC_DOWNLOAD += --download-mpich-device=ch4:ofi
@@ -99,6 +99,7 @@ endif
 endif
 
 ifeq ($(WIN32DLLTARGET),)
+PETSC_DOWNLOAD += --download-bison
 ifneq ($(FC),)
 ifneq ($(wildcard ~/.petsc_pkg),)
 PETSC_DOWNLOAD += --download-slepc-configure-arguments="--download-arpack --with-packages-download-dir=~/.petsc_pkg"
