@@ -67,6 +67,7 @@ double gwait=0;//  no wait in second
 #include "ffthreads.hpp"
 
 int version =0;
+int subversion =0;
 
 Thread::Id tidRead=0;
 bool NoMorePlot=false;

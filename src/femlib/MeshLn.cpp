@@ -77,7 +77,7 @@ namespace Fem2D
   const int (* const GenericElement<DataSeg3>::onWhatBorder)[3] = onWhatIsVertex ;
   template<> const int  GenericElement<DataSeg3>::nitemdim[4] = {2,1,0,0 }  ;
    
-  const string GsbeginL="MeshS::GSave v0",GsendL="end";
+  const string GsbeginL="MeshL::GSave v0",GsendL="end";
   void MeshL::GSave(FILE * ff,int offset) const
   {
     PlotStream f(ff);
@@ -555,7 +555,7 @@ namespace Fem2D
     PlotStream f(ff);
     string s;
     f >> s;
-    ffassert( s== GsbeginL);
+    ffassert( s== GsbeginL || s== "MeshS::GSave v0"); // to by pass bug 
     f >> nv >> nt >> nbe;
     if(verbosity>2)
       cout << " GRead : nv " << nv << " " << nt << " " << nbe << endl;
