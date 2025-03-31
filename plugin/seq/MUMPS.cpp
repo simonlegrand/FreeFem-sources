@@ -224,7 +224,8 @@ class SolveMUMPS_seq : public VirtualSolver< int, R > {
     }
     ICNTL(9) = trans == 0;    // 1: A x = b, !1 : tA x = b  during slove phase
     id.nrhs = N;
-    myscopy(id.n, b, x);
+    id.lrhs = id.n;
+    myscopy(N*id.n, b, x);
 
     if (trans && is_same<R,Complex>::value) // for tA x = b MUMPS does not conjugate, so we conjugate b and x
     for (int k = 0; k < N*id.n; ++k)
