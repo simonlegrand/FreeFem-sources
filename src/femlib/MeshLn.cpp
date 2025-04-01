@@ -555,7 +555,7 @@ namespace Fem2D
     PlotStream f(ff);
     string s;
     f >> s;
-    ffassert( s== GsbeginL || s== "MeshS::GSave v0"); // to by pass bug 
+    ffassert( s == GsbeginL || s == "MeshS::GSave v0"); // to by pass bug 
     f >> nv >> nt >> nbe;
     if(verbosity>2)
       cout << " GRead : nv " << nv << " " << nt << " " << nbe << endl;
