@@ -37,8 +37,13 @@ static PetscErrorCode GenEntriesFromCtx(PetscInt sdim,PetscInt M,PetscInt N, con
 }
 
 template<typename P, typename MeshBemtool>
+#if PETSC_VERSION_GE(3, 23, 0)
+static PetscErrorCode DestroyHtoolCtx(void **ctx) {
+    HtoolCtx<P,MeshBemtool>* user = (HtoolCtx<P,MeshBemtool>*)*ctx;
+#else
 static PetscErrorCode DestroyHtoolCtx(void *ctx) {
     HtoolCtx<P,MeshBemtool>* user = (HtoolCtx<P,MeshBemtool>*)ctx;
+#endif
 
     PetscFunctionBeginUser;
     delete user;
@@ -146,7 +151,11 @@ void dispatch(MeshBemtool *mesh, bemtool::Geometry *node, int VFBEM, Stack stack
         Assembly(B,ctx,ds.sparams,p1,p1,MPI_COMM_NULL,Mesh1::RdHat::d+1,ds.sym);
         PetscContainerCreate(PetscObjectComm((PetscObject)B->_petsc), &ptr);
         PetscContainerSetPointer(ptr, ctx);
+#if PETSC_VERSION_GE(3, 23, 0)
+        PetscContainerSetCtxDestroy(ptr, DestroyHtoolCtx<P,MeshBemtool>);
+#else
         PetscContainerSetUserDestroy(ptr, DestroyHtoolCtx<P,MeshBemtool>);
+#endif
         PetscObjectCompose((PetscObject)B->_petsc, "HtoolCtx", (PetscObject)ptr);
     }
     else {
@@ -193,7 +202,11 @@ void dispatch(MeshBemtool *mesh, bemtool::Geometry *node, int VFBEM, Stack stack
         Assembly(B,ctx,ds.sparams,p1,p1,MPI_COMM_NULL,Mesh1::RdHat::d+1,ds.sym);
         PetscContainerCreate(PetscObjectComm((PetscObject)B->_petsc), &ptr);
         PetscContainerSetPointer(ptr, ctx);
+#if PETSC_VERSION_GE(3, 23, 0)
+        PetscContainerSetCtxDestroy(ptr, DestroyHtoolCtx<P,MeshBemtool>);
+#else
         PetscContainerSetUserDestroy(ptr, DestroyHtoolCtx<P,MeshBemtool>);
+#endif
         PetscObjectCompose((PetscObject)B->_petsc, "HtoolCtx", (PetscObject)ptr);
     }
     else {
@@ -742,7 +755,7 @@ namespace PETSc {
     {"restriction", &typeid(Matrice_Creuse< double >*)}, {"parent", &typeid(Type*)}};
   template< class Type >
   void change(Type* const& ptA, Matrice_Creuse< upscaled_type<PetscScalar> >* const& mat, Type* const& ptB,
-              Matrice_Creuse< double >* const& pList, Type* const& ptParent) {
+              Type* const& ptParent, Matrice_Creuse< double >* const& pList = nullptr) {
     if (mat) {
       if (ptA) {
         MatriceMorse< upscaled_type<PetscScalar> >* mN = nullptr;
@@ -1073,17 +1086,17 @@ namespace PETSc {
     Matrice_Creuse< double >* pList =
       nargs[0] ? GetAny< Matrice_Creuse< double >* >((*nargs[0])(stack)) : nullptr;
     Type* ptParent = nargs[1] ? GetAny< Type* >((*nargs[1])(stack)) : nullptr;
-    change(ptA, mat, ptB, pList, ptParent);
+    change(ptA, mat, ptB, ptParent, pList);
     return 0L;
   }
   Dmat* changeOperatorSimple(Dmat* const& dA, Dmat* const& A) {
     Dmat* const null = nullptr;
-    change(dA, nullptr, A, nullptr, null);
+    change(dA, nullptr, A, null);
     return dA;
   }
   Dmat* changeOperatorSimple(Dmat* const& dA, Matrice_Creuse< upscaled_type<PetscScalar> >* const& A) {
     Dmat* const null = nullptr;
-    change(dA, A, null, nullptr, null);
+    change(dA, A, null, null);
     return dA;
   }
   template<class A, class B>
@@ -2663,7 +2676,6 @@ namespace PETSc {
             const HPDDM::MatrixCSR< PetscScalar >* const A = ptA->_A->getMatrix( );
             if (isType) {
               if(nargs[20]) {
-#if PETSC_VERSION_GE(3, 18, 0)
                   Mat Z;
                   FEbaseArrayKn<upscaled_type<PetscScalar>>* deflation = GetAny<FEbaseArrayKn<upscaled_type<PetscScalar>>*>((*nargs[20])(stack));
                   MatCreateSeqDense(PETSC_COMM_SELF, ptA->_A->getDof(), deflation->N, NULL, &Z);
@@ -2674,9 +2686,6 @@ namespace PETSc {
                   MatDenseRestoreArrayWrite(Z, &data);
                   PCHPDDMSetDeflationMat(pc, is, Z);
                   MatDestroy(&Z);
-#else
-                  ffassert(0);
-#endif
               }
               else if(A) {
                 if (!A->HPDDM_ia) {

@@ -5,14 +5,6 @@
 
 #include "common_hpddm.hpp"
 
-#if PETSC_VERSION_LT(3, 18, 0)
-#define MATHERMITIANTRANSPOSEVIRTUAL MATTRANSPOSEMAT
-#endif
-
-#if PETSC_VERSION_LT(3, 19, 0)
-#define PETSC_SUCCESS 0
-#endif
-
 namespace PETSc {
 template<class HpddmType>
 class DistributedCSR {
@@ -301,16 +293,7 @@ void setCompositePC(PC pc, const std::vector<Mat>* S) {
         KSPSetOperators(subksp[nsplits - 1], (*S)[0], (*S)[0]);
         if(S->size() == 1) {
             IS is;
-#if PETSC_VERSION_GE(3,12,0)
             PCFieldSplitGetISByIndex(pc, nsplits - 1, &is);
-#else
-            const char* prefixPC;
-            PCGetOptionsPrefix(pc, &prefixPC);
-            const char* prefixIS;
-            KSPGetOptionsPrefix(subksp[nsplits - 1], &prefixIS);
-            std::string str = std::string(prefixIS).substr((prefixPC ? std::string(prefixPC).size() : 0) + std::string("fieldsplit_").size(), std::string(prefixIS).size() - ((prefixPC ? std::string(prefixPC).size() : 0) + std::string("fieldsplit_").size() + 1));
-            PCFieldSplitGetIS(pc, str.c_str(), &is);
-#endif
             PetscObjectCompose((PetscObject)is, "pmat", (PetscObject)(*S)[0]);
         }
         else {
@@ -319,13 +302,8 @@ void setCompositePC(PC pc, const std::vector<Mat>* S) {
             PCSetType(pcS, PCCOMPOSITE);
             PetscInt j;
             PCCompositeGetNumberPC(pcS, &j);
-            for(int i = j; i < S->size(); ++i) {
-#if PETSC_VERSION_GE(3,15,0)
+            for(int i = j; i < S->size(); ++i)
                 PCCompositeAddPCType(pcS, PCNONE);
-#else
-                PCCompositeAddPC(pcS, PCNONE);
-#endif
-            }
             PCSetUp(pcS);
             for(int i = 0; i < S->size(); ++i) {
                 PC subpc;
