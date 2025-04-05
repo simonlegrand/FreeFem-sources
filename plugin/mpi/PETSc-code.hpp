@@ -861,13 +861,15 @@ namespace PETSc {
           PetscInt* ia = nullptr;
           PetscInt* ja = nullptr;
           PetscScalar* c = nullptr;
-          bool free = true;
+          bool free = true, dense = false;
           if (ptA->_cnum) {
             PetscInt* cnum = ptA->_num + dN->HPDDM_n;
             if (ptA->_petsc) {
                 int rank, size, N;
+                unsigned int flag = mN->nnz == mN->n * mN->m ? 1 : 0;
                 MPI_Comm_size(PetscObjectComm((PetscObject)ptA->_petsc), &size);
                 if (size > 1) {
+                  PetscBool dense;
                   const PetscInt* ranges;
                   MatGetOwnershipRangesColumn(ptA->_petsc, &ranges);
                   MPI_Comm_rank(PetscObjectComm((PetscObject)ptA->_petsc), &rank);
@@ -877,7 +879,15 @@ namespace PETSc {
                           cnum = new PetscInt[N];
                       MPI_Bcast(cnum, N, MPIU_INT, 0, PetscObjectComm((PetscObject)ptA->_petsc));
                   }
+                  PetscObjectTypeCompareAny((PetscObject)ptA->_petsc, &dense, MATMPIDENSE, MATSEQDENSE, "");
+                  if (!dense)
+                      MPI_Allreduce(MPI_IN_PLACE, &flag, 1, MPI_UNSIGNED, MPI_MAX, PetscObjectComm((PetscObject)ptA->_petsc));
+                  else
+                      flag = true;
                 }
+                if (flag) dense = true;
+                if (dense)
+                  MatSetType(ptA->_petsc, MATDENSE);
             }
             free = HPDDM::template Subdomain< PetscScalar >::distributedCSR(
               ptA->_num, ptA->_first, ptA->_last, ia, ja, c, dN, cnum);
@@ -886,7 +896,7 @@ namespace PETSc {
           }
           else
             free = ptA->_A->distributedCSR(ptA->_num, ptA->_first, ptA->_last, ia, ja, c);
-          if (assembled) {
+          if (assembled || dense) {
             MatZeroEntries(ptA->_petsc);
             for (PetscInt i = 0; i < ptA->_last - ptA->_first; ++i) {
               PetscInt row = ptA->_first + i;
