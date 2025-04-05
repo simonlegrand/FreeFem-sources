@@ -897,6 +897,7 @@ namespace PETSc {
           else
             free = ptA->_A->distributedCSR(ptA->_num, ptA->_first, ptA->_last, ia, ja, c);
           if (assembled || dense) {
+            MatSetOption(ptA->_petsc, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
             MatZeroEntries(ptA->_petsc);
             for (PetscInt i = 0; i < ptA->_last - ptA->_first; ++i) {
               PetscInt row = ptA->_first + i;
