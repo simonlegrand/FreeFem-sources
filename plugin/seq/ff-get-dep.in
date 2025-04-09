@@ -1,6 +1,7 @@
 #!/bin/sh
 # ff-c++ `./ff-get-dep -ff metis.cpp`
-
+#  add stuff to remove double , -Wl,-rpath, -L*, -l*   in link ...  F. Hecht 8/4/25 
+#  suppose [[  ]]  works ..
 case "$1" in
     -dlib)
 	shift
@@ -35,5 +36,5 @@ wherel=''
 test -f WHERE_LIBRARY && wherel="$wherel WHERE_LIBRARY"
 test -f WHERE_LIBRARY-config && wherel="$wherel  WHERE_LIBRARY-config"
 test -f WHERE_LIBRARY-download && wherel="$wherel  WHERE_LIBRARY-download"
-awk -f ff-get-dep.awk -v libs="$libs"  -v cpp="$cpp" $wherel
+awk -f ff-get-dep.awk -v libs="$libs"  -v cpp="$cpp" $wherel |  for i in `cat -`; do ii="i";case "$i" in -Wl,-rpath,*|.-[Ll]*) k=$i; [[ "$j" == *"$i"* ]] && k="";    j="$j:$k:"; test -n "$k" &&  echo $k ;; *) echo $i;; esac;  done
 exit $?
