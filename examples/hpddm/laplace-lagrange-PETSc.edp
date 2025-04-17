@@ -2,7 +2,6 @@
 // NBPROC 4
 
 load "PETSc"                        // PETSc plugin
-macro dimension()2// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
 
 macro grad(u)[dx(u), dy(u)]// EOM   // two-dimensional gradient
@@ -14,10 +13,10 @@ macro ThRefinementFactor()getARGV("-split", 1)//
 MatCreate(Th, A, Pk);
 
 fespace Wh(Th, Pk);                 // local finite element space
-varf vPb(u, v) = intN(Th)(grad(u)' * grad(v));
+varf vPb(u, v) = int2d(Th)(grad(u)' * grad(v));
 func f = 1 + x - y;
-varf vL(u, v)  = intN(Th)(f * v);
-varf vb(u, v)  = intN(Th)(v);
+varf vL(u, v)  = int2d(Th)(f * v);
+varf vb(u, v)  = int2d(Th)(v);
 real[int] F = vL(0, Wh);
 real[int] B = vb(0, Wh);
 real[int] pB, pF, pSol;

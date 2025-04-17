@@ -16,7 +16,6 @@ mesh Th;
     plot(Th);
 }
 
-macro dimension()2//
 include "macro_ddm.idp"
 
 macro def(i)[i, i#B, i#C]//

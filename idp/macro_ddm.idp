@@ -567,6 +567,9 @@ IFMACRO(privateDmesh#ThName)
 IFMACRO(!ThName#Comm)
 NewMacro ThName#Comm()mpiCommWorld EndMacro
 ENDIFMACRO
+IFMACRO(!dimension)
+NewMacro dimension()2 EndMacro
+ENDIFMACRO
 IFMACRO(dimension,3)
 savemesh(ThName, name + "_" + mpiRank(ThName#Comm) + "_" + mpiSize(ThName#Comm) + ".meshb");
 ENDIFMACRO
@@ -597,6 +600,9 @@ ENDIFMACRO
 {
 IFMACRO(!ThName#Comm)
 NewMacro ThName#Comm()mpiCommWorld EndMacro
+ENDIFMACRO
+IFMACRO(!dimension)
+NewMacro dimension()2 EndMacro
 ENDIFMACRO
 IFMACRO(dimension,3)
 ThName = readmesh3(name + "_" + mpiRank(ThName#Comm) + "_" + mpiSize(ThName#Comm) + ".meshb");

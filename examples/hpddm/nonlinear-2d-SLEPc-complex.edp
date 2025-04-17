@@ -2,7 +2,6 @@
 // NBPROC 4
 
 load "PETSc-complex"                // SLEPc plugin
-macro dimension()2// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
 
 macro grad(u)[dx(u), dy(u)]// EOM   // two-dimensional gradient

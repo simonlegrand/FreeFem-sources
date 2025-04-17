@@ -2,7 +2,6 @@
 // NBPROC 4
 
 load "PETSc"                        // PETSc plugin
-macro dimension()2// EOM            // 2D or 3D
 macro trueRestrict()true//
 macro removeZeros()true//
 include "macro_ddm.idp"             // additional DDM functions
@@ -20,8 +19,8 @@ macro ThN2O()n2o//
 DmeshCreate(Th);
 fespace Wh(Th, Pk);           // local finite element space
 
-varf vPb(u, v) = intN(Th)(u * v + grad(u)' * grad(v) - 10 * dy(v) * u) + intN(Th)(v * x) + on(1, 2, 3, 4, u = 0.0);
-varf vPbT(u, v) = intN(Th)(u * v + grad(u)' * grad(v) - 10 * dy(u) * v) + intN(Th)(v * x) + on(1, 2, 3, 4, u = 0.0);
+varf vPb(u, v) = int2d(Th)(u * v + grad(u)' * grad(v) - 10 * dy(v) * u) + int2d(Th)(v * x) + on(1, 2, 3, 4, u = 0.0);
+varf vPbT(u, v) = int2d(Th)(u * v + grad(u)' * grad(v) - 10 * dy(u) * v) + int2d(Th)(v * x) + on(1, 2, 3, 4, u = 0.0);
 matrix<real> Loc  = vPb(Wh, Wh);
 matrix<real> LocT = vPbT(Wh, Wh);
 real[int] rhs = vPb(0, Wh);

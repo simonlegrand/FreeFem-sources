@@ -50,7 +50,6 @@ KSPSolve(D, bP, uP);
 ChangeNumbering(A, u[], uP, inverse = true, exchange = true);
 // visualization
 if(!NoGraphicWindow) {
-    macro dimension()2// EOM
     int np = 200;
     int R = 4;
 

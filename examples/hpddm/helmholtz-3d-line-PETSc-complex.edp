@@ -55,7 +55,6 @@ if(mass) {
 complex[int] u = H^-1 * bf[];
 // visualization
 if(!NoGraphicWindow) {
-    macro dimension()2// EOM
     int np = 200;
     int R = 4;
 

@@ -11,7 +11,6 @@ if(1) {
     mesh localMesh2D = dm;
     if(mpirank == 0)
         cout << labels(localMesh2D) << endl;
-    macro dimension()2//
     include "macro_ddm.idp"
     plotDmesh(localMesh2D, cmm = "Distributed 2D mesh");
     DmeshReconstruct(localMesh2D);

@@ -2,7 +2,6 @@
 // NBPROC 1
 
 load "PETSc-complex"
-macro dimension()2// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
 
 assert(mpisize == 1);

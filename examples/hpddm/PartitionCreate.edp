@@ -1,7 +1,6 @@
 //  run with MPI:  ff-mpirun -np 4 script.edp
 // NBPROC 4
 
-macro dimension()2// EOM
 include "macro_ddm.idp"
 
 border circle(t=0, 2*pi) { x=cos(t); y=sin(t); label=1; }

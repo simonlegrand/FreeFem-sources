@@ -2,7 +2,6 @@
 // NBPROC 4
 
 load "PETSc"
-macro dimension()2// EOM
 include "macro_ddm.idp"
 
 real c = 6.25;

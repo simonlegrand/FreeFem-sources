@@ -12,7 +12,6 @@ int[int] fforder = [1];
     func Pk = P4;                       // finite element space
     func PkNew = P3;                    // finite element space
 
-    macro dimension()2// EOM            // 2D or 3D
     include "macro_ddm.idp"             // additional DDM functions
     mesh ThNew, Th = square(getARGV("-global_2d", 20), getARGV("-global_2d", 20)); // global mesh
     {

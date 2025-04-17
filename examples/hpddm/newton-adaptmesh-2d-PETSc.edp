@@ -2,7 +2,6 @@
 // NBPROC 4
 
 load "PETSc"                        // PETSc plugin
-macro dimension()2// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
 func Pk = P2;                       // finite element space
 func Pkdc = P2dc;                   // finite element space
