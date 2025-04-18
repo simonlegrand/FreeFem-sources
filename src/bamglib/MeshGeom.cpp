@@ -1061,7 +1061,7 @@ namespace bamg {
 
     if (verbosity > 3)
       cout << "    End ReadGeometry: Number of curves in geometry is " << NbOfCurves << endl;
-    if (verbosity > 4)
+    if (verbosity > 9)
       for (int i = 0; i < NbOfCurves; i++) {
         cout << " Curve " << i << " begin e=" << Number(curves[i].be) << " k=" << curves[i].kb
              << "  end e= " << Number(curves[i].ee) << " k=" << curves[i].ke << endl;

@@ -761,8 +761,9 @@ const Fem2D::Mesh *  BuildMesh(Stack stack,const  Fem2D::MeshL **ppmshL , int nb
   {
       Gh->AfterRead();
       
-     double nbx  = min(((double) nbvmax*(double)nbvmax)/9.+1000,0.5e9);
+     double nbx  = min(((double) Gh->nbv*(double)Gh->nbv)/9.+1000,0.5e9);
      int nbvx = nbvmax ? nbvmax : (int) nbx ;
+     if(verbosity>1) cout << " BuilMesh (MeshL)" << nbvx << " nbx = " << nbx << " nbvmax=" <<nbvmax << endl;
     //  int nbtx= nbvmax ? nbvmax :  (Gh->nbv*Gh->nbv)/9 +1000;
       if(verbosity> 99) cout << " ** Gh = " << endl << *Gh << endl << " *** " <<nbvx<<endl; ;
       Triangles *Th = 0;
@@ -1426,6 +1427,7 @@ const Fem2D::Mesh *  buildmeshbamg( string * const & s, int nbvxin) {
   double nbx  = min(((double) Gh.nbv*(double) Gh.nbv)/9.+1000,0.5e9);
     
   int nbvx = nbvxin ? nbvxin : (int) nbx ;
+    if (verbosity>1) cout << "    buildmeshbamg:    nbvx = "<< nbvx << "nbx =" << nbx << " " << nbvxin << endl;
   Triangles * bTh=  new Triangles(nbvx,Gh);
   const Fem2D::Mesh * m=bamg2msh(bTh,false);// no renum
   delete bTh;
