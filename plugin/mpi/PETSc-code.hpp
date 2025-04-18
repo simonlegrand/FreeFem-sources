@@ -4885,7 +4885,7 @@ namespace PETSc {
                                   first = cast[i * N + j]->_first;
                                   last = cast[i * N + j]->_last;
                               }
-                              A = cast[i * N + j]->_exchange[isType ? 1 : 0];
+                              if(cast[i * N + j]->_exchange) A = cast[i * N + j]->_exchange[isType ? 1 : 0];
                               n = A ? A->getDof() : 0;
                           }
                           else {
