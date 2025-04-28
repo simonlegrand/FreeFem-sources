@@ -1,0 +1,10 @@
+for i in $*; do
+echo clean $i
+if grep Wl,-commons,use_dylibs $i ; then 
+cp $i $i-cpy
+sed <$i-cpy >$i -e s/-Wl,-commons,use_dylibs//
+diff $i-cpy $i
+else
+echo nothing in $i
+fi
+done
