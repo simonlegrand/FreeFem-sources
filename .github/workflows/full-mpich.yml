@@ -6,6 +6,7 @@ on:
     branches:
       - develop
       - master
+      - slegrand-actions-debug
       
   pull_request:
     branches:
@@ -113,7 +114,7 @@ jobs:
           brew install m4 git bison hdf5 wget autoconf automake
           brew remove llvm@$LLVM_VERSION
 
-      - name: Symlink GCC & Fortran
+      - name: Symlink gfortran
         run: ./etc/actions/macos/link_fortran.sh "$(uname -p)"
 
       - name: Configure
