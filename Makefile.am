@@ -298,7 +298,8 @@ install-exec-local:: bin/script/PostInstall.sh FreeFEM-documentation.pdf bin/md2
 	cd idp; for i in *.idp; do \
 		if [ -f $$i ]; then $(INSTALL) -m 555 $$i "$(DESTDIR)$(ff_prefix_dir)/idp"; fi; done
 	test ! -s FreeFEM-documentation.pdf || $(INSTALL_DATA) FreeFEM-documentation.pdf "$(DESTDIR)$(pkgdatadir)" 	
-	test `uname` != Darwin || ( rm "$(DESTDIR)/usr/local/bin/FreeFem++-CoCoa"; $(INSTALL_SCRIPT) FreeFem++-CoCoa "$(DESTDIR)/usr/local/bin" )		
+#  not error if PB insall FreeFem++-CoCoa in /usr/local/bin/
+	-test `uname` != Darwin || ( rm "$(DESTDIR)/usr/local/bin/FreeFem++-CoCoa"; $(INSTALL_SCRIPT) FreeFem++-CoCoa "$(DESTDIR)/usr/local/bin" )		
 	test `uname` != Darwin || $(INSTALL_SCRIPT) FreeFem++-CoCoa "$(DESTDIR)${bindir}"
 #    need sudo ...	
 #winDssSSs	test `uname` != Darwin || echo "$(bindir)" > "$(DESTDIR)/etc/paths.d/FreeFem++"

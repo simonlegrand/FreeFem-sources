@@ -52,11 +52,16 @@ cout << "b2 = " << b2(.25,.25) << " == " << 4 <<endl;
 cout << "b3 = " << b3(.25,.25) << " == " << 0 <<endl;
 // Build interplation matrix a_ij at points (xx[j],yy[j]) j = 0, 1 :
 //  $a_ij = d_op(w^i_c (xx[j],yy[j]))$ where $w_i$ is the basic function.  
-real[int] xx=[.3,.4],yy=[.1,.4];
+real[int] xx=[.3,.4,2],yy=[.1,.4,0.333];
 int c=0,dop=0; //  component and d operator 
-matrix Ixx= interpolate(Vh,xx,yy,op=dop,composante=c);
+matrix Ixx= interpolate(Vh,xx,yy,op=dop,composante=c,inside=0);// Pas OK d'not  remove point 2
 cout << Ixx << endl;
+Ixx= interpolate(Vh,xx,yy,op=dop,composante=c,inside=1);// OK remove point 2 correction 28/04/25
+cout << Ixx << endl;
+
 Vh ww;
-real[int] dd=[1,2]; 
+real[int] dd=[1,3,3]; 
 ww[]= Ixx*dd;
+
 plot(ww,wait=1);
+assert(ww(1,.333)<1e-6);// version new version ... skip point 2,0.333

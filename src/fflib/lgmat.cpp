@@ -1389,7 +1389,7 @@ MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace & Uh,const KN_<double
    for(int ii=0;ii<nbxx;ii++)
    {
      const Triangle *ts=ThU.Find(R2(xx[ii],yy[ii]),Phat,outside);
-     if(outside && !inside) continue;
+     if(outside && inside) continue;// sorry bug wrong not OK if outside and inside 28/04/25 FH and PHT 
      int it = ThU(ts);
      FElement KU(Uh[it]);
      KNMK_<R> fb(v,nbdfUK,NUh,last_operatortype);
@@ -1468,7 +1468,7 @@ MatriceMorse<R> *  buildInterpolationMatrixT1(const FESpaceT & Uh,const KN_<doub
   for(int ii=0;ii<nbxx;ii++){
       if(verbosity>9) cout << " Find ThU " <<ii << ":" <<  RdT(xx[ii],yy[ii],zz[ii]) << endl;
     const ElementT *ts=ThU.Find(RdT(xx[ii],yy[ii],zz[ii]),Phat,outside);
-    if(outside && !inside) continue;
+    if(outside && inside) continue;//  sorry bug wrong not OK if outside and inside 28/04/25 FH and PHT
     int it = ThU(ts);
     FElementT KU(Uh[it]);
     KNMK_<R> fb(v,nbdfUK,NUh,last_operatortype);

@@ -35,6 +35,7 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Fixed
+    - bug in mat_interpolation of set of point with inside=true flag ( wrong set ) in 2d,3d, surface.
     - pass LDFLAGS=@LDFLAGS@ to petsc  configure
     - correct wrong assert in ClosePoints.cpp  (k<9) => (k<=9)
     - correct  in interpolate(Vh,xx,yy,zz) du to copy past error :
