@@ -1,0 +1,7 @@
+#!/bin/sh
+lr=`otool -l $1  | awk '/cmd LC_RPATH/,/path/ { if ($1 ~ /path/)  print $2}'| sort | awk ' /\// { if($1==aa) {print aa}; aa=$1}' `
+echo $lr
+for i in $lr ; do 
+ install_name_tool $1 -delete_rpath $i
+ done 
+otool -l $1  | awk '/cmd LC_RPATH/,/path/ { if ($1 ~ /path/)  print $2}'| sort 
