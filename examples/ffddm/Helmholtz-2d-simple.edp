@@ -61,6 +61,16 @@ macro VarfOpt(varfName, meshName, PhName)
 				+ int1d(meshName,Robin,10)(1i*k*u*v)
 				+ on(Dirichlet,u=0); // EOM
 
+// mass for DtN
+macro Varfmass(varfName, meshName, PhName)
+    varf varfName(u,v) =
+  int1d(meshName,10)(u*v)
+        + on(Dirichlet,u=0); // EOM
+
+// tag Dirichlet dofs for DtN
+macro VarfDirichlet(varfName, meshName, PhName)
+    varf varfName(u,v) = on(Dirichlet,u=1); // EOM
+
 macro Varfrhs(varfName, meshName, PhName)
     varf varfName(u,v) =
                 -int2d(meshName)(f*v)
@@ -72,9 +82,9 @@ macro HFEdefmplot(u)real(u)//
 
 ffddmbuildDfespace(HFE,Hmesh,complex,def,init,Pk)
 
-vsym = 2; // symmetric, not hermitian
+vsym = 0; // symmetric, not hermitian
 vtgv = 1.e+30;
-vtgvelim = 1.e+30;
+vtgvelim = -1;
 
 //macro Hwithhpddmkrylov()1//
 
@@ -105,7 +115,7 @@ Hwritesummary
 
 if (mpirank == 0) cout << endl << "ORAS TWO-LEVEL (DtN):" << endl;
 
-ffddmdtnsetup(H,Varf,k)
+ffddmdtnsetup(H,Varf,Varfmass,VarfDirichlet,k)
 
 u[] = HfGMRES(x0, rhs, 1.e-6, 200, "right");
 

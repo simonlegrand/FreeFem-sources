@@ -28,8 +28,8 @@ int Robin = 2;
 int Neumann = 3;
 
 //int[int] chlab=[1, Robin, 2, Robin, 3, Robin, 4, Robin];
-//int[int] chlab=[1, Dirichlet, 2, Dirichlet, 3, Dirichlet, 4, Dirichlet];
-int[int] chlab=[1, Neumann, 2, Neumann, 3, Neumann, 4, Neumann];
+int[int] chlab=[1, Dirichlet, 2, Dirichlet, 3, Dirichlet, 4, Dirichlet];
+//int[int] chlab=[1, Neumann, 2, Neumann, 3, Neumann, 4, Neumann];
 
 int mysplit = 2;
 
@@ -68,6 +68,16 @@ macro VarfIP(varfName, meshName, PhName)
   int2d(meshName)(k^2*u*v+Grad(u)'*Grad(v))
         + on(Dirichlet,u=0); // EOM
 
+// mass for DtN
+macro Varfmass(varfName, meshName, PhName)
+    varf varfName(u,v) =
+  int1d(meshName,10)(u*v)
+        + on(Dirichlet,u=0); // EOM
+
+// tag Dirichlet dofs for DtN
+macro VarfDirichlet(varfName, meshName, PhName)
+    varf varfName(u,v) = on(Dirichlet,u=1); // EOM
+
 macro Varfrhs(varfName, meshName, PhName)
     varf varfName(u,v) =
                 -int2d(meshName)(f*v)
@@ -78,7 +88,7 @@ ffddmbuildDmeshAug(Hmesh,Th,mpiCommWorld)
 ffddmbuildDfespace(HFE,Hmesh,complex,def,init,Pk)
 
 vsym = 0;
-vtgv = 1.e+30;
+vtgv = -1;
 vtgvelim = -1;
 
 ffddmsetup(H,HFE,Varf,VarfOpt)
@@ -124,9 +134,9 @@ Hwritesummary
 
 if (mpirank == 0) cout << endl << "DtN:" << endl;
 
-ffddmdtnsetup(H,Varf,k)
+ffddmdtnsetup(H,Varf,Varfmass,VarfDirichlet,k)
 
-u[] = HfGMRES(x0, rhs, 1.e-6, 500, "right");
+u[] = HfGMRES(x0, rhs, 1.e-6, 200, "right");
 
 Hwritesummary
 

@@ -931,9 +931,11 @@ if (pr#prfe#prmesh#isincomm)
   pr#corr = ffddmcorrection;
 // EOM
 
-macro ffddmdtnsetup(pr,Varf,lambdamax)
+macro ffddmdtnsetup(pr,Varf,Varfmass,VarfDirichlet,lambdamax)
 
 pr#bCM = 0;
+
+pr#regularizeE = 1e-12;
 
 if (pr#prfe#prmesh#isincomm)
 {
@@ -974,19 +976,24 @@ pr#si=0;
 pr#prfe#prmesh#tic(pr#tloc) /* For timings */
 
 int[int] sizel(pr#prfe#prmesh#npart);
-int[int] sizelT(pr#prfe#prmesh#npart);
 
 for(int i=0;i<pr#prfe#prmesh#npart;++i) /* Loop over the subdomains */
 if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#commddm)))) { /* If subdomain assigned to this processor */
 	pr#prfe#prmesh#Thi=pr#prfe#prmesh#aTh[i]; /* Local mesh */
 
   /* Start DtN part */
-
   varf vv(pr#prfe#mdef(u), pr#prfe#mdef(v)) = on(ffddminterfacelabel, pr#prfe#mdef(u) = pr#prfe#minit(1)); /* Mark interface */
   real[int] b10 = vv(0,pr#prfe#Vhi,tgv=1);
+
+  IFMACRO(VarfDirichlet)
+  VarfDirichlet(vDir,pr#prfe#prmesh#Thi,pr#prfe#Vhi) /* Mark Dirichlet dofs */
+  real[int] bDir = vDir(0,pr#prfe#Vhi,tgv=1);
+  b10 = bDir ? 0 : b10; /* Remove Dirichlet dofs from interface */
+  ENDIFMACRO
+
   int ndof10 = 0, ndofint = 0; /* Set up interface and interior DOFs */
   for (int j=0;j<b10.n;j++) {
-    if (b10[j] != 0) {
+    if (b10[j]) {
       ndof10++;
       b10[j] = ndof10; /* Enumerate interface DOFs */
     }
@@ -1025,7 +1032,7 @@ if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#comm
   {
     if (pr#prfe#prmesh#overlap > 0) {
       Varf(vN,pr#prfe#prmesh#Thi,pr#prfe#Vhi)
-      pr#matN = vN(pr#prfe#Vhi,pr#prfe#Vhi,sym=vsym,tgv=vtgv,solver=GMRES);
+      pr#matN = vN(pr#prfe#Vhi,pr#prfe#Vhi,sym=vsym,tgv=1e+30,solver=GMRES);
     }
   }
   ENDIFMACRO
@@ -1046,8 +1053,8 @@ if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#comm
   matrix<pr#prfe#K> A10int = A10intt*Rint';
 
   /* Interface mass matrix */
-  varf vmass(pr#prfe#mdef(u),pr#prfe#mdef(v)) = pr#prfe#prmesh#intbN(pr#prfe#prmesh#Thi,ffddminterfacelabel)(pr#prfe#mdef(u)'*pr#prfe#mdef(v));
-  matrix<pr#prfe#K> mmass = vmass(pr#prfe#Vhi,pr#prfe#Vhi);
+  Varfmass(vmass,pr#prfe#prmesh#Thi,pr#prfe#Vhi)
+  matrix<pr#prfe#K> mmass = vmass(pr#prfe#Vhi,pr#prfe#Vhi,solver=GMRES);
   matrix<pr#prfe#K> mmass10t = R10*mmass;
   matrix<pr#prfe#K> mmass10 = mmass10t*R10';
   set(mmass10,solver=sparsesolver,commworld=pr#prfe#prmesh#commself);
@@ -1098,7 +1105,7 @@ if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#comm
   {
     if(j<kk && (real(ev[j]) < lambdamax)) /* Criterion 4.3 of Lea's paper */
     {
-    /* cout << "Eigenvalue " << i << "," << nok << " " << ev[j] << endl; */
+    if (mpiRank(pr#prfe#prmesh#commddm) == 0) cout << "Eigenvalue " << i << "," << nok << " " << ev[j] << endl;
     /* Retain eigenfuntion on interface */
     tmp = R10'*eVC(:,j);
      /* Extend eigenfunctions into the domain */
@@ -1143,6 +1150,8 @@ macro ffddmharmonicgeneosetup(pr,Varf,VarfLap,VarfIP,lambdamax)
 
 pr#bCM = 0;
 
+pr#regularizeE = 1e-12;
+
 if (pr#prfe#prmesh#isincomm)
 {
 int nev = ffddmnu;
@@ -1168,10 +1177,10 @@ if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#comm
 
   {
     VarfIP(vIP,pr#prfe#prmesh#Thi,pr#prfe#Vhi)
-    matrix<pr#prfe#K> pr#matIP = vIP(pr#prfe#Vhi,pr#prfe#Vhi,sym=0,tgv=-1,solver=GMRES);
+    matrix<pr#prfe#K> pr#matIP = vIP(pr#prfe#Vhi,pr#prfe#Vhi,sym=0,tgv=-10,solver=GMRES);
 
     VarfLap(vL,pr#prfe#prmesh#Thi,pr#prfe#Vhi)
-    matrix<pr#prfe#K> pr#matLap = vL(pr#prfe#Vhi,pr#prfe#Vhi,sym=0,tgv=1e+30,solver=GMRES);
+    matrix<pr#prfe#K> pr#matLap = vL(pr#prfe#Vhi,pr#prfe#Vhi,sym=0,tgv=-1,solver=GMRES);
 
     Varf(vH,pr#prfe#prmesh#Thi,pr#prfe#Vhi)
     matrix<pr#prfe#K> pr#matH = vH(pr#prfe#Vhi,pr#prfe#Vhi,sym=0,tgv=-1,solver=GMRES);
@@ -1229,6 +1238,7 @@ if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#comm
     "-eps_type krylovschur "+
     "-eps_target_largest_magnitude "+
     "-eps_gen_non_hermitian "+
+    /*"-eps_pos_gen_non_hermitian "+*/
     "-eps_target 0. "+
     "-eps_tol 1e-12 "+
     "-eps_conv_abs "+
@@ -1238,7 +1248,7 @@ if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#comm
     "-st_mat_mumps_icntl_14 330 "+
     "-bv_orthog_type mgs " +
     "-bv_orthog_refine always " +
-    /*"-eps_error_absolute ::ascii_info_detail "+ */
+    (mpiRank(pr#prfe#prmesh#commddm) == 0 ?"-eps_error_absolute ::ascii_info_detail ":" ")+
     "-prefix_pop",
     values = ev, array = eVV, prefix="harmonicgeneo_");
 
@@ -1325,11 +1335,11 @@ if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#comm
     pr#prfe#AugAuginterp.resize(pr#prfe#AugVhi.ndof, pr#prfe#AugAugVhi.ndof);
 
     Varf(vPb, pr#prfe#prmesh#AugAugThi, pr#prfe#AugAugVhi)
-    ADirichlettilde = vPb(pr#prfe#AugAugVhi, pr#prfe#AugAugVhi,sym=vsym,tgv=vtgv,solver=GMRES);
+    ADirichlettilde = vPb(pr#prfe#AugAugVhi, pr#prfe#AugAugVhi,sym=vsym,tgv=-10,solver=GMRES);
     renumbering(ADirichlettilde, pr#prfe#AugAuginterp, eps=-1);
 
     VarfC(vPbC, pr#prfe#prmesh#AugAugThi, pr#prfe#AugAugVhi)
-    CDirichlettilde = vPbC(pr#prfe#AugAugVhi, pr#prfe#AugAugVhi,sym=1,tgv=vtgv,solver=GMRES);
+    CDirichlettilde = vPbC(pr#prfe#AugAugVhi, pr#prfe#AugAugVhi,sym=vsym,tgv=-10,solver=GMRES);
     renumbering(CDirichlettilde, pr#prfe#AugAuginterp, eps=-1);
   }
 
@@ -1386,7 +1396,7 @@ if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#comm
 
   {
     VarfC(vN,pr#prfe#prmesh#AugThi,pr#prfe#AugVhi)
-    pr#matN = vN(pr#prfe#AugVhi,pr#prfe#AugVhi,sym=vsym,tgv=vtgv,solver=GMRES);
+    pr#matN = vN(pr#prfe#AugVhi,pr#prfe#AugVhi,sym=vsym,tgv=-1,solver=GMRES);
   }
 
   Mat<pr#prfe#K> PetscCNeumanntilde(pr#matN, communicator = mpiCommSelf);
@@ -1409,7 +1419,7 @@ if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#comm
     "-st_pc_factor_mat_solver_type mumps "+
     "-bv_orthog_type mgs " +
     "-bv_orthog_refine always " +
-    /*"-eps_error_absolute ::ascii_info_detail "+*/
+    (mpiRank(pr#prfe#prmesh#commddm) == 0 ?"-eps_error_absolute ::ascii_info_detail ":" ")+
     "-prefix_pop",
     values = ev, array = eV, prefix="extendedharmonicgeneo_");
 
