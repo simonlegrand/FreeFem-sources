@@ -1,11 +1,17 @@
-FILE(GLOB_RECURSE CFILES *.c)
+add_library(libMesh)
 
-LIST(REMOVE_ITEM CFILES ${CMAKE_SOURCE_DIR}/src/libMesh/test_sol.c
-                        ${CMAKE_SOURCE_DIR}/src/libMesh/test_libmesh5.c)
+# Don't add the 'lib' prefix to the library name.
+set_target_properties(libMesh PROPERTIES
+  PREFIX "")
 
-ADD_LIBRARY(libMesh ${CFILES})
+target_sources(libMesh
+  PRIVATE
+  chrono.c
+  eigenv.c
+  libmeshb7.c
+  memory.c)
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/femlib ${CMAKE_SOURCE_DIR}/src/libMesh)
-
-SET_TARGET_PROPERTIES(libMesh PROPERTIES PREFIX "")
-
+target_include_directories(libMesh
+  PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}
+)
