@@ -1,6 +1,6 @@
-diff --color -Naur petsc-3.23.0/config/BuildSystem/config/packages/PTScotch.py petsc-3.23.0-p1/config/BuildSystem/config/packages/PTScotch.py
---- petsc-3.23.0/config/BuildSystem/config/packages/PTScotch.py	2025-03-26 15:00:03
-+++ petsc-3.23.0-p1/config/BuildSystem/config/packages/PTScotch.py	2025-03-26 17:06:45
+diff --color -Naur petsc-3.23.1/config/BuildSystem/config/packages/PTScotch.py petsc-3.23.1-p1/config/BuildSystem/config/packages/PTScotch.py
+--- petsc-3.23.1/config/BuildSystem/config/packages/PTScotch.py	2025-03-26 15:00:03
++++ petsc-3.23.1-p1/config/BuildSystem/config/packages/PTScotch.py	2025-03-26 17:06:45
 @@ -63,4 +63,10 @@
  
      args.append('-DBUILD_FORTRAN:BOOL=OFF')
@@ -12,9 +12,9 @@ diff --color -Naur petsc-3.23.0/config/BuildSystem/config/packages/PTScotch.py p
 +        args.append('-DCMAKE_C_COMPILER="'+mpicc.split(None, 1)[0]+'"')
 +        args.append('-DCMAKE_CXX_COMPILER="'+mpicxx.split(None, 1)[0]+'"')
      return args
-diff --color -Naur petsc-3.23.0/config/BuildSystem/config/packages/SuiteSparse.py petsc-3.23.0-p1/config/BuildSystem/config/packages/SuiteSparse.py
---- petsc-3.23.0/config/BuildSystem/config/packages/SuiteSparse.py	2025-03-26 15:00:03
-+++ petsc-3.23.0-p1/config/BuildSystem/config/packages/SuiteSparse.py	2025-03-26 17:07:16
+diff --color -Naur petsc-3.23.1/config/BuildSystem/config/packages/SuiteSparse.py petsc-3.23.1-p1/config/BuildSystem/config/packages/SuiteSparse.py
+--- petsc-3.23.1/config/BuildSystem/config/packages/SuiteSparse.py	2025-03-26 15:00:03
++++ petsc-3.23.1-p1/config/BuildSystem/config/packages/SuiteSparse.py	2025-03-26 17:07:16
 @@ -70,4 +70,10 @@
      args.append('-DSUITESPARSE_USE_OPENMP:BOOL='+('ON' if self.openmp.found else 'OFF'))
      args.append('-DSUITESPARSE_USE_64BIT_BLAS:BOOL='+('ON' if self.blasLapack.has64bitindices else 'OFF'))
@@ -26,9 +26,9 @@ diff --color -Naur petsc-3.23.0/config/BuildSystem/config/packages/SuiteSparse.p
 +        args.append('-DCMAKE_C_COMPILER="'+mpicc.split(None, 1)[0]+'"')
 +        args.append('-DCMAKE_CXX_COMPILER="'+mpicxx.split(None, 1)[0]+'"')
      return args
-diff --color -Naur petsc-3.23.0/config/BuildSystem/config/packages/SuperLU.py petsc-3.23.0-p1/config/BuildSystem/config/packages/SuperLU.py
---- petsc-3.23.0/config/BuildSystem/config/packages/SuperLU.py	2025-03-20 05:44:35
-+++ petsc-3.23.0-p1/config/BuildSystem/config/packages/SuperLU.py	2025-03-26 17:07:16
+diff --color -Naur petsc-3.23.1/config/BuildSystem/config/packages/SuperLU.py petsc-3.23.1-p1/config/BuildSystem/config/packages/SuperLU.py
+--- petsc-3.23.1/config/BuildSystem/config/packages/SuperLU.py	2025-03-20 05:44:35
++++ petsc-3.23.1-p1/config/BuildSystem/config/packages/SuperLU.py	2025-03-26 17:07:16
 @@ -54,5 +54,11 @@
        if item.find('CMAKE_C_FLAGS') >= 0 or item.find('CMAKE_CXX_FLAGS') >= 0:
          args[place]=item[:-1]+' '+mangledef+'"'
@@ -41,9 +41,9 @@ diff --color -Naur petsc-3.23.0/config/BuildSystem/config/packages/SuperLU.py pe
 +        args.append('-DCMAKE_CXX_COMPILER="'+mpicxx.split(None, 1)[0]+'"')
      return args
  
-diff --color -Naur petsc-3.23.0/config/BuildSystem/config/packages/metis.py petsc-3.23.0-p1/config/BuildSystem/config/packages/metis.py
---- petsc-3.23.0/config/BuildSystem/config/packages/metis.py	2025-03-08 23:51:15
-+++ petsc-3.23.0-p1/config/BuildSystem/config/packages/metis.py	2025-03-26 17:07:16
+diff --color -Naur petsc-3.23.1/config/BuildSystem/config/packages/metis.py petsc-3.23.1-p1/config/BuildSystem/config/packages/metis.py
+--- petsc-3.23.1/config/BuildSystem/config/packages/metis.py	2025-03-08 23:51:15
++++ petsc-3.23.1-p1/config/BuildSystem/config/packages/metis.py	2025-03-26 17:07:16
 @@ -44,6 +44,12 @@
      if self.framework.argDB['download-metis-use-doubleprecision']:
        args.append('-DMETIS_USE_DOUBLEPRECISION=1')
@@ -57,9 +57,9 @@ diff --color -Naur petsc-3.23.0/config/BuildSystem/config/packages/metis.py pets
      return args
  
    def configureLibrary(self):
-diff --color -Naur petsc-3.23.0/config/BuildSystem/config/packages/mmg.py petsc-3.23.0-p1/config/BuildSystem/config/packages/mmg.py
---- petsc-3.23.0/config/BuildSystem/config/packages/mmg.py	2025-03-26 15:00:03
-+++ petsc-3.23.0-p1/config/BuildSystem/config/packages/mmg.py	2025-03-26 17:07:16
+diff --color -Naur petsc-3.23.1/config/BuildSystem/config/packages/mmg.py petsc-3.23.1-p1/config/BuildSystem/config/packages/mmg.py
+--- petsc-3.23.1/config/BuildSystem/config/packages/mmg.py	2025-03-26 15:00:03
++++ petsc-3.23.1-p1/config/BuildSystem/config/packages/mmg.py	2025-03-26 17:07:16
 @@ -29,6 +29,12 @@
      args.append('-DUSE_VTK=OFF')
      args.append('-DMMG_INSTALL_PRIVATE_HEADERS=ON')
@@ -73,152 +73,3 @@ diff --color -Naur petsc-3.23.0/config/BuildSystem/config/packages/mmg.py petsc-
      if self.getDefaultIndexSize() == 64:
        int64_t = '''
  #if !(defined(PETSC_HAVE_STDINT_H) && defined(PETSC_HAVE_INTTYPES_H) && defined(PETSC_HAVE_MPI_INT64_T))
-diff --git a/config/BuildSystem/config/package.py b/config/BuildSystem/config/package.py
-index cd8a320e941..3f61abae946 100644
---- a/config/BuildSystem/config/package.py
-+++ b/config/BuildSystem/config/package.py
-@@ -1911,6 +1911,7 @@ class CMakePackage(Package):
-   def __init__(self, framework):
-     Package.__init__(self, framework)
-     self.minCmakeVersion = (2,0,0)
-+    self.need35policy = False
-     return
- 
-   def setupHelp(self, help):
-@@ -2026,6 +2027,8 @@ class CMakePackage(Package):
-             with self.Language('C++'):
-               args.append('-DCMAKE_CUDA_HOST_COMPILER="{}"'.format(self.getCompiler()))
-         break
-+    if self.need35policy:
-+      args.append('-DCMAKE_POLICY_VERSION_MINIMUM=3.5')
-     return args
- 
-   def updateControlFiles(self):
-diff --git a/config/BuildSystem/config/packages/ColPack.py b/config/BuildSystem/config/packages/ColPack.py
-index ff95de057ca..c0fdcbe5af8 100644
---- a/config/BuildSystem/config/packages/ColPack.py
-+++ b/config/BuildSystem/config/packages/ColPack.py
-@@ -13,6 +13,7 @@ class Configure(config.package.CMakePackage):
-     self.complex         = 0
-     self.cmakelistsdir   = 'build/cmake'
-     self.minCmakeVersion = (3,4,0)
-+    self.need35policy    = True
-     return
- 
-   def setupDependencies(self, framework):
-diff --git a/config/BuildSystem/config/packages/elemental.py b/config/BuildSystem/config/packages/elemental.py
-index d0fc4cac1cd..242b5ae1a75 100644
---- a/config/BuildSystem/config/packages/elemental.py
-+++ b/config/BuildSystem/config/packages/elemental.py
-@@ -13,6 +13,7 @@ class Configure(config.package.CMakePackage):
-     self.hastests         = 1
-     self.hastestsdatafiles= 1
-     self.downloaddirnames = ['Elemental']
-+    self.need35policy     = True
-     return
- 
-   def setupDependencies(self, framework):
-diff --git a/config/BuildSystem/config/packages/metis.py b/config/BuildSystem/config/packages/metis.py
-index 467a2627202..0d7936aaa1a 100644
---- a/config/BuildSystem/config/packages/metis.py
-+++ b/config/BuildSystem/config/packages/metis.py
-@@ -13,6 +13,7 @@ class Configure(config.package.CMakePackage):
-     self.hastests          = 1
-     self.useddirectly      = 0
-     self.downloadonWindows = 1
-+    self.need35policy      = True
-     return
- 
-   def setupHelp(self, help):
-diff --git a/config/BuildSystem/config/packages/opencascade.py b/config/BuildSystem/config/packages/opencascade.py
-index bff50d00f67..f408a28db9d 100644
---- a/config/BuildSystem/config/packages/opencascade.py
-+++ b/config/BuildSystem/config/packages/opencascade.py
-@@ -15,6 +15,7 @@ class Configure(config.package.CMakePackage):
-     self.pkgname         = 'opencascade'
-     self.buildLanguages  = ['Cxx']
-     self.hastests        = 1
-+    self.need35policy    = True
-     return
- 
-   def setupDependencies(self, framework):
-diff --git a/config/BuildSystem/config/packages/parmetis.py b/config/BuildSystem/config/packages/parmetis.py
-index 6afd8ca90ad..1e50752de86 100644
---- a/config/BuildSystem/config/packages/parmetis.py
-+++ b/config/BuildSystem/config/packages/parmetis.py
-@@ -13,6 +13,7 @@ class Configure(config.package.CMakePackage):
-     self.hastests          = 1
-     self.downloaddirnames  = ['petsc-pkg-parmetis']
-     self.downloadonWindows = 1
-+    self.need35policy      = True
- 
-   def setupDependencies(self, framework):
-     config.package.CMakePackage.setupDependencies(self, framework)
-@@ -46,5 +47,3 @@ class Configure(config.package.CMakePackage):
-     else:
-       self.ComputeVertexSeparator = 0
-     return
--
--
-diff --git a/config/BuildSystem/config/packages/pragmatic.py b/config/BuildSystem/config/packages/pragmatic.py
-index 18b33e04de6..875387a7346 100644
---- a/config/BuildSystem/config/packages/pragmatic.py
-+++ b/config/BuildSystem/config/packages/pragmatic.py
-@@ -9,6 +9,7 @@ class Configure(config.package.CMakePackage):
-     self.functions         = ['pragmatic_2d_init']
-     self.includes          = ['pragmatic/pragmatic.h']
-     self.liblist           = [['libpragmatic.a']]
-+    self.need35policy      = True
-     return
- 
-   def setupDependencies(self, framework):
--- 
-GitLab
-
-
-From 6cde835db1a70eda20dd10f907d8f17e178de56a Mon Sep 17 00:00:00 2001
-From: Pierre Jolivet <pierre@joliv.et>
-Date: Wed, 9 Apr 2025 21:22:28 +0200
-Subject: [PATCH 2/2] configure: update muparser/ScaLAPACK to avoid failures
- with CMake 4.0.0
-
----
- config/BuildSystem/config/packages/muparser.py  | 2 +-
- config/BuildSystem/config/packages/scalapack.py | 4 ++--
- 2 files changed, 3 insertions(+), 3 deletions(-)
-
-diff --git a/config/BuildSystem/config/packages/muparser.py b/config/BuildSystem/config/packages/muparser.py
-index 098549b4070..4986da27d8f 100644
---- a/config/BuildSystem/config/packages/muparser.py
-+++ b/config/BuildSystem/config/packages/muparser.py
-@@ -4,7 +4,7 @@ import os
- class Configure(config.package.CMakePackage):
-   def __init__(self, framework):
-     config.package.CMakePackage.__init__(self, framework)
--    self.gitcommit  = 'v2.3.3-1'
-+    self.gitcommit  = 'v2.3.5'
-     self.download   = ['git://https://github.com/beltoforion/muparser/','https://github.com/beltoforion/muparser/archive/'+self.gitcommit+'.tar.gz']
-     self.includes   = ['muParser.h']
-     self.liblist    = [['libmuparser.a']]
-diff --git a/config/BuildSystem/config/packages/scalapack.py b/config/BuildSystem/config/packages/scalapack.py
-index 23b3bdf32c8..dbc8dfe46f0 100644
---- a/config/BuildSystem/config/packages/scalapack.py
-+++ b/config/BuildSystem/config/packages/scalapack.py
-@@ -5,7 +5,7 @@ class Configure(config.package.CMakePackage):
-   def __init__(self, framework):
-     config.package.CMakePackage.__init__(self, framework)
-     self.version          = '2.2.2'
--    self.gitcommit        = 'v'+self.version
-+    self.gitcommit        = '0e8767285b7a201c7b1ff34d2c2bb009534145df' # master (CMake 4.0.0 fix) apr-08-2025
-     self.download         = ['git://https://github.com/Reference-ScaLAPACK/scalapack','https://github.com/Reference-ScaLAPACK/scalapack/archive/'+self.gitcommit+'.tar.gz']
-     self.includes         = []
-     self.liblist          = [['libscalapack.a'],
-@@ -19,7 +19,7 @@ class Configure(config.package.CMakePackage):
-     self.precisions       = ['single','double']
-     self.downloadonWindows= 1
-     self.makerulename     = 'scalapack'
--    self.minCmakeVersion  = (3,9,0)
-+    self.minCmakeVersion  = (3,26,0)
-     self.libDirs          = ['lib',os.path.join('lib','intel64')]
-     self.requirekandr     = 1
-     return
