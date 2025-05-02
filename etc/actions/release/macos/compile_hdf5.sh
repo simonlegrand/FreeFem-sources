@@ -10,9 +10,9 @@ CXX=$3
 sudo mkdir -p "$PREFIX/pkg"
 cd "$PREFIX/pkg"
 
-wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.3/src/hdf5-1.14.3.tar.bz2
-tar zxf hdf5-1.14.3.tar.bz2
-cd hdf5-1.14.3
+wget https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_6/downloads/hdf5-1.14.6.tar.gz
+tar -zxf hdf5-1.14.6.tar.gz
+cd hdf5-1.14.6
 ./configure --enable-cxx --prefix="$PREFIX" CC="$CC" CXX="$CXX"
 make -j2
 make install
