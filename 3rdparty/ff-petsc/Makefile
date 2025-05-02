@@ -49,7 +49,7 @@ PETSC_DOWNLOAD_C := --with-metis-dir=$(DIR_INSTALL_REAL) \
 		--with-parmetis-dir=$(DIR_INSTALL_REAL) \
 		--with-tetgen-dir=$(DIR_INSTALL_REAL)
 PETSC_DOWNLOAD := --download-metis --download-ptscotch \
-		--download-hypre --download-parmetis \
+		--download-hypre --download-hypre-commit=v2.33.0 --download-parmetis \
 		--download-superlu --download-suitesparse --download-tetgen
 ifneq ($(TOOL_DYLIB_mmg),)
 PETSC_DOWNLOAD += --download-mmg
