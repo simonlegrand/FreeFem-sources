@@ -17,6 +17,8 @@ if (pr#prfe#prmesh#isincomm)
 {
 pr#prfe#prmesh#tic(pr#tloc)
 
+pr#E.clear;
+
 if (!bpara) {
   assert (Stringification(prT) == Stringification(pr)); /* TODO */
   pr#ncoarsespace = pr#si + pr#sg; /* local and global deflation vectors */
@@ -472,7 +474,7 @@ else {
     mpiWait(rqt);
   }
 
-  if (mpiRank(pr#prfe#prmesh#mpicomm) < pr#prfe#prmesh#pCS) { /* fill E0 with Eii and Eij */
+  if (mpiRank(pr#prfe#prmesh#mpicomm) < pr#prfe#prmesh#pCS) { /* fill E with Eii and Eij */
     int[int] offsetl(locnpart);
     for (int i = 0; i < locnpart; i++)
       offsetl[i] = (i == 0 ? 0 : offsetl[i-1] + pr#sizelg[rkrdd(i-1)]);
@@ -481,62 +483,76 @@ else {
     for (int i = 0; i < locnpart; i++)
       offsetl[i] = (i == 0 ? 0 : offsetl[i-1] + pr#sizelg[rkrdd(i-1)]);
 
-    pr#E0.resize(offsetl[locnpart-1] + pr#sizelg[rkrdd(locnpart-1)] + (mpiRank(pr#prfe#prmesh#mpicomm)==0)*prT#sg, pr#ncoarsespace);
+    pr#E.resize(offsetl[locnpart-1] + pr#sizelg[rkrdd(locnpart-1)] + (mpiRank(pr#prfe#prmesh#mpicomm)==0)*prT#sg, pr#ncoarsespace);
     /* TODO prT#sg > 0 works only when pCS = 1 */
     assert(!prT#sg || pr#prfe#prmesh#pCS == 1);
-    pr#E0 = 0;
 
     if (!pr#prfe#prmesh#excluded) {
       int k = mpiRank(pr#prfe#prmesh#mpicomm);
       /* block Epp */
-      for (int jj=0; jj< pr#sizelg[mpiRank(pr#prfe#prmesh#mpicomm)]; jj++)
-        pr#E0(0:prT#sizelg[k]-1,pr#offseti[k]+jj) = Eii(:,jj);
+      int[int] renumi = (0:prT#sizelg[k]-1);
+      int[int] renumj = (pr#offseti[k]:pr#offseti[k]+prT#sizelg[k]-1);
+      pr#E += Eii(renumi^-1,renumj^-1);
 
       /* blocks Epj */
-      for(int j=0;j<pr#prfegeneo#prmesh#numberIntersection;++j)
-      for (int jj=0; jj< pr#sizelg[pr#prfegeneo#prmesh#arrayIntersection[j]]; jj++)
-        pr#E0(0:prT#sizelg[k]-1,pr#offseti[pr#prfegeneo#prmesh#arrayIntersection[j]]+jj) = Eij[j](:,jj);
+      for(int j=0;j<pr#prfegeneo#prmesh#numberIntersection;++j) {
+        int rj = pr#prfegeneo#prmesh#arrayIntersection[j];
+        int[int] renumi = (0:prT#sizelg[k]-1);
+        int[int] renumj = (pr#offseti[rj]:pr#offseti[rj]+prT#sizelg[rj]-1);
+        pr#E += Eij[j](renumi^-1,renumj^-1);
+      }
 
       /* blocks Epg */
-      for(int jj=0;jj<pr#sg;++jj) {
-        pr#E0(0:prT#sizelg[k]-1,pr#ncoarsespace-pr#sg+jj) = Eig(:,jj);
-        pr#E0(pr#ncoarsespace-pr#sg+jj,0:prT#sizelg[k]-1) = Eig(:,jj); /* TODO works only in the symmetric case */
+      if (pr#sg > 0) {
+        renumi = (0:prT#sizelg[k]-1);
+        renumj = (pr#ncoarsespace-pr#sg:pr#ncoarsespace-1);
+        pr#E += Eig(renumi^-1,renumj^-1);
+        pr#prfe#K[int,int] Eigt = Eig';
+        pr#E += Eigt(renumj^-1,renumi^-1); /* TODO works only in the symmetric case */
       }
 
       IFMACRO(pr#geneofullpattern)
-      for(int j=0;j<fullnumberIntersection-pr#prfegeneo#prmesh#numberIntersection;++j)
-      for (int jj=0; jj< pr#sizelg[fullarrayIntersection[pr#prfegeneo#prmesh#numberIntersection+j]]; jj++)
-        pr#E0(0:prT#sizelg[k]-1,pr#offseti[fullarrayIntersection[pr#prfegeneo#prmesh#numberIntersection+j]]+jj) += Ekj[tabarrayIntersectionflat[j]](:,jj);
+      for(int j=0;j<fullnumberIntersection-pr#prfegeneo#prmesh#numberIntersection;++j) {
+        int rj = fullarrayIntersection[pr#prfegeneo#prmesh#numberIntersection+j];
+        int[int] renumi = (0:prT#sizelg[k]-1);
+        int[int] renumj = (pr#offseti[rj]:pr#offseti[rj]+prT#sizelg[rj]-1);
+        pr#E += Ekj[tabarrayIntersectionflat[j]](renumi^-1,renumj^-1);
+      }
       ENDIFMACRO
     }
     
     int cpt = 0;
     for (int i = !pr#prfe#prmesh#excluded; i < locnpart; i++) {
     	/* blocks Eii */
-      for (int jj=0; jj< pr#sizelg[rkrdd(i)]; jj++)
-        pr#E0(offsetl[i]:offsetl[i]+prT#sizelg[rkrdd(i)]-1,pr#offseti[rkrdd(i)]+jj) = tabEii[i](:,jj);
+      int[int] renumi = (offsetl[i]:offsetl[i]+prT#sizelg[rkrdd(i)]-1);
+      int[int] renumj = (pr#offseti[rkrdd(i)]:pr#offseti[rkrdd(i)]+prT#sizelg[rkrdd(i)]-1);
+      pr#E += tabEii[i](renumi^-1,renumj^-1);
+
       /* blocks Eij */
       for(int j=0;j<tabnumberIntersection[i];++j) {
-        for (int jj=0; jj< pr#sizelg[tabarrayIntersection[i][j]]; jj++)
-          pr#E0(offsetl[i]:offsetl[i]+prT#sizelg[rkrdd(i)]-1,pr#offseti[tabarrayIntersection[i][j]]+jj) += tabEij[cpt](:,jj);
+        int rj = tabarrayIntersection[i][j];
+        int[int] renumi = (offsetl[i]:offsetl[i]+prT#sizelg[rkrdd(i)]-1);
+        int[int] renumj = (pr#offseti[rj]:pr#offseti[rj]+prT#sizelg[rj]-1);
+        pr#E += tabEij[cpt](renumi^-1,renumj^-1);
         cpt++;
       }
+
       /* blocks Eig */
-      for(int jj=0;jj<pr#sg;++jj) {
-        pr#E0(offsetl[i]:offsetl[i]+prT#sizelg[rkrdd(i)]-1,pr#ncoarsespace-pr#sg+jj) = tabEig[i](:,jj);
-        pr#E0(pr#ncoarsespace-pr#sg+jj,offsetl[i]:offsetl[i]+prT#sizelg[rkrdd(i)]-1) = tabEig[i](:,jj); /* TODO works only in the symmetric case */
+      if (pr#sg > 0) {
+        renumi = (offsetl[i]:offsetl[i]+prT#sizelg[rkrdd(i)]-1);
+        renumj = (pr#ncoarsespace-pr#sg:pr#ncoarsespace-1);
+        pr#E += tabEig[i](renumi^-1,renumj^-1);
+        pr#prfe#K[int,int] Eigt = tabEig[i]';
+        pr#E += Eigt(renumj^-1,renumi^-1); /* TODO works only in the symmetric case */
       }
     }
 
-    if (mpiRank(pr#prfe#prmesh#mpicomm) == 0) {
-      /* block Egg */
-      for (int jj=0; jj < pr#sg; jj++) {
-        for (int ii=0; ii < prT#sg; ii++)
-          pr#E0(prT#ncoarsespace-prT#sg+ii,pr#ncoarsespace-pr#sg+jj) = Egg(ii,jj);
-      }
+    /* block Egg */
+    if (mpiRank(pr#prfe#prmesh#mpicomm) == 0 && pr#sg > 0) {
+      int[int] renumi = (pr#ncoarsespace-pr#sg:pr#ncoarsespace-1);
+      pr#E += Egg(renumi^-1,renumi^-1);
     }
 
-    pr#E = pr#E0;
     IFMACRO(pr#CSwithpetsc)
     Mat pr#petsctmp(pr#E.n,communicator = pr#prfe#prmesh#commCS);
     pr#petsctmp = pr#E;
