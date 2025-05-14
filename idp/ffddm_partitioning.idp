@@ -1193,7 +1193,7 @@ ENDIFMACRO
 
 {
   real[int] locpartition;
-  ffddmpartf(prmesh,Th,ffddmoverlap,locpartition)
+  ffddmpartf(prmesh,Th,ffddmoverlap+prmesh#buildAug,locpartition)
   
   IFMACRO(prmesh#buildAug,1)
   ffddmbuildDmeshf(prmesh#Aug,Th,locpartition,(ffddmoverlap+1))
