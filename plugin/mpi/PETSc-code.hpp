@@ -2161,6 +2161,7 @@ namespace PETSc {
   struct _n_User< NonlinearSolver< Type > > {
     typename NonlinearSolver< Type >::VecF_O* op;
     typename LinearSolver< Type >::MatF_O* r;
+    typename NonlinearSolver< Type >::IMonF_O* mon;
     typename NonlinearSolver< Type >::IConvF_O* conv;
   };
   template< class Type >
@@ -4246,7 +4247,7 @@ namespace PETSc {
       Expression x;
       const OneOperator *codeJ, *codeR, *codeRHS;
       const int c;
-      static const int n_name_param = 12;
+      static const int n_name_param = 13;
       static basicAC_F0::name_and_type name_param[];
       Expression nargs[n_name_param];
       E_NonlinearSolver(const basicAC_F0& args, int d)
@@ -4323,7 +4324,9 @@ namespace PETSc {
     {"JacobianEquality", &typeid(Polymorphic*)},
     {"JI", &typeid(Type*)},
     {"JE", &typeid(Type*)},
-    {"reason", &typeid(long*)}};
+    {"reason", &typeid(long*)},
+    {"convergence", &typeid(Polymorphic*)}
+  };
   template< class Type >
   PetscErrorCode FormJacobian(SNES snes, Vec x, Mat J, Mat B, void* ctx) {
     User< Type >* user;
@@ -4338,6 +4341,23 @@ namespace PETSc {
     long ret = mat->apply(xx);
     VecRestoreArrayRead(x, &in);
     PetscFunctionReturn(PetscErrorCode(ret));
+  }
+  template<class Type>
+  PetscErrorCode Monitor(SNES snes, PetscInt it, PetscReal norm, void* ctx) {
+    User<Type>* user;
+    const PetscScalar* in;
+    Vec u;
+
+    PetscFunctionBeginUser;
+    user = reinterpret_cast< User< Type >* >(ctx);
+    typename NonlinearSolver< Type >::IMonF_O* mat =
+        reinterpret_cast<typename NonlinearSolver< Type >::IMonF_O* >((*user)->mon);
+    SNESGetSolution(snes, &u);
+    VecGetArrayRead(u, &in);
+    KN_< PetscScalar > xx(const_cast< PetscScalar* >(in), mat->x.n);
+    mat->apply(it, norm, xx);
+    VecRestoreArrayRead(u, &in);
+    PetscFunctionReturn(PETSC_SUCCESS);
   }
   template< class Type >
   PetscErrorCode Convergence(SNES snes, PetscInt it, PetscReal xnorm, PetscReal gnorm, PetscReal f,
@@ -4360,6 +4380,11 @@ namespace PETSc {
     SNESConvergedDefault(snes, it, xnorm, gnorm, f, reason, ctx);
     if (*reason == SNES_CONVERGED_ITERATING)
       *reason = SNESConvergedReason(mat->apply(it, xnorm, gnorm, f, xx, ww));
+    else if (*reason > 0) {
+      PetscInt userreason = mat->apply(it, xnorm, gnorm, f, xx, ww);
+      if (userreason < 0)
+        *reason = SNESConvergedReason(userreason);
+    }
     VecRestoreArrayRead(du, &din);
     VecRestoreArrayRead(u, &in);
     PetscFunctionReturn(PETSC_SUCCESS);
@@ -4679,6 +4704,7 @@ namespace PETSc {
           PetscNew(&user);
           user->op = new NonlinearSolver< Type >::VecF_O(in->n, stack, codeJ);
           user->r = new typename LinearSolver< Type >::MatF_O(in->n, stack, codeR);
+          user->mon = nullptr;
           user->conv = nullptr;
           SNES snes;
           SNESCreate(PETSC_COMM_WORLD, &snes);
@@ -4705,10 +4731,19 @@ namespace PETSc {
           if (op) {
             ffassert(op);
             const OneOperator* codeM =
+              op->Find("(", ArrayOfaType(atype< long >( ), atype< double >( ),
+                                          atype< KN< PetscScalar >* >( ), false));
+            user->mon = new NonlinearSolver< Type >::IMonF_O(in->n, stack, codeM);
+            SNESMonitorSet(snes, Monitor< NonlinearSolver< Type > >, &user, NULL);
+          }
+          op = nargs[12] ? dynamic_cast< const Polymorphic* >(nargs[12]) : nullptr;
+          if (op) {
+            ffassert(op);
+            const OneOperator* codeC =
               op->Find("(", ArrayOfaType(atype< long >( ), atype< double >( ), atype< double >( ),
                                          atype< double >( ), atype< KN< PetscScalar >* >( ),
                                          atype< KN< PetscScalar >* >( ), false));
-            user->conv = new NonlinearSolver< Type >::IConvF_O(in->n, stack, codeM);
+            user->conv = new NonlinearSolver< Type >::IConvF_O(in->n, stack, codeC);
             SNESSetConvergenceTest(snes, Convergence< NonlinearSolver< Type > >, &user, NULL);
           }
           SNESSolve(snes, c == 1 ? f : NULL, x);
@@ -4725,6 +4760,7 @@ namespace PETSc {
           }
           SNESDestroy(&snes);
           delete user->conv;
+          delete user->mon;
           delete user->r;
           delete user->op;
           PetscFree(user);
