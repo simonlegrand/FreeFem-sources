@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # ff-c++ `./ff-get-dep -ff metis.cpp`
 #  add stuff to remove double , -Wl,-rpath, -L*, -l*   in link ...  F. Hecht 8/4/25 
 #  suppose [[  ]]  works ..
