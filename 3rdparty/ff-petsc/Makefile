@@ -193,7 +193,7 @@ PETSc-complex:
 WHERE:../lib/WHERE.PETSc ../lib/WHERE.SLEPc
 
 ../lib/WHERE.PETSc:$(SRCDIR)/tag-install-real
-	-mkdir ../lib
+	-mkdir ../lib 2>/dev/null
 	echo 'petsc LD -Wl,-rpath,"$(DIR_INSTALL_REAL)/lib" -L"$(DIR_INSTALL_REAL)/lib" -lpetsc' > $@
 	echo 'petsc INCLUDE -I"$(DIR_INSTALL_REAL)/include"' >> $@
 
@@ -242,16 +242,15 @@ WHERE-complex:../lib/WHERE.PETSc-complex ../lib/WHERE.SLEPc-complex
 
 ../lib/WHERE.PETSc-complex:$(SRCDIR)/tag-install-complex
 	test -e $(DIR_INSTALL_COMPLEX)/include/petsc.h
-	-mkdir ../lib
+	-mkdir ../lib 2>/dev/null
 	echo 'petsccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib" -lpetsc' > $@
 	echo 'petsccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"' >> $@
-	echo done $@
+
 ../lib/WHERE.SLEPc-complex:
 	test -e $(DIR_INSTALL_COMPLEX)/include/slepc.h
-	-mkdir ../lib
+	-mkdir ../lib 2>/dev/null
 	echo 'slepccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib" -lslepc' > $@
 	echo 'slepccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"' >> $@
-	echo done $@
 
 WHERE-all:Makefile WHERE WHERE-complex
 	echo >$@
@@ -305,7 +304,7 @@ $(PACKAGE):
 	../getall -o PETSc -a
 
 ../lib/WHERE.SLEPc:
-	-mkdir ../lib
+	-mkdir ../lib 2>/dev/null
 	test -e $(DIR_INSTALL_REAL)/include/slepc.h
 	echo 'slepc LD -Wl,-rpath,"$(DIR_INSTALL_REAL)/lib" -L"$(DIR_INSTALL_REAL)/lib" -lslepc' > $@
 	echo 'slepc INCLUDE -I"$(DIR_INSTALL_REAL)/include"' >> $@
