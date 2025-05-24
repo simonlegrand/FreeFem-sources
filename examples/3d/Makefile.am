@@ -160,5 +160,13 @@ regtests.edp: regtests.m4 ../../etc/config/m4/regtests.m4
 echo:
 	echo $(LIST_CONDITIONAL)
 	echo $(LIST)
-	
+
+clean-local:
+	@for file in *.edp; do \
+		base=$${file%.edp}; \
+		if test -f "$$base.md"; then \
+			rm -f "$$file"; \
+		fi; \
+	done
+
 FORCE:

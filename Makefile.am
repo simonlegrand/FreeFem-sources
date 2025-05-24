@@ -21,6 +21,7 @@
 # E-MAIL  :
 # add F. Hecht 
 bin_PROGRAMS=bin/md2edp
+bin_md2edp_SOURCES=etc/tools/md2edp.cpp
 
 SUBDIRS=3rdparty src \
 	plugin  \

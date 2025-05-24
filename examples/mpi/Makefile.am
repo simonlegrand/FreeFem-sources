@@ -102,4 +102,10 @@ freefem++.pref: Makefile
 	echo "loadpath += ../../plugin/seq/" >>freefem++.pref
 	echo "includepath = ../../idp/" >> freefem++.pref
 
-clean-local::
+clean-local:
+	@for file in *.edp; do \
+		base=$${file%.edp}; \
+		if test -f "$$base.md"; then \
+			rm -f "$$file"; \
+		fi; \
+	done
