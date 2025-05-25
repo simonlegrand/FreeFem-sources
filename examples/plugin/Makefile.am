@@ -275,8 +275,7 @@ freefem++.pref: Makefile
 	echo includepath = "../../idp/" >> freefem++.pref
 
 clean-local:
-	-rm -r include
-	-rm include.done
+	-rm -r include include.done *pdf *.mesh* *.ppm *.vtk *.hb *.vtu *.data *.dt *.ps *.dx
 
 Ref: makeref.edp
 	../../src/nw/FreeFem++-nw makeref.edp

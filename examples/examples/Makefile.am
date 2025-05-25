@@ -94,6 +94,7 @@ clean-local:
 			rm -f "$$file"; \
 		fi; \
 	done
+	-rm -r *.ps *.eps *.msh
 
 freefem++.pref:Makefile
 	echo includepath = \"../../idp/\" > freefem++.pref
