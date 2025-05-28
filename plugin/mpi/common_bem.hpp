@@ -1493,6 +1493,14 @@ void ff_BIO_Generator_Maxwell(htool::VirtualGenerator<K>*& generator, BemKernel 
             default: ffassert(0);
         }
     }
+    // Eq Yukawa  kappa1.real() == 0 et kappa1.imag() > 0
+    else if ( (!kappaRe1 && kappaIm1) && !iscombined && (!kappaRe2 && !kappaIm2) && alpha == 0. ) {
+        switch (ker1) {
+            case bemtool::SL_OP : generator=new bemtool::BIO_Generator<bemtool::BIOpKernel<MA_YU,bemtool::SL_OP,3,bemtool::RT0_2D,bemtool::RT0_2D>,bemtool::RT0_2D>(dof,kappaIm1);
+                if(mpirank == 0 && verbosity>5) cout << " call bemtool func BIOpKernel<MA_YU,SL_OP ..." << endl; break;
+            default: ffassert(0);
+        }
+    }
     else {
         if(mpirank == 0) cout << "Maxwell:: kernel definition error" << endl; ffassert(0);}
 }
