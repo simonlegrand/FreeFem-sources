@@ -4,6 +4,7 @@ on:
     branches:
       - develop
       - master
+      - slegrand-actions-debug
       
   pull_request:
     branches:

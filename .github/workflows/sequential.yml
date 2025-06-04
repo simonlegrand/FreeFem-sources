@@ -5,6 +5,7 @@ on:
     branches:
       - develop
       - master
+      - slegrand-actions-debug
       
   pull_request:
     branches:
@@ -40,7 +41,6 @@ jobs:
         run: |
           autoreconf -i
           ./configure --enable-download --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
-          ./3rdparty/getall -a -o ARPACK,METIS,Scotch,SuiteSparse,SuperLU,mmg,Boost,libpthread-google,TetGen,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet
 
       - name: Build
         run: make -j 4
@@ -79,7 +79,6 @@ jobs:
         run: |
           autoreconf -i
           ./configure --enable-download --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
-          ./3rdparty/getall -a -o ARPACK,METIS,Scotch,SuiteSparse,SuperLU,mmg,Boost,libpthread-google,TetGen,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet
 
       - name: Build
         run: make -j 3
@@ -136,8 +135,7 @@ jobs:
       - name: Configure
         run: |
           autoreconf -i
-          ./configure --enable-download --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
-          ./3rdparty/getall -a -o ARPACK,METIS,Scotch,SuiteSparse,SuperLU,mmg,Boost,libpthread-google,TetGen,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet
+          ./configure --enable-download --disable-superlu --disable-scotch --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
 
       - name: Build
         run: make -j 4
