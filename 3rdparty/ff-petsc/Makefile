@@ -67,7 +67,7 @@ ifeq ($(FF_generic_petsc), yes)
 FLAGS_MTUNE := -mtune=generic
 endif
 unexport MAKEFLAGS
-COMMON_FLAGS := --with-debugging=0 COPTFLAGS='-O3 $(FLAGS_MTUNE)' CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' FOPTFLAGS='-O3 $(FLAGS_MTUNE)' --with-ssl=0 --with-x=0 --with-fortran-bindings=0 --with-syclc=0 --with-hipc=0 --with-cudac=0 --with-tau-perfstubs=0 \
+COMMON_FLAGS := --with-debugging=0 COPTFLAGS='-O3 $(FLAGS_MTUNE)' CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' FOPTFLAGS='-O3 $(FLAGS_MTUNE)' --with-ssl=0 --with-x=0 --with-fortran-bindings=0 --with-hg=0 --with-c2html=0 --with-coverage=0 --with-syclc=0 --with-hipc=0 --with-cudac=0 --with-tau-perfstubs=0 \
 		--download-slepc --download-hpddm
 
 ifneq ($(wildcard ~/.petsc_pkg),)

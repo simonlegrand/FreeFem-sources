@@ -1637,6 +1637,8 @@ namespace PETSc {
         A = to< DistributedCSR< HpddmType >* >(args[0]);
         if (c == 1 || c == 3 || c == 4)
           K = to< long >(args[1]);
+        else if (c == 5)
+          K = to< KNM<Dmat>* >(args[1]);
         else
           K = to< Matrice_Creuse< upscaled_type<PetscScalar> >* >(args[1]);
         if (c == 0 || c == 1) {
@@ -1682,6 +1684,10 @@ namespace PETSc {
       : OneOperator(atype< DistributedCSR< HpddmType >* >( ),
                     atype< DistributedCSR< HpddmType >* >( ), atype< long >( ), atype< long >( )),
         c(4) {}
+    initCSR(int, int, int, int, int)
+      : OneOperator(atype< DistributedCSR< HpddmType >* >( ), atype< DistributedCSR< HpddmType >* >( ),
+                    atype< KNM<DistributedCSR< HpddmType >>* >( )),
+        c(5) {}
   };
   template< class HpddmType, bool C >
   basicAC_F0::name_and_type initCSR< HpddmType, C >::E_initCSR::name_param[] = {
@@ -1694,135 +1700,159 @@ namespace PETSc {
   template< class HpddmType, bool C >
   AnyType initCSR< HpddmType, C >::E_initCSR::operator( )(Stack stack) const {
     DistributedCSR< HpddmType >* ptA = GetAny< DistributedCSR< HpddmType >* >((*A)(stack));
-    KN< KN< long > >* ptR = (c == 0 || c == 1 ? GetAny< KN< KN< long > >* >((*R)(stack)) : nullptr);
-    KN< typename std::conditional< std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value,
-                                   double, long >::type >* ptD =
-      (c == 0 || c == 1
-         ? GetAny< KN< typename std::conditional<
-             std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value, double, long >::type >* >(
-             (*D)(stack))
-         : nullptr), *empty = nullptr;
-    PetscInt bs = nargs[1] ? GetAny< long >((*nargs[1])(stack)) : 1;
-    int dof = 0;
-    MatriceMorse< upscaled_type<PetscScalar> >* mA = nullptr;
-    if (c == 0 || c == 2) {
-      mA = static_cast< MatriceMorse< upscaled_type<PetscScalar> >* >(
-        &(*GetAny< Matrice_Creuse< upscaled_type<PetscScalar> >* >((*K)(stack))->A));
-      if (c == 2) ffassert(mA);
-    }
-    else
-      dof = GetAny< long >((*K)(stack));
-    MPI_Comm* comm = nargs[0] ? (MPI_Comm*)GetAny< pcommworld >((*nargs[0])(stack)) : 0;
-    if ((c == 2 && mA->n != mA->m) || c == 4) {
-      ptA->_first = 0;
-      ptA->_cfirst = 0;
-      if (c != 4) {
-        ptA->_last = mA->n;
-        ptA->_clast = mA->m;
+    if (c == 5) {
+      MPI_Comm comm1 = MPI_COMM_NULL, comm2 = MPI_COMM_NULL;
+      KNM< Dmat >* pt = GetAny< KNM< Dmat >* >((*K)(stack));
+      ffassert(pt);
+      Mat* array = new Mat[pt->N() * pt->M()]();
+      for (int i = 0; i < pt->N(); ++i) {
+        for (int j = 0; j < pt->M(); ++j) {
+          if (pt->operator()(i, j)._petsc) {
+            array[i * pt->M() + j] = pt->operator()(i, j)._petsc;
+            PetscObjectGetComm((PetscObject)array[i * pt->M() + j], &comm2);
+          }
+          if (comm1 != MPI_COMM_NULL) {
+            int flag;
+            MPI_Comm_compare(comm1, comm2, &flag);
+            ffassert(flag == MPI_CONGRUENT || flag == MPI_IDENT);
+          }
+          comm1 = comm2;
+        }
       }
-      else {
-        ptA->_last = dof;
-        ptA->_clast = GetAny< long >((*R)(stack));
-      }
-      MatCreate(comm ? *comm : PETSC_COMM_WORLD, &ptA->_petsc);
-      MatSetSizes(ptA->_petsc, ptA->_last, ptA->_clast, PETSC_DECIDE, PETSC_DECIDE);
-      MatSetType(ptA->_petsc, MATAIJ);
-      MatSetUp(ptA->_petsc);
-      ptA->_num = new PetscInt[ptA->_last + ptA->_clast];
-      ptA->_cnum = ptA->_num + ptA->_last;
-      PetscInt rbegin, cbegin;
-      MatGetOwnershipRange(ptA->_petsc, &rbegin, NULL);
-      MatGetOwnershipRangeColumn(ptA->_petsc, &cbegin, NULL);
-      std::iota(ptA->_num, ptA->_cnum, rbegin);
-      std::iota(ptA->_cnum, ptA->_cnum + ptA->_clast, cbegin);
-      ptA->_first += rbegin;
-      ptA->_last += rbegin;
-      ptA->_cfirst += cbegin;
-      ptA->_clast += cbegin;
-      if (c != 4) {
-        ff_HPDDM_MatrixCSR< PetscScalar > dA(mA);
-        if(cbegin)
-          for(int i = 0; i < dA.HPDDM_nnz; ++i)
-            dA.HPDDM_ja[i] += cbegin;
-#if defined(PETSC_USE_64BIT_INDICES)
-        PetscInt* ia = new PetscInt[dA.HPDDM_n + 1];
-        std::copy_n(dA.HPDDM_ia, dA.HPDDM_n + 1, ia);
-        PetscInt* ja = new PetscInt[dA.HPDDM_nnz];
-        std::copy_n(dA.HPDDM_ja, dA.HPDDM_nnz, ja);
-        PetscScalar* c = new PetscScalar[dA.HPDDM_nnz];
-        std::copy_n(dA.HPDDM_a, dA.HPDDM_nnz, c);
-        MatSeqAIJSetPreallocationCSR(ptA->_petsc, ia, ja, c);
-        MatMPIAIJSetPreallocationCSR(ptA->_petsc, ia, ja, c);
-        delete[] c;
-        delete[] ja;
-        delete[] ia;
-#else
-        MatSeqAIJSetPreallocationCSR(ptA->_petsc, dA.HPDDM_ia, dA.HPDDM_ja, dA.HPDDM_a);
-        MatMPIAIJSetPreallocationCSR(ptA->_petsc, dA.HPDDM_ia, dA.HPDDM_ja, dA.HPDDM_a);
-#endif
-        if(cbegin)
-          for(int i = 0; i < dA.HPDDM_nnz; ++i)
-            dA.HPDDM_ja[i] -= cbegin;
-      }
+      MatCreateNest(comm1, pt->N(), NULL, pt->M(), NULL, array, &ptA->_petsc);
+      delete [] array;
     }
     else {
-      ptA->_A = new HpddmType;
-      if ((ptR || c == 2 || c == 3) && (mA || (c != 0 && c != 2))) {
-        HPDDM::MatrixCSR< PetscScalar >* dA;
-        if (mA)
-          dA = new_HPDDM_MatrixCSR< PetscScalar >(mA);
-        else
-          dA = new HPDDM::MatrixCSR< PetscScalar >(dof, dof, 0, nullptr, nullptr, nullptr, false);
-        Matrice_Creuse< double >* pList =
-          nargs[4] ? GetAny< Matrice_Creuse< double >* >((*nargs[4])(stack)) : 0;
-        HPDDM::MatrixCSR< void >* dL = nullptr;
-        int level = nargs[5] ? std::abs(GetAny< long >((*nargs[5])(stack))) : 0;
-        KN_< KN< long > > sub((c == 0 || c == 1) && ptR->n > 0 && ptR->operator[](0).n > 0
-                                ? (*ptR)(FromTo(1 + level * ptR->operator[](0).n,
-                                                1 + (level + 1) * ptR->operator[](0).n - 1))
-                                : KN< KN< long > >( ));
-        if (std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value && pList &&
-            (mA || (c != 0 && c != 2))) {
-          int n = 0;
-          ptA->_exchange = new HPDDM::template Subdomain< PetscScalar >*[2]( );
-          ptA->_exchange[0] = new HPDDM::template Subdomain< PetscScalar >( );
-          ptA->_exchange[0]->initialize(
-            dA, STL< long >((c == 0 || c == 1) && ptR->n > 0 ? ptR->operator[](0) : KN< long >( )),
-            sub, comm);
-          ptA->_exchange[0]->setBuffer( );
-          if (pList->A) {
-            MatriceMorse< double >* mList = static_cast< MatriceMorse< double >* >(&*(pList->A));
-            mList->CSR( );
-            ffassert(mList->n == mList->nnz);
-            ffassert(mList->m == (mA ? mA->n : dof));
-            n = mList->n;
-            dL = new HPDDM::MatrixCSR< void >(n, mA ? mA->n : dof, n, mList->p, mList->j, false);
-            ptA->_D = new KN<PetscReal>(n);
-            for (int i = 0; i < n; ++i) ptA->_D->operator[](i) = ptD->operator[](mList->j[i]);
-          } else {
-            dL = new HPDDM::MatrixCSR< void >(0, mA ? mA->n : dof, 0, nullptr, nullptr, false);
-            empty = new KN< typename std::conditional< std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value,
-                                     double, long >::type >(0);
+      KN< KN< long > >* ptR = (c == 0 || c == 1 ? GetAny< KN< KN< long > >* >((*R)(stack)) : nullptr);
+      KN< typename std::conditional< std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value,
+                                     double, long >::type >* ptD =
+        (c == 0 || c == 1
+           ? GetAny< KN< typename std::conditional<
+               std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value, double, long >::type >* >(
+               (*D)(stack))
+           : nullptr), *empty = nullptr;
+      PetscInt bs = nargs[1] ? GetAny< long >((*nargs[1])(stack)) : 1;
+      int dof = 0;
+      MatriceMorse< upscaled_type<PetscScalar> >* mA = nullptr;
+      if (c == 0 || c == 2) {
+        mA = static_cast< MatriceMorse< upscaled_type<PetscScalar> >* >(
+          &(*GetAny< Matrice_Creuse< upscaled_type<PetscScalar> >* >((*K)(stack))->A));
+        if (c == 2) ffassert(mA);
+      }
+      else
+        dof = GetAny< long >((*K)(stack));
+      MPI_Comm* comm = nargs[0] ? (MPI_Comm*)GetAny< pcommworld >((*nargs[0])(stack)) : 0;
+      if ((c == 2 && mA->n != mA->m) || c == 4) {
+        ptA->_first = 0;
+        ptA->_cfirst = 0;
+        if (c != 4) {
+          ptA->_last = mA->n;
+          ptA->_clast = mA->m;
+        }
+        else {
+          ptA->_last = dof;
+          ptA->_clast = GetAny< long >((*R)(stack));
+        }
+        MatCreate(comm ? *comm : PETSC_COMM_WORLD, &ptA->_petsc);
+        MatSetSizes(ptA->_petsc, ptA->_last, ptA->_clast, PETSC_DECIDE, PETSC_DECIDE);
+        MatSetType(ptA->_petsc, MATAIJ);
+        MatSetUp(ptA->_petsc);
+        ptA->_num = new PetscInt[ptA->_last + ptA->_clast];
+        ptA->_cnum = ptA->_num + ptA->_last;
+        PetscInt rbegin, cbegin;
+        MatGetOwnershipRange(ptA->_petsc, &rbegin, NULL);
+        MatGetOwnershipRangeColumn(ptA->_petsc, &cbegin, NULL);
+        std::iota(ptA->_num, ptA->_cnum, rbegin);
+        std::iota(ptA->_cnum, ptA->_cnum + ptA->_clast, cbegin);
+        ptA->_first += rbegin;
+        ptA->_last += rbegin;
+        ptA->_cfirst += cbegin;
+        ptA->_clast += cbegin;
+        if (c != 4) {
+          ff_HPDDM_MatrixCSR< PetscScalar > dA(mA);
+          if(cbegin)
+            for(int i = 0; i < dA.HPDDM_nnz; ++i)
+              dA.HPDDM_ja[i] += cbegin;
+#if defined(PETSC_USE_64BIT_INDICES)
+          PetscInt* ia = new PetscInt[dA.HPDDM_n + 1];
+          std::copy_n(dA.HPDDM_ia, dA.HPDDM_n + 1, ia);
+          PetscInt* ja = new PetscInt[dA.HPDDM_nnz];
+          std::copy_n(dA.HPDDM_ja, dA.HPDDM_nnz, ja);
+          PetscScalar* c = new PetscScalar[dA.HPDDM_nnz];
+          std::copy_n(dA.HPDDM_a, dA.HPDDM_nnz, c);
+          MatSeqAIJSetPreallocationCSR(ptA->_petsc, ia, ja, c);
+          MatMPIAIJSetPreallocationCSR(ptA->_petsc, ia, ja, c);
+          delete[] c;
+          delete[] ja;
+          delete[] ia;
+#else
+          MatSeqAIJSetPreallocationCSR(ptA->_petsc, dA.HPDDM_ia, dA.HPDDM_ja, dA.HPDDM_a);
+          MatMPIAIJSetPreallocationCSR(ptA->_petsc, dA.HPDDM_ia, dA.HPDDM_ja, dA.HPDDM_a);
+#endif
+          if(cbegin)
+            for(int i = 0; i < dA.HPDDM_nnz; ++i)
+              dA.HPDDM_ja[i] -= cbegin;
+        }
+      }
+      else {
+        ptA->_A = new HpddmType;
+        if ((ptR || c == 2 || c == 3) && (mA || (c != 0 && c != 2))) {
+          HPDDM::MatrixCSR< PetscScalar >* dA;
+          if (mA)
+            dA = new_HPDDM_MatrixCSR< PetscScalar >(mA);
+          else
+            dA = new HPDDM::MatrixCSR< PetscScalar >(dof, dof, 0, nullptr, nullptr, nullptr, false);
+          Matrice_Creuse< double >* pList =
+            nargs[4] ? GetAny< Matrice_Creuse< double >* >((*nargs[4])(stack)) : 0;
+          HPDDM::MatrixCSR< void >* dL = nullptr;
+          int level = nargs[5] ? std::abs(GetAny< long >((*nargs[5])(stack))) : 0;
+          KN_< KN< long > > sub((c == 0 || c == 1) && ptR->n > 0 && ptR->operator[](0).n > 0
+                                  ? (*ptR)(FromTo(1 + level * ptR->operator[](0).n,
+                                                  1 + (level + 1) * ptR->operator[](0).n - 1))
+                                  : KN< KN< long > >( ));
+          if (std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value && pList &&
+              (mA || (c != 0 && c != 2))) {
+            int n = 0;
+            ptA->_exchange = new HPDDM::template Subdomain< PetscScalar >*[2]( );
+            ptA->_exchange[0] = new HPDDM::template Subdomain< PetscScalar >( );
+            ptA->_exchange[0]->initialize(
+              dA, STL< long >((c == 0 || c == 1) && ptR->n > 0 ? ptR->operator[](0) : KN< long >( )),
+              sub, comm);
+            ptA->_exchange[0]->setBuffer( );
+            if (pList->A) {
+              MatriceMorse< double >* mList = static_cast< MatriceMorse< double >* >(&*(pList->A));
+              mList->CSR( );
+              ffassert(mList->n == mList->nnz);
+              ffassert(mList->m == (mA ? mA->n : dof));
+              n = mList->n;
+              dL = new HPDDM::MatrixCSR< void >(n, mA ? mA->n : dof, n, mList->p, mList->j, false);
+              ptA->_D = new KN<PetscReal>(n);
+              for (int i = 0; i < n; ++i) ptA->_D->operator[](i) = ptD->operator[](mList->j[i]);
+            } else {
+              dL = new HPDDM::MatrixCSR< void >(0, mA ? mA->n : dof, 0, nullptr, nullptr, false);
+              empty = new KN< typename std::conditional< std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value,
+                                       double, long >::type >(0);
+            }
           }
-        }
-        ptA->_A->HPDDM::template Subdomain< PetscScalar >::initialize(
-          dA, STL< long >((c == 0 || c == 1) && ptR->n > 0 ? ptR->operator[](0) : KN< long >( )), sub,
-          comm, dL);
-        delete dL;
-        ptA->_num = new PetscInt[ptA->_A->getMatrix( )->HPDDM_n];
-        if (!C && (c == 2 || c == 3)) {
-            long long global;
-            ptA->_A->distributedNumbering(ptA->_num, ptA->_first, ptA->_last, global);
-        }
-        initPETScStructure<C>(ptA, bs,
-          nargs[3] && GetAny< bool >((*nargs[3])(stack)) ? PETSC_TRUE : PETSC_FALSE, empty ? empty : ptD);
-        delete empty;
-        if (!std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value) {
-          mA->p = ptA->_A->getMatrix( )->HPDDM_ia;
-        }
-        if (nargs[2] && GetAny< bool >((*nargs[2])(stack))) {
-          if (ptR) ptR->resize(0);
-          if (c == 0 || c == 2) GetAny< Matrice_Creuse< PetscScalar >* >((*K)(stack))->destroy( );
+          ptA->_A->HPDDM::template Subdomain< PetscScalar >::initialize(
+            dA, STL< long >((c == 0 || c == 1) && ptR->n > 0 ? ptR->operator[](0) : KN< long >( )), sub,
+            comm, dL);
+          delete dL;
+          ptA->_num = new PetscInt[ptA->_A->getMatrix( )->HPDDM_n];
+          if (!C && (c == 2 || c == 3)) {
+              long long global;
+              ptA->_A->distributedNumbering(ptA->_num, ptA->_first, ptA->_last, global);
+          }
+          initPETScStructure<C>(ptA, bs,
+            nargs[3] && GetAny< bool >((*nargs[3])(stack)) ? PETSC_TRUE : PETSC_FALSE, empty ? empty : ptD);
+          delete empty;
+          if (!std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value) {
+            mA->p = ptA->_A->getMatrix( )->HPDDM_ia;
+          }
+          if (nargs[2] && GetAny< bool >((*nargs[2])(stack))) {
+            if (ptR) ptR->resize(0);
+            if (c == 0 || c == 2) GetAny< Matrice_Creuse< PetscScalar >* >((*K)(stack))->destroy( );
+          }
         }
       }
     }
@@ -6618,6 +6648,7 @@ static void Init_PETSc( ) {
   TheOperators->Add("<-", new PETSc::initCSR< HpSchwarz< PetscScalar > >(1, 1));
   TheOperators->Add("<-", new PETSc::initCSR< HpSchwarz< PetscScalar > >(1, 1, 1));
   TheOperators->Add("<-", new PETSc::initCSR< HpSchwarz< PetscScalar > >(1, 1, 1, 1));
+  TheOperators->Add("<-", new PETSc::initCSR< HpSchwarz< PetscScalar > >(1, 1, 1, 1, 1));
   Global.Add("constructor", "(", new PETSc::initCSR< HpSchwarz< PetscScalar >, true >);
   Global.Add("constructor", "(", new PETSc::initCSR< HpSchwarz< PetscScalar >, true >(1));
   Global.Add("constructor", "(", new PETSc::initCSR< HpSchwarz< PetscScalar >, true >(1, 1, 1));

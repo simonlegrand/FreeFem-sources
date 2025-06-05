@@ -428,37 +428,94 @@ void addScalarProduct() {
     atype<Op*>()->Add("(", "", new OneOperator3_<K, Op*, KN<K>*, KN<K>*>(scalarProduct<Op, K>));
 }
 
-template<class A>
-inline AnyType MyDestroyKN(Stack, const AnyType& x) {
-    KN<A>* a = GetAny<KN<A>*>(x);
-    for(int i = 0; i < a->N(); ++i)
-        (*a)[i].dtor();
-    a->destroy();
-    return Nothing;
-}
-template<class R>
-R* InitKN(R* const& a, const long& n) {
-    a->init(n);
-    return a;
-}
 template<class T>
-T* resizeClean(const Resize<T>& t, const long &n) {
-    int m = t.v->N();
-    for(int i = n; i < m; ++i)
-        (*t.v)[i].dtor();
-    t.v->resize(n);
+T* resizeClean(const Resize<T>& t, const long &m) {
+    long M = t.v->N();
+    if(M != m) {
+      M = std::min(M, m);
+      typename T::K* array = new typename T::K[M]();
+      for(long j = 0; j < M; ++j) {
+#if defined(WITH_petsc) || defined(WITH_petsccomplex)
+          if((*t.v)[j]._petsc) {
+#endif
+            array[j] = (*t.v)[j];
+            (*t.v)[j] = typename T::K();
+#if defined(WITH_petsc) || defined(WITH_petsccomplex)
+          }
+#endif
+      }
+      t.v->resize(m);
+      for(long j = 0; j < M; ++j) {
+#if defined(WITH_petsc) || defined(WITH_petsccomplex)
+          if(array[j]._petsc) {
+#endif
+            (*t.v)[j] = array[j];
+            array[j] = typename T::K();
+#if defined(WITH_petsc) || defined(WITH_petsccomplex)
+          }
+#endif
+      }
+      delete [] array;
+    }
+    return t.v;
+}
+
+template<class T>
+T* resizeClean(const Resize<T>& t, const long &n, const long &m) {
+    long N = t.v->N();
+    long M = t.v->M();
+    if (N != n || M != m) {
+      N = std::min(N, n);
+      M = std::min(M, m);
+      typename T::K* array = new typename T::K[N * M]();
+      for(long i = 0; i < N; ++i)
+        for(long j = 0; j < M; ++j) {
+#if defined(WITH_petsc) || defined(WITH_petsccomplex)
+          if((*t.v)(i, j)._petsc) {
+#endif
+            array[i * M + j] = (*t.v)(i, j);
+            (*t.v)(i, j) = typename T::K();
+#if defined(WITH_petsc) || defined(WITH_petsccomplex)
+          }
+#endif
+        }
+      t.v->resize(n, m);
+      for(long i = 0; i < N; ++i)
+        for(long j = 0; j < M; ++j) {
+#if defined(WITH_petsc) || defined(WITH_petsccomplex)
+          if(array[i * M + j]._petsc) {
+#endif
+            (*t.v)(i, j) = array[i * M + j];
+            array[i * M + j] = typename T::K();
+#if defined(WITH_petsc) || defined(WITH_petsccomplex)
+          }
+#endif
+        }
+      delete [] array;
+    }
     return t.v;
 }
 
 template<class Op>
 void addArray() {
-    Dcl_Type<KN<Op>*>(0, MyDestroyKN<Op>);
-    TheOperators->Add("<-", new OneOperator2_<KN<Op>*, KN<Op>*, long>(&InitKN));
+    Dcl_Type<KN<Op>*>(InitP<KN<Op>>, Destroy<KN<Op>>);
+    TheOperators->Add("<-", new OneOperator2_<KN<Op>*, KN<Op>*, long>(&set_init));
     atype<KN<Op>*>()->Add("[", "", new OneOperator2_<Op*, KN<Op>*, long>(get_elementp_<Op, KN<Op>*, long>));
     Dcl_Type<Resize<KN<Op>>>();
     Add<KN<Op>*>("resize", ".", new OneOperator1<Resize<KN<Op>>, KN<Op>*>(to_Resize));
     Add<Resize<KN<Op>>>("(", "", new OneOperator2_<KN<Op>*, Resize<KN<Op>>, long>(resizeClean));
     map_type_of_map[make_pair(atype<long>(), atype<Op*>())] = atype<KN<Op>*>();
+    Add<KN<Op>*>("n", ".", new OneOperator1<long, KN<Op>*>(get_n));
+
+    Dcl_Type<KNM<Op>*>(InitP<KNM<Op>>, Destroy<KN<Op>>);
+    TheOperators->Add("<-", new OneOperator3_<KNM<Op>*, KNM<Op>*, long, long>(&set_init2));
+    atype<KNM<Op>*>()->Add("(", "", new OneOperator3_<Op*, KNM<Op>*, long, long>(get_elementp2_<Op, KNM<Op>*, long, long>));
+    Dcl_Type<Resize<KNM<Op>>>();
+    Add<KNM<Op>*>("resize", ".", new OneOperator1<Resize<KNM<Op>>, KNM<Op>*>(to_Resize));
+    Add<Resize<KNM<Op>>>("(", "", new OneOperator3_<KNM<Op>*, Resize<KNM<Op>>, long, long>(resizeClean));
+    map_type_of_map[make_pair(atype<pair<long, long>>(), atype<Op*>())] = atype<KNM<Op>*>();
+    Add<KNM<Op>*>("n", ".", new OneOperator1<long, KNM<Op>*>(get_n));
+    Add<KNM<Op>*>("m", ".", new OneOperator1<long, KNM<Op>*>(get_m));
 }
 
 void parallelIO(string*& name, MPI_Comm* const& comm, bool const& append, int& T, int& size, std::string& base_filename) {
