@@ -1248,7 +1248,7 @@ namespace PETSc {
       return 0L;
   }
 
-  template< class HpddmType, int C >
+  template< class HpddmType, int C, bool D = false >
   class initCSRfromDMatrix : public OneOperator {
    public:
     const int c;
@@ -1292,9 +1292,9 @@ namespace PETSc {
           atype< DistributedCSR< HpddmType >* >( )),
         c(2) {}
   };
-  template< class HpddmType, int C >
+  template< class HpddmType, int C, bool D >
   basicAC_F0::name_and_type
-    initCSRfromDMatrix< HpddmType, C >::initCSRfromDMatrix_Op::name_param[] = {
+    initCSRfromDMatrix< HpddmType, C, D >::initCSRfromDMatrix_Op::name_param[] = {
       {C == 1 ? "transpose" : "clean", C == 1 ? &typeid(Polymorphic*) : &typeid(bool)},
       {"symmetric", &typeid(bool)},
       {"restriction", &typeid(Matrice_Creuse< double >*)}};
@@ -3814,8 +3814,8 @@ namespace PETSc {
     }
     return 0L;
   }
-  template< class HpddmType, int C >
-  AnyType initCSRfromDMatrix< HpddmType, C >::initCSRfromDMatrix_Op::operator( )(
+  template< class HpddmType, int C, bool D >
+  AnyType initCSRfromDMatrix< HpddmType, C, D >::initCSRfromDMatrix_Op::operator( )(
     Stack stack) const {
     ffassert((C == 0 && (c == 0 || c == 2)) || (C == c && C == 1));
     DistributedCSR< HpddmType >* ptA = GetAny< DistributedCSR< HpddmType >* >((*A)(stack));
@@ -3851,7 +3851,7 @@ namespace PETSc {
             ptA->_D = new KN<PetscReal>(dA->HPDDM_n);
             for (int i = 0; i < dA->HPDDM_n; ++i) ptA->_D->operator[](i) = ptB->_A->getScaling()[i];
         }
-        initPETScStructure<false>(ptA, bs,
+        initPETScStructure<D>(ptA, bs,
           nargs[1] && GetAny< bool >((*nargs[1])(stack)) ? PETSC_TRUE : PETSC_FALSE,
           ptA->_D);
       } else {
@@ -3887,7 +3887,7 @@ namespace PETSc {
           dA, o, r, const_cast<MPI_Comm*>(&comm), L);
         delete L;
         ptA->_num = new PetscInt[ptA->_A->getDof()];
-        initPETScStructure<false>(ptA, bs,
+        initPETScStructure<D>(ptA, bs,
           nargs[1] && GetAny< bool >((*nargs[1])(stack)) ? PETSC_TRUE : PETSC_FALSE, empty);
         delete empty;
         if (c != 0 || !ptK->A)
@@ -6663,6 +6663,7 @@ static void Init_PETSc( ) {
   TheOperators->Add("<-", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar >, 0 >);
   TheOperators->Add("<-", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar >, 1 >);
   TheOperators->Add("<-", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar >, 0 >(1));
+  Global.Add("constructor", "(", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar >, 0, true >);
   TheOperators->Add("<-", new PETSc::initRectangularCSRfromDMatrix< HpSchwarz< PetscScalar >, 0 >);
   TheOperators->Add("<-", new PETSc::initRectangularCSRfromDMatrix< HpSchwarz< PetscScalar >, 1 >);
   TheOperators->Add("<-", new PETSc::initRectangularCSRfromDMatrix< HpSchwarz< PetscScalar >, 0 >(1));
