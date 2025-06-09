@@ -868,7 +868,7 @@ namespace PETSc {
             PetscInt* cnum = ptA->_num + dN->HPDDM_n;
             if (ptA->_petsc) {
                 int rank, size, N;
-                unsigned int flag = mN->nnz == mN->n * mN->m ? 1 : 0;
+                unsigned int flag = mN->nnz && mN->nnz == mN->n * mN->m ? 1 : 0;
                 MPI_Comm_size(PetscObjectComm((PetscObject)ptA->_petsc), &size);
                 if (size > 1) {
                   PetscBool dense;
@@ -4925,7 +4925,7 @@ namespace PETSc {
                               type = MATHERMITIANTRANSPOSEVIRTUAL;
                           }
                       } else MatGetSize(mat[i][j], &n, &m);
-                      if(isType && m >= n) {
+                      if(isType && m >= n && !(cast[i * N + j] && cast[i * N + j]->_num)) {
                           PetscMPIInt rank;
                           MPI_Comm_rank(PetscObjectComm((PetscObject)mat[i][j]), &rank);
                           if(rank == 0) {
