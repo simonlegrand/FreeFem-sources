@@ -150,6 +150,7 @@ while [ $# -ne 0 ]  ; do
 	*.cxx) files="$files '$1'";  o=`basename "$1" .cxx` ; fileso="$fileso '$o.o'"; args=$argsp;;
 	*.c)   files="$files '$1'";  o=`basename "$1" .c` ; fileso="$fileso '$o.o'"; args=$argsp;;
 	*.f)   ffiles="$ffiles '$1'";  o=`basename "$1" .f` ; fileso="$fileso '$o.o'";;
+	*.f90) ffiles="$ffiles '$1'";  o=`basename "$1" .f90` ; fileso="$fileso '$o.o'";;
 	*.F)   ffiles="$ffiles '$1'";  o=`basename "$1" .F` ; fileso="$fileso '$o.o'";;
 	*.o)   fileso="$fileso '$1'"; o=`basename "$1" .o` ;;
 	-o)    out="$2"; shift;;
