@@ -2591,7 +2591,7 @@ template<typename R>  BlockMatrix<R>::BlockMatrix(const basicAC_F0 & args,int ii
 		    t_Mij[i][j]=0;
 		}
 		else if ( atype<R >()->CastingFrom(rij) )
-		{  		  // frev 2007
+		{  		  // fevr 2007
 		    e_Mij[i][j]=to<R>(c_Mij);
 		    t_Mij[i][j]=7; //  just un scalaire
 		}
@@ -2788,7 +2788,7 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
       Fij(i,j)=0;
       Expression eij = e_Mij[i][j];
       int tij=t_Mij[i][j];
-      if (eij)
+      if (eij) // warning eij == 0 is O case.
       {
         cnjij(i,j) = tij%2 == 0;
         AnyType e=(*eij)(s);
@@ -2805,6 +2805,7 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
          ExecError(" Type sub matrix block unknown ");
         }
       }
+      else ffassert(tij==0);
      }
      //  compute size of matrix
      int err=0;
@@ -2844,7 +2845,7 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
 
     if (err)    ExecError("Error Block Matrix,  size sub matrix");
     //  gestion of zero block ????
-
+/*  remove for block of size 0  june 13 2025 PHT and FH 
     for (int j=0;j<M;++j)
     {  if(verbosity>99) cout << j << " column size" << Oj(j+1) << endl;
         if   ( Oj(j+1) ==0) {
@@ -2859,7 +2860,7 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
                if( Oi(i+1) !=1)  err++;}
     }
     if (err)    ExecError("Error Block Matrix with  0 line or  0 colomn..");
-
+*/
     for (int i=0;i<N;++i)
       Oi(i+1) += Oi(i);
     for (int j=0;j<M;++j) // correct 10/01/2007 FH
