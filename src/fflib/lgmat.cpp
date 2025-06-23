@@ -2778,10 +2778,13 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
 
    cnjij = false;
    KN<long> Oi(N+1), Oj(M+1);
+    KN<bool> Zi(N,false), Zj(M,false);
+
    if(verbosity>9) { cout << " Build Block Matrix : " << N << " x " << M << endl;}
    Bij = (L) 0;
    Oi = (long) 0;
    Oj = (long)0;
+
   for (int i=0;i<N;++i)
    for (int j=0;j<M;++j)
     {
@@ -2818,7 +2821,8 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
          nm = get_NM( *Bij(i,j));
        else if(Fij(i,j))
          nm = make_pair<long,long>(Fij(i,j)->N(), Fij(i,j)->M());
-
+       else
+           Zi(i)=Zj(j)=true;
         if (( nm.first || nm.second)  && verbosity>3)
           cout << " Block [ " << i << "," << j << " ]      =     " << nm.first << " x " << nm.second << " cnj = " << cnjij(i,j) << endl;
         if (nm.first)
@@ -2845,22 +2849,20 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
 
     if (err)    ExecError("Error Block Matrix,  size sub matrix");
     //  gestion of zero block ????
-/*  remove for block of size 0  june 13 2025 PHT and FH 
+/*  remove for block of size 0  june 13 2025 PHT and FH */
     for (int j=0;j<M;++j)
     {  if(verbosity>99) cout << j << " column size" << Oj(j+1) << endl;
-        if   ( Oj(j+1) ==0) {
+        if   ( Oj(j+1) ==0 && Zj(j))
             Oj(j+1)=1;
-            if( Oj(j+1) !=1)  err++;}
+           
     }
     for (int i=0;i<N;++i)
     {
         if(verbosity>99) cout << i << " row size" << Oi(i+1) << endl;
-        if   ( Oi(i+1) ==0) {
+        if   ( Oi(i+1) ==0 && Zi(i))
                Oi(i+1)=1;
-               if( Oi(i+1) !=1)  err++;}
     }
-    if (err)    ExecError("Error Block Matrix with  0 line or  0 colomn..");
-*/
+
     for (int i=0;i<N;++i)
       Oi(i+1) += Oi(i);
     for (int j=0;j<M;++j) // correct 10/01/2007 FH
