@@ -5,7 +5,7 @@ function(ff_write_config_file)
 
   # Header
   file(WRITE ${CMAKE_BINARY_DIR}/${FILENAME} "# Paths found by CMake\n")
-
+  message(STATUS "=${CMAKE_BINARY_DIR}")
   # Compilers
   file(APPEND ${CMAKE_BINARY_DIR}/${FILENAME} "CMAKE_C_COMPILER ${CMAKE_C_COMPILER}\n")
   file(APPEND ${CMAKE_BINARY_DIR}/${FILENAME} "CMAKE_C_FLAGS ${CMAKE_C_FLAGS}\n")

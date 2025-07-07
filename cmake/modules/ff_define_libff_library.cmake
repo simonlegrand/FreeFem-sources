@@ -3,6 +3,24 @@ macro(ff_define_libff_library)
   include(ff_define_strversionnumber_library)
   ff_define_strversionnumber_library()
 
+  add_library(libff)
+  
+  target_sources(libff
+    PRIVATE
+    UMFPack_Solver.cpp
+    AFunction.cpp
+    AFunciton2.cpp
+    array_long.cpp
+    array_real.cpp
+    array_complex.cpp
+    lex.cpp
+    lgmesh.cpp
+    lgmesh3.cpp
+    CodeAlloc.cpp
+    lgmat.cpp
+    global.cpp
+  )
+  
   # Get paths to cpp files in femlib and fflib and put them in LIBFF_SRC
   file(GLOB FEMLIB_SRC ${CMAKE_SOURCE_DIR}/src/femlib/*.cpp)
   file(GLOB_RECURSE FFLIB_SRC ${CMAKE_SOURCE_DIR}/src/fflib/*.cpp)

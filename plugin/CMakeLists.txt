@@ -1,2 +1,1 @@
-#ADD_SUBDIRECTORY(mpi)
-ADD_SUBDIRECTORY(seq)
+add_subdirectory(seq)
