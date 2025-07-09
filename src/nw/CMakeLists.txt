@@ -25,7 +25,6 @@ set_target_properties(
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON	
   ENABLE_EXPORTS 1
-  POSITION_INDEPENDENT_CODE 1
 )
 
 target_link_libraries(${FF_EXE_NW_NAME}

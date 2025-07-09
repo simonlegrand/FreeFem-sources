@@ -2,8 +2,7 @@ add_library(ff)
 set_target_properties(ff
   PROPERTIES
   CXX_STANDARD 14
-  CXX_STANDARD_REQUIRED ON
-  POSITION_INDEPENDENT_CODE 1)
+  CXX_STANDARD_REQUIRED ON)
 
 target_sources(ff
   PRIVATE
