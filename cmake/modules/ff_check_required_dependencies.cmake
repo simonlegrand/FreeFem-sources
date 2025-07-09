@@ -8,4 +8,4 @@
 find_package(BISON REQUIRED)
 find_package(FLEX REQUIRED)
 find_package(Patch REQUIRED)
-find_package(LAPACK REQUIRED)
+find_package(BLAS REQUIRED)

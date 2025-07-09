@@ -32,5 +32,5 @@ target_link_libraries(${FF_EXE_NW_NAME}
   lglib
   ff
   PRIVATE
-  LAPACK::LAPACK
+  BLAS::BLAS
 )
