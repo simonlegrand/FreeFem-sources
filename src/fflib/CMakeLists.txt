@@ -1,10 +1,11 @@
-add_library(ff)
-set_target_properties(ff
+add_library(${FF_LIBFF_NAME})
+set_target_properties(${FF_LIBFF_NAME}
   PROPERTIES
   CXX_STANDARD 14
-  CXX_STANDARD_REQUIRED ON)
+  CXX_STANDARD_REQUIRED ON
+  BUILD_RPATH ${CMAKE_CURRENT_BINARY_DIR}/../../plugin/seq)
 
-target_sources(ff
+target_sources(${FF_LIBFF_NAME}
   PRIVATE
   UMFPack_Solver.cpp
   AFunction.cpp
@@ -74,7 +75,7 @@ target_sources(ff
   ${PROJECT_BINARY_DIR}/strversionnumber.cpp
 )
 
-target_include_directories(ff
+target_include_directories(${FF_LIBFF_NAME}
   PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}
   ../lglib

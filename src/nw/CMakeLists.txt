@@ -1,6 +1,5 @@
-set(FF_EXE_NW_NAME FreeFem++-nw)
-
-add_executable(${FF_EXE_NW_NAME})
+add_executable(${FF_EXE_NW_NAME}
+WIN32 MACOSX_BUNDLE)
 
 target_sources(${FF_EXE_NW_NAME}
   PRIVATE
@@ -25,12 +24,13 @@ set_target_properties(
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON	
   ENABLE_EXPORTS 1
+  BUILD_RPATH ${CMAKE_CURRENT_BINARY_DIR}/../../plugin/seq
 )
 
 target_link_libraries(${FF_EXE_NW_NAME}
   PUBLIC
-  lglib
-  ff
+  ${FF_LIBLG_NAME}
+  ${FF_LIBFF_NAME}
   PRIVATE
   BLAS::BLAS
 )

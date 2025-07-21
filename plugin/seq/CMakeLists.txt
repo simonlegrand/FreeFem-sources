@@ -71,6 +71,9 @@ set(SEQ_PLUGINS_LIST
   Element_P3pnc_3d
 )
 
+
+set(PLUGINS_LIST ${SEQ_PLUGINS_LIST} PARENT_SCOPE)
+
 foreach(plugin ${SEQ_PLUGINS_LIST})
   add_library(${plugin} MODULE ${plugin}.cpp)
 
@@ -85,6 +88,13 @@ foreach(plugin ${SEQ_PLUGINS_LIST})
     ${CMAKE_SOURCE_DIR}/src/medit
     ${CMAKE_BINARY_DIR})
 
+  # Checker l'influence de -bundle
+  if(APPLE)
+  target_link_options(${plugin}
+    PRIVATE
+    -bundle -undefined dynamic_lookup)
+  endif()
+  
   set_target_properties(${plugin}
     PROPERTIES
     CXX_STANDARD 14

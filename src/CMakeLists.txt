@@ -1,6 +1,6 @@
 
 # include(ff_define_ffglut_executable)
-include(ff_define_freefem_executable)
+# include(ff_define_freefem_executable)
 # include(ff_define_freefem_mpi_executable)
 
 # # define the three executables:
@@ -15,7 +15,7 @@ include(ff_define_freefem_executable)
 
 # add_subdirectory(bamg)
 #add_subdirectory(bamglib)
-add_subdirectory(libMesh)
+#add_subdirectory(libMesh)
 add_subdirectory(fflib)
 add_subdirectory(lglib)
 

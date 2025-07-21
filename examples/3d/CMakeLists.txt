@@ -35,7 +35,10 @@ set(SEQ_TESTS_TIMEOUT 60)
 
 foreach(TEST ${TEST_NAMES})
   add_test(NAME ${TEST}
-    COMMAND ${CMAKE_BINARY_DIR}/src/nw/FreeFem++-nw ${CMAKE_SOURCE_DIR}/examples/3d/${TEST}
+    COMMAND $<TARGET_FILE:${FF_EXE_NW_NAME}> ${CMAKE_SOURCE_DIR}/examples/3d/${TEST}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/examples/3d)
-  set_tests_properties(${TEST} PROPERTIES TIMEOUT ${SEQ_TESTS_TIMEOUT})
+  set_tests_properties(${TEST}
+    PROPERTIES
+    TIMEOUT ${SEQ_TESTS_TIMEOUT}
+    ENVIRONMENT "FF_INCLUDEPATH=../../idp")
 endforeach()

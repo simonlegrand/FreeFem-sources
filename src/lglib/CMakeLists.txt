@@ -1,18 +1,18 @@
-set(LIB_NAME lglib)
-add_library(${LIB_NAME})
-set_target_properties(${LIB_NAME}
+add_library(${FF_LIBLG_NAME})
+set_target_properties(${FF_LIBLG_NAME}
   PROPERTIES
   PREFIX ""
   CXX_STANDARD 14
-  CXX_STANDARD_REQUIRED ON)
+  CXX_STANDARD_REQUIRED ON
+  BUILD_RPATH ${CMAKE_CURRENT_BINARY_DIR}/../../plugin/seq)
 
-target_sources(${LIB_NAME}
+target_sources(${FF_LIBLG_NAME}
   PRIVATE
   lg.tab.cpp
   mymain.cpp
 )
 
-target_include_directories(${LIB_NAME}
+target_include_directories(${FF_LIBLG_NAME}
   PRIVATE
   ../fflib
   ../bamglib

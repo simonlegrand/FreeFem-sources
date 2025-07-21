@@ -1,0 +1,35 @@
+#ifndef CONFIG_H_
+#define CONFIG_H_
+
+/* If umfpack.h is located in UMFPACK subdir */
+#cmakedefine HAVE_BIG_UMFPACK_UMFPACK_H 1
+
+/* freecadna is use to evalute the round-off error propagation */
+#cmakedefine HAVE_CADNA
+
+/* Complementary error function is available */
+#cmakedefine HAVE_ERFC
+
+/* Dynamic loading - not mandatory */
+#cmakedefine HAVE_DLFCN_H
+
+/* Access environement variables with geteenv function */
+#cmakedefine HAVE_GETENV
+
+/* Version number of package */
+#define VERSION "@FREEFEM_VERSION@"
+
+/* FreeFEM version as a float */
+#define VersionFreeFem @FREEFEM_VERSION@
+
+/* FreeFEM build date */
+#define VersionFreeFemDate "@FREEFEM_BUILD_DATE@"
+
+/* FreeFEM install prefix for everything but bin and share */
+// TODO Why is it installed this way?
+// Should it be different on MacOS?
+// Furthermore, not very robust since it is different at build time and
+// when installed.
+#define FF_PREFIX_DIR "@CMAKE_INSTALL_PREFIX@/lib/ff++/@FREEFEM_VERSION@"
+
+#endif
