@@ -74,6 +74,12 @@ set(SEQ_PLUGINS_LIST
 
 set(PLUGINS_LIST ${SEQ_PLUGINS_LIST} PARENT_SCOPE)
 
+# This doesn't seem standard, this dylib extension should be reserved
+# to shared libraries and not modules.
+if (APPLE)
+  set(CMAKE_SHARED_MODULE_SUFFIX ".dylib")
+endif()
+
 foreach(plugin ${SEQ_PLUGINS_LIST})
   add_library(${plugin} MODULE ${plugin}.cpp)
 
