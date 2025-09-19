@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.22)
-
+cmake_minimum_required(VERSION 3.23)
+include(CMakePrintHelpers)
 # Add the path containing FreeFEM CMake modules
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/modules)
 
@@ -41,10 +41,11 @@ else()
 endif()
 
 file(RELATIVE_PATH relDir
-  ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}
-  ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}
+  ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}
+  ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}
 )
 set(CMAKE_INSTALL_RPATH ${base} ${base}/${relDir})
+cmake_print_variables(CMAKE_INSTALL_RPATH)
 
 ### Dependencies search
 #
@@ -61,16 +62,16 @@ set(FF_LIBFF_NAME ff)
 set(FF_LIBLG_NAME lglib)
 #set(FF_LIBMESH_NAME Mesh)
 set(FF_LIBS ${FF_LIBFF_NAME} ${FF_LIBLG_NAME} ${FF_LIBMESH_NAME})
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src)
+add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 
 # Dynamically loadable plugins
 set(FF_PLUGINS_LIST "")
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/plugin)
+add_subdirectory(${PROJECT_SOURCE_DIR}/plugin)
 
 # Note: this call MUST be performed in the main CMake script
 enable_testing()
 # Examples are tests
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/examples)
+add_subdirectory(${PROJECT_SOURCE_DIR}/examples)
 
 # ### PETSc
 # # Chercher les deux version réels et complexes
@@ -114,6 +115,16 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/examples)
 #   message(STATUS "- ${_dep_found}")
 # endforeach()
 
+# FreeFEM install prefix for everything but bin and share
+# TODO Why is it installed this way?
+# Should it be different on MacOS?
+# This variable should be reset at install time to take into account
+# the possible use of --prefix option.
+#
+# This variable is used in source code to locate primary freefem++.pref file.
+# It must be know at build time. 
+set(FF_PREFIX_DIR ${CMAKE_INSTALL_PREFIX}/FreeFem++-nw.app/Contents/Resources)
+
 # Should be run at the end, after dependencies detection
 include(ff_configure_config_header)
 ff_configure_config_header()
@@ -136,30 +147,29 @@ endif()
 
 ### Installation
 install(TARGETS
-  ${FF_MD2EDP_EXE_NAME}
   ${FF_EXE_NW_NAME}
-  ${FF_LIBS}
-  ${FF_PLUGINS_LIST}
   BUNDLE DESTINATION .
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-# FreeFEM install prefix for everything but bin and share
-# TODO Why is it installed this way?
-# Should it be different on MacOS?
-# This variable should be reset at install time to take into account
-# the possible use of --prefix option.
-set(FF_PREFIX_DIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/ff++/${FREEFEM_VERSION})
+# set(genex "$<TARGET_FILE_DIR:${FF_EXE_NW_NAME}>")
+# add_custom_target(printGenex
+#   COMMENT "Result of generator expression:"
+#   COMMAND ${CMAKE_COMMAND} -E echo "${genex}"
+#   VERBATIM)
+
 file(GLOB FF_IDP_FILES
   idp/*.idp)
-#file()
-install(FILES
-  ${FF_IDP_FILES}
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/ff++/${FREEFEM_VERSION}/idp)
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  include(platform/linux/CMakeLists.txt)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  include(install_darwin)
+endif()
 
 # Trick to get the PROJECT_SOURCE_DIR set in the install script and
-# evaluate CMAKE_INSTALL_LIBDIR at install time.
+# evaluate FF_PREFIX_DIR at install time.
 # See https://stackoverflow.com/questions/73815300/how-do-i-get-project-root-dir-in-the-cmake-install-code-section
 string(CONFIGURE [[
   set(PROJECT_SOURCE_DIR "@PROJECT_SOURCE_DIR@")
@@ -170,3 +180,16 @@ string(CONFIGURE [[
   ]] install_script @ONLY)
 
 install(CODE "${install_script}")
+
+set(CPACK_VERBATIM_VARIABLES YES)
+set(CPACK_PACKAGE_DIRECTORY distribution)
+set(CPACK_PACKAGE_VENDOR "LJLL")
+set(CPACK_SOURCE_PACKAGE_FILE_NAME "${PROJECT_NAME}-${FREEFEM_VERSION}")
+set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_NAME})
+set(CPACK_MONOLITHIC_INSTALL TRUE)
+
+include(CPack)
+
+# set(CPACK_PACKAGE_VERSION "4.15")
+# set(CPACK_PACKAGE_CONTACT "support@yourcompany.com")

@@ -76,7 +76,7 @@ set(PLUGINS_LIST ${SEQ_PLUGINS_LIST} PARENT_SCOPE)
 
 # This doesn't seem standard, this dylib extension should be reserved
 # to shared libraries and not modules.
-if (APPLE)
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   set(CMAKE_SHARED_MODULE_SUFFIX ".dylib")
 endif()
 
@@ -94,18 +94,23 @@ foreach(plugin ${SEQ_PLUGINS_LIST})
     ${CMAKE_SOURCE_DIR}/src/medit
     ${CMAKE_BINARY_DIR})
 
-  # Checker l'influence de -bundle
-  if(APPLE)
-  target_link_options(${plugin}
-    PRIVATE
-    -bundle -undefined dynamic_lookup)
-  endif()
-  
   set_target_properties(${plugin}
     PROPERTIES
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON
     PREFIX "")
+
+  if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    target_link_options(${plugin}
+      PRIVATE
+      -undefined dynamic_lookup)
+    # If using XCode, copy libs and plugins in the bundle of the binary dir.
+    #
+    add_custom_command(TARGET ${plugin} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      $<TARGET_FILE:${plugin}>
+      $<TARGET_FILE_DIR:${FF_EXE_NW_NAME}>/../PlugIns/$<TARGET_FILE_NAME:${plugin}>)
+  endif()
 endforeach()
 
 # FILE(GLOB CPPFILES *.cpp)

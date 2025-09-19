@@ -30,6 +30,7 @@
 // Should it be different on MacOS?
 // Furthermore, not very robust since it is different at build time and
 // when installed.
-#define FF_PREFIX_DIR "@CMAKE_INSTALL_PREFIX@/lib/ff++/@FREEFEM_VERSION@"
+// #define FF_PREFIX_DIR "@CMAKE_INSTALL_PREFIX@/lib/ff++/@FREEFEM_VERSION@"
+#define FF_PREFIX_DIR "@FF_PREFIX_DIR@"
 
 #endif

@@ -1,10 +1,4 @@
 add_library(${FF_LIBLG_NAME})
-set_target_properties(${FF_LIBLG_NAME}
-  PROPERTIES
-  PREFIX ""
-  CXX_STANDARD 14
-  CXX_STANDARD_REQUIRED ON
-  BUILD_RPATH ${CMAKE_CURRENT_BINARY_DIR}/../../plugin/seq)
 
 target_sources(${FF_LIBLG_NAME}
   PRIVATE
@@ -20,6 +14,34 @@ target_include_directories(${FF_LIBLG_NAME}
   ../femlib
   ${CMAKE_BINARY_DIR}
 )
+
+set_target_properties(${FF_LIBLG_NAME}
+  PROPERTIES
+  PREFIX ""
+  CXX_STANDARD 14
+  CXX_STANDARD_REQUIRED ON
+  BUILD_RPATH ${PROJECT_BINARY_DIR}/../../plugin/seq
+)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  # Adapt RPATH for MacoS since it isn't the default file hierarchy
+  # in the bundle.
+  set_target_properties(
+    ${FF_LIBLG_NAME}
+    PROPERTIES
+    BUILD_RPATH "@loader_path/../PlugIns")
+  
+  target_link_options(${FF_LIBLG_NAME}
+    PRIVATE
+    -undefined dynamic_lookup)
+
+  # If using XCode, copy libs and plugins in the bundle of the binary dir.
+  #
+  add_custom_command(TARGET ${FF_LIBLG_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    $<TARGET_FILE:${FF_LIBLG_NAME}>
+    $<TARGET_FILE_DIR:${FF_EXE_NW_NAME}>/../Frameworks/$<TARGET_FILE_NAME:${FF_LIBLG_NAME}>)
+endif()
 
 # TODO: remove this line as soon as autoconf is removed (only here for config.h and config-wrapper.h)
 # INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}) 

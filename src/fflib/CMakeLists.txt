@@ -1,9 +1,11 @@
 add_library(${FF_LIBFF_NAME})
+
 set_target_properties(${FF_LIBFF_NAME}
   PROPERTIES
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON
   BUILD_RPATH ${CMAKE_CURRENT_BINARY_DIR}/../../plugin/seq)
+
 
 target_sources(${FF_LIBFF_NAME}
   PRIVATE
@@ -85,6 +87,24 @@ target_include_directories(${FF_LIBFF_NAME}
   ${CMAKE_BINARY_DIR}
 )
 
+if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+
+  set_target_properties(
+    ${FF_LIBFF_NAME}
+    PROPERTIES
+    BUILD_RPATH "@loader_path/../PlugIns")
+  
+  target_link_options(${FF_LIBFF_NAME}
+    PRIVATE
+    -undefined dynamic_lookup)
+
+  # If using XCode, copy libs and plugins in the bundle of the binary dir.
+  #
+  add_custom_command(TARGET ${FF_LIBFF_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    $<TARGET_FILE:${FF_LIBFF_NAME}>
+    $<TARGET_FILE_DIR:${FF_EXE_NW_NAME}>/../Frameworks/$<TARGET_FILE_NAME:${FF_LIBFF_NAME}>)
+endif()
 # set_target_properties(
 #   ff
 #   PROPERTIES
