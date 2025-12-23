@@ -1,14 +1,14 @@
- // for gestion of FreeFem++ argument and in version 3.10-1 FH
- // F. Hecht 
- // Usage:  getARGV(n,defaultvalue) // get the fist used default valeu
- //  or     getARGV(after,defaultvalue) // get the arg after after 
- // the type of delfaut value given the return type: int,double, string
- // Modif version 3.54-2  Jan 2018 (add ones include)
- IFMACRO(!getARGVidp)
- macro getARGVidp 1 // EOM (FH)
- 
- 
- func int usedARGV(int n)
+// for gestion of FreeFem++ argument and in version 3.10-1 FH
+// F. Hecht 
+// Usage:  getARGV(n,defaultvalue) // get the fist used default valeu
+//  or     getARGV(after,defaultvalue) // get the arg after after 
+// the type of delfaut value given the return type: int,double, string
+// Modif version 3.54-2  Jan 2018 (add ones include)
+IFMACRO(!getARGVidp)
+macro getARGVidp 1 // EOM (FH)
+
+
+func int usedARGV(int n)
 {
   int k=1,ii=1,kk=1,ret=-1;
   for(int i=1;i<ARGV.n;++i)
@@ -94,4 +94,3 @@ cout << getARGV(3,"300.000") << endl;
 cout << getARGV("-n"," xxx") << endl;
 */
 ENDIFMACRO
-//

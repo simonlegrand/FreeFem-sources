@@ -5,6 +5,7 @@ on:
     branches:
       - develop
       - master
+      - update_win_vm
 
   pull_request:
     branches:
@@ -18,79 +19,79 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  linux:
-    strategy:
-      fail-fast: false
-      matrix:
-        version: [22.04, 24.04]
-        cfg:
-        - {opts: --enable-debug}
-        - {opts: --enable-optim --enable-generic}
+  # linux:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       version: [22.04, 24.04]
+  #       cfg:
+  #       - {opts: --enable-debug}
+  #       - {opts: --enable-optim --enable-generic}
 
-    name: Ubuntu ${{ matrix.version }} with ${{ matrix.cfg.opts }} - ${{ github.workflow }}
-    runs-on: ubuntu-${{ matrix.version }}
+  #   name: Ubuntu ${{ matrix.version }} with ${{ matrix.cfg.opts }} - ${{ github.workflow }}
+  #   runs-on: ubuntu-${{ matrix.version }}
 
-    steps:
-      - uses: actions/checkout@main
+  #   steps:
+  #     - uses: actions/checkout@main
 
-      - name: Install
-        run: |
-          sudo apt update
-          sudo apt install autoconf gcc g++ gfortran m4 patch git liblapack-dev flex bison
+  #     - name: Install
+  #       run: |
+  #         sudo apt update
+  #         sudo apt install autoconf gcc g++ gfortran m4 patch git liblapack-dev flex bison
 
-      - name: Configure
-        run: |
-          autoreconf -i
-          ./configure --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
+  #     - name: Configure
+  #       run: |
+  #         autoreconf -i
+  #         ./configure --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
 
-      - name: Build
-        run: make -j 4
+  #     - name: Build
+  #       run: make -j 4
 
-      - name: Check
-        run: |
-          make check -i
-          ./etc/actions/failed_tests_logs.sh
+  #     - name: Check
+  #       run: |
+  #         make check -i
+  #         ./etc/actions/failed_tests_logs.sh
 
-      - name: Install
-        run: make install
+  #     - name: Install
+  #       run: make install
 
-  macos:
-    strategy:
-      fail-fast: false
-      matrix:
-        version: [13, 14, 15]
-        cfg:
-        - {opts: --enable-debug}
-        - {opts: --enable-optim --enable-generic}
+  # macos:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       version: [13, 14, 15]
+  #       cfg:
+  #       - {opts: --enable-debug}
+  #       - {opts: --enable-optim --enable-generic}
 
-    name: macOS ${{ matrix.version }} with ${{ matrix.cfg.opts }} - ${{ github.workflow }}
-    runs-on: macos-${{ matrix.version }}
+  #   name: macOS ${{ matrix.version }} with ${{ matrix.cfg.opts }} - ${{ github.workflow }}
+  #   runs-on: macos-${{ matrix.version }}
 
-    steps:
-      - uses: actions/checkout@main
+  #   steps:
+  #     - uses: actions/checkout@main
 
-      # Automake is necessary on MacOS since aclocal is not included in autoconf
-      - name: Install
-        run: brew install autoconf automake m4 flex bison
+  #     # Automake is necessary on MacOS since aclocal is not included in autoconf
+  #     - name: Install
+  #       run: brew install autoconf automake m4 flex bison
 
-      - name: Symlink GCC & Fortran
-        run: ./etc/actions/macos/link_fortran.sh "$(uname -p)"
+  #     - name: Symlink GCC & Fortran
+  #       run: ./etc/actions/macos/link_fortran.sh "$(uname -p)"
 
-      - name: Configure
-        run: |
-          autoreconf -i
-          ./configure --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
+  #     - name: Configure
+  #       run: |
+  #         autoreconf -i
+  #         ./configure --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
 
-      - name: Build
-        run: make -j 3
+  #     - name: Build
+  #       run: make -j 3
 
-      - name: Check
-        run: |
-          make check -i
-          ./etc/actions/failed_tests_logs.sh
+  #     - name: Check
+  #       run: |
+  #         make check -i
+  #         ./etc/actions/failed_tests_logs.sh
 
-      - name: Install
-        run: make install
+  #     - name: Install
+  #       run: make install
 
   windows:
     strategy:
@@ -100,8 +101,8 @@ jobs:
         - {opts: --enable-debug}
         - {opts: --enable-optim --enable-generic}
 
-    name: Windows Server 2022 with ${{ matrix.cfg.opts }} - ${{ github.workflow }}
-    runs-on: windows-2022
+    name: Windows Server 2025 with ${{ matrix.cfg.opts }} - ${{ github.workflow }}
+    runs-on: windows-2025
 
     defaults:
       run:
