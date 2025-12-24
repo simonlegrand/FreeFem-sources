@@ -4,6 +4,11 @@
 //  or     getARGV(after,defaultvalue) // get the arg after after 
 // the type of delfaut value given the return type: int,double, string
 // Modif version 3.54-2  Jan 2018 (add ones include)
+
+IFMACRO(!undefined)
+cout << "ON PASSE PAR LA" << endl;
+ENDIFMACRO
+
 IFMACRO(!getARGVidp)
 macro getARGVidp() 1 // EOM (FH)
 
