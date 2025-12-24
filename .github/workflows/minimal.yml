@@ -133,7 +133,9 @@ jobs:
           ./configure --without-mpi ${{ matrix.cfg.opt }} --prefix="${HOME}/freefem"
 
       - name: Build
-        run: make -j 4
+        run: |
+          export TESTS='lap3-cpu.edp'
+          make -j 4
 
       - name: Check
         run: |

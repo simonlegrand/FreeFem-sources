@@ -4,8 +4,8 @@
 //  or     getARGV(after,defaultvalue) // get the arg after after 
 // the type of delfaut value given the return type: int,double, string
 // Modif version 3.54-2  Jan 2018 (add ones include)
-// IFMACRO(!getARGVidp)
-// macro getARGVidp 1 // EOM (FH)
+IFMACRO(!getARGVidp)
+macro getARGVidp() 1 // EOM (FH)
 
 
 func int usedARGV(int n)
@@ -93,4 +93,4 @@ cout << getARGV(2,200.) << endl;
 cout << getARGV(3,"300.000") << endl;
 cout << getARGV("-n"," xxx") << endl;
 */
-// ENDIFMACRO
+ENDIFMACRO
