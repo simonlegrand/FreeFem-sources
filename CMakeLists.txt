@@ -163,7 +163,7 @@ file(GLOB FF_IDP_FILES
   idp/*.idp)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  include(platform/linux/CMakeLists.txt)
+  include(install_linux)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   include(install_darwin)
 endif()
