@@ -6,7 +6,8 @@ on:
     branches:
       - develop
       - master
-
+      - TestsMacOS26
+      
   pull_request:
     branches:
       - develop
@@ -19,70 +20,70 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  linux:
-    strategy:
-      fail-fast: false
-      matrix:
-        version: [22.04, 24.04]
-        cfg:
-        - {opts: --enable-debug}
-        - {opts: --enable-optim --enable-generic}
+  # linux:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       version: [22.04, 24.04]
+  #       cfg:
+  #       - {opts: --enable-debug}
+  #       - {opts: --enable-optim --enable-generic}
 
-    name: Ubuntu ${{ matrix.version }} with ${{ matrix.cfg.opts }} \
-            - ${{ github.workflow }}
+  #   name: Ubuntu ${{ matrix.version }} with ${{ matrix.cfg.opts }} \
+  #           - ${{ github.workflow }}
 
-    runs-on: ubuntu-${{ matrix.version }}
+  #   runs-on: ubuntu-${{ matrix.version }}
 
-    steps:
-      - uses: actions/checkout@v4
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Install
-        run: |
-          sudo apt update
-          sudo apt install gcc g++ gfortran m4 patch git wget cmake \
-          libhdf5-dev flex bison autoconf automake \
-          autotools-dev
+  #     - name: Install
+  #       run: |
+  #         sudo apt update
+  #         sudo apt install gcc g++ gfortran m4 patch git wget cmake \
+  #         libhdf5-dev flex bison autoconf automake \
+  #         autotools-dev
 
-      - name: Configure
-        run: |
-          autoreconf -i
-          ./configure --enable-download ${{ matrix.cfg.opts }} \
-          --prefix="${HOME}/freefem"
-          ./3rdparty/getall -a -o PETSc
+  #     - name: Configure
+  #       run: |
+  #         autoreconf -i
+  #         ./configure --enable-download ${{ matrix.cfg.opts }} \
+  #         --prefix="${HOME}/freefem"
+  #         ./3rdparty/getall -a -o PETSc
 
-      - name: PETSc
-        run: |
-          cd 3rdparty/ff-petsc
-          make petsc-slepc
-          cd -
-          ./reconfigure
+  #     - name: PETSc
+  #       run: |
+  #         cd 3rdparty/ff-petsc
+  #         make petsc-slepc
+  #         cd -
+  #         ./reconfigure
 
-      - name: Upload PETSc and reconfigure logs on fail
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: PETSc-reconfigure-logs
-          path: |
-            3rdparty/ff-petsc/petsc-*/configure.log
-            config.log
-          compression-level: 9
+  #     - name: Upload PETSc and reconfigure logs on fail
+  #       if: ${{ failure() }}
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: PETSc-reconfigure-logs
+  #         path: |
+  #           3rdparty/ff-petsc/petsc-*/configure.log
+  #           config.log
+  #         compression-level: 9
 
-      - name: Build
-        run: make -j 4
+  #     - name: Build
+  #       run: make -j 4
 
-      - name: Check
-        run: |
-          make check -i
-          ./etc/actions/failed_tests_logs.sh
+  #     - name: Check
+  #       run: |
+  #         make check -i
+  #         ./etc/actions/failed_tests_logs.sh
 
-      - name: Install
-        run: make install
+  #     - name: Install
+  #       run: make install
 
   macos:
     strategy:
       fail-fast: false
       matrix:
-        version: [14, 15]
+        version: [26]
         cfg:
         - {opts: --enable-debug}
         - {opts: --enable-optim --enable-generic}
@@ -105,16 +106,14 @@ jobs:
           elif [ "${{ matrix.version }}" -eq "14" ]; then
             echo "LLVM_VERSION=15" >> $GITHUB_ENV
             sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
-          elif [ "${{ matrix.version }}" -eq "13" ]; then
-            echo "LLVM_VERSION=15" >> $GITHUB_ENV
-            sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
-            echo "LDFLAGS=-Wl,-ld_classic -Wl,-commons,use_dylibs" >> $GITHUB_ENV
           fi
 
       - name: Install
         run: |
           brew install m4 bison hdf5 autoconf automake
-          brew remove llvm@$LLVM_VERSION
+          if [ "${{ matrix.version }}" -ne "26" ]; then
+            brew remove llvm@$LLVM_VERSION
+          fi
 
       - name: Symlink gfortran
         run: ./etc/actions/macos/link_fortran.sh "$(uname -p)"

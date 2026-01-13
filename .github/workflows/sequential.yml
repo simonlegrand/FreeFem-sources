@@ -5,7 +5,8 @@ on:
     branches:
       - develop
       - master
-
+      - TestsMacOS26
+      
   pull_request:
     branches:
       - develop
@@ -18,49 +19,49 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  linux:
-    strategy:
-      fail-fast: false
-      matrix:
-        version: [22.04, 24.04]
-        cfg:
-        - {opts: --enable-debug}
-        - {opts: --enable-optim --enable-generic}
+  # linux:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       version: [22.04, 24.04]
+  #       cfg:
+  #       - {opts: --enable-debug}
+  #       - {opts: --enable-optim --enable-generic}
 
-    name: Ubuntu ${{ matrix.version }} with ${{ matrix.cfg.opts }} - ${{ github.workflow }}
-    runs-on: ubuntu-${{ matrix.version }}
+  #   name: Ubuntu ${{ matrix.version }} with ${{ matrix.cfg.opts }} - ${{ github.workflow }}
+  #   runs-on: ubuntu-${{ matrix.version }}
 
-    steps:
-      - uses: actions/checkout@main
+  #   steps:
+  #     - uses: actions/checkout@main
 
-      - name: Install
-        run: |
-          sudo apt update
-          sudo apt install gcc g++ gfortran m4 patch \
-            git libblas-dev liblapack-dev libhdf5-dev libgsl-dev flex bison \
-            wget cmake autoconf automake autotools-dev
+  #     - name: Install
+  #       run: |
+  #         sudo apt update
+  #         sudo apt install gcc g++ gfortran m4 patch \
+  #           git libblas-dev liblapack-dev libhdf5-dev libgsl-dev flex bison \
+  #           wget cmake autoconf automake autotools-dev
 
-      - name: Configure
-        run: |
-          autoreconf -i
-          ./configure --enable-download --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
+  #     - name: Configure
+  #       run: |
+  #         autoreconf -i
+  #         ./configure --enable-download --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
 
-      - name: Build
-        run: make -j 4
+  #     - name: Build
+  #       run: make -j 4
 
-      - name: Check
-        run: |
-          make check -i
-          ./etc/actions/failed_tests_logs.sh
+  #     - name: Check
+  #       run: |
+  #         make check -i
+  #         ./etc/actions/failed_tests_logs.sh
 
-      - name: Install
-        run: make install
+  #     - name: Install
+  #       run: make install
 
   macos:
     strategy:
       fail-fast: false
       matrix:
-        version: [14, 15]
+        version: [26]
         cfg:
         - {opts: --enable-debug}
         - {opts: --enable-optim --enable-generic}
@@ -93,54 +94,54 @@ jobs:
       - name: Install
         run: make install
 
-  windows:
-    strategy:
-      fail-fast: false
-      matrix:
-        cfg:
-#        - {opts: --enable-debug}
-        - {opts: --enable-optim --enable-generic}
+#   windows:
+#     strategy:
+#       fail-fast: false
+#       matrix:
+#         cfg:
+# #        - {opts: --enable-debug}
+#         - {opts: --enable-optim --enable-generic}
 
-    name: Windows Server 2025 with ${{ matrix.cfg.opts }} - ${{github.workflow}}
-    runs-on: windows-2025
+#     name: Windows Server 2025 with ${{ matrix.cfg.opts }} - ${{github.workflow}}
+#     runs-on: windows-2025
 
-    defaults:
-      run:
-        shell: msys2 {0}
+#     defaults:
+#       run:
+#         shell: msys2 {0}
 
-    steps:
-      - uses: msys2/setup-msys2@v2
-        with:
-          update: true
-          install: >-
-            mingw-w64-x86_64-gcc-fortran
-            mingw-w64-x86_64-toolchain
-            mingw-w64-x86_64-autotools
-            make
-            m4
-            patch
-            git
-            flex
-            bison
-            unzip
-            mingw-w64-x86_64-openblas
-            mingw-w64-x86_64-gsl
-            pkg-config
-            pkgfile
-            tar
-            mingw-w64-x86_64-cmake
+#     steps:
+#       - uses: msys2/setup-msys2@v2
+#         with:
+#           update: true
+#           install: >-
+#             mingw-w64-x86_64-gcc-fortran
+#             mingw-w64-x86_64-toolchain
+#             mingw-w64-x86_64-autotools
+#             make
+#             m4
+#             patch
+#             git
+#             flex
+#             bison
+#             unzip
+#             mingw-w64-x86_64-openblas
+#             mingw-w64-x86_64-gsl
+#             pkg-config
+#             pkgfile
+#             tar
+#             mingw-w64-x86_64-cmake
 
-      - uses: actions/checkout@v4
+#       - uses: actions/checkout@v4
 
-      - name: Configure
-        run: |
-          autoreconf -i
-          ./configure --enable-download --disable-superlu --disable-scotch --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
+#       - name: Configure
+#         run: |
+#           autoreconf -i
+#           ./configure --enable-download --disable-superlu --disable-scotch --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
 
-      - name: Build
-        run: make -j 4
+#       - name: Build
+#         run: make -j 4
 
-      - name: Check
-        run: |
-          make check -i
-          ./etc/actions/failed_tests_logs.sh
+#       - name: Check
+#         run: |
+#           make check -i
+#           ./etc/actions/failed_tests_logs.sh
