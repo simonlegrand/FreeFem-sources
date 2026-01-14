@@ -1,0 +1,132 @@
+name: Minimal CMake version
+
+on:
+  push:
+    branches:
+      - develop
+      - master
+      - cmake
+
+  pull_request:
+    branches:
+      - develop
+
+  # For development phase
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [24.04]
+
+    name: Ubuntu ${{ matrix.version }} CMake - ${{ github.workflow }}
+    runs-on: ubuntu-${{ matrix.version }}
+
+    steps:
+      - uses: actions/checkout@main
+
+      - name: Install
+        run: |
+          sudo apt update
+          sudo apt install cmake ninja-build gcc g++ gfortran patch git liblapack-dev flex bison
+
+      - name: Configure
+        run: |
+          cmake -B build -DWITH_MPI=OFF -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_INSTALL_PREFIX="${HOME}/freefem" -G Ninja
+
+      - name: Build
+        run: cmake --build build --verbose
+
+      - name: Check
+        continue-on-error: true
+        run: |
+          ctest --output-on-failure --test-dir build
+
+      - name: Install
+        run: cmake --install build
+
+  macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [26]
+
+    name: macOS ${{ matrix.version }} CMake - ${{ github.workflow }}
+    runs-on: macos-${{ matrix.version }}
+
+    steps:
+      - uses: actions/checkout@main
+
+      - name: Install
+        run: brew install cmake ninja flex bison
+
+      - name: Symlink GCC & Fortran
+        run: ./etc/actions/macos/link_fortran.sh "$(uname -p)"
+
+      - name: Configure
+        run: |
+          cmake -B build -DWITH_MPI=OFF -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_INSTALL_PREFIX="${HOME}/freefem" -G Ninja
+
+      - name: Build
+        run: cmake --build build --verbose
+
+      - name: Check
+        continue-on-error: true
+        run: |
+          ctest --output-on-failure --test-dir build
+
+      - name: Install
+        run: cmake --install build
+
+  windows:
+    strategy:
+      fail-fast: false
+ 
+    name: Windows Server 2025 CMake - ${{ github.workflow }}
+    runs-on: windows-2025
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+      - uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc-fortran
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-lapack
+            patch       
+            git
+            flex
+            bison
+            unzip
+
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: |
+          cmake -B build -DWITH_MPI=OFF -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_INSTALL_PREFIX="${HOME}/freefem" -G Ninja
+
+      - name: Build
+        run: cmake --build build --verbose
+
+      - name: Check
+        continue-on-error: true
+        run: |
+          ctest --output-on-failure --test-dir build
+
+      - name: Install
+        run: cmake --install build
