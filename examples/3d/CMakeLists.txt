@@ -40,5 +40,5 @@ foreach(TEST ${TEST_NAMES})
   set_tests_properties(${TEST}
     PROPERTIES
     TIMEOUT ${SEQ_TESTS_TIMEOUT}
-    ENVIRONMENT "FF_INCLUDEPATH=../../idp")
+    ENVIRONMENT "FF_INCLUDEPATH=../../idp;FF_LOADPATH=${PROJECT_BINARY_DIR}/plugin/seq")
 endforeach()
