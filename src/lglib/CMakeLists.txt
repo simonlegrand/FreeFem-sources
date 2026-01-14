@@ -6,14 +6,43 @@ target_sources(${FF_LIBLG_NAME}
   mymain.cpp
 )
 
-target_include_directories(${FF_LIBLG_NAME}
+target_sources(${FF_LIBLG_NAME}
   PRIVATE
-  ../fflib
-  ../bamglib
-  ../Graphics
-  ../femlib
-  ${CMAKE_BINARY_DIR}
+    FILE_SET ff_liblg_private_headers
+    TYPE HEADERS
+    BASE_DIRS
+      ../fflib
+      ../femlib
+      ../Graphics
+    FILES
+      ../fflib/InitFunct.hpp
+      ../fflib/strversionnumber.hpp
+      ../fflib/error.hpp
+      ../fflib/environment.hpp
+      ../fflib/lex.hpp
+      ../fflib/lgfem.hpp
+      ../fflib/AFunction.hpp
+      ../femlib/RNM.hpp
+      ../femlib/fem.hpp
+      ../femlib/FESpace.hpp
+      ../femlib/FESpacen.hpp
+      ../femlib/MeshPoint.hpp
+      ../Graphics/rgraph.hpp
+  PUBLIC
+    FILE_SET ff_liblg_pub_headers
+    TYPE HEADERS
+    FILES
+      lg.tab.hpp
 )
+message(STATUS "${FF_LIBLG_NAME} links with ${FF_CONFIG_H_LIB}")
+target_link_libraries(${FF_LIBLG_NAME}
+  PRIVATE
+  ${FF_CONFIG_H_LIB}
+)
+# target_include_directories(${FF_LIBLG_NAME}
+#   PRIVATE
+#   ${CMAKE_BINARY_DIR}
+# )
 
 set_target_properties(${FF_LIBLG_NAME}
   PROPERTIES

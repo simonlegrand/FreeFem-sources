@@ -14,6 +14,6 @@ function(ff_configure_config_header)
 
   # Configure template config header and put in the build tree
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/config_cmake.h.in
-    ${CMAKE_BINARY_DIR}/config.h)
+    ${PROJECT_BINARY_DIR}/config.h)
   
 endfunction()

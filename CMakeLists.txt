@@ -62,6 +62,12 @@ set(FF_LIBFF_NAME ff)
 set(FF_LIBLG_NAME lglib)
 #set(FF_LIBMESH_NAME Mesh)
 set(FF_LIBS ${FF_LIBFF_NAME} ${FF_LIBLG_NAME} ${FF_LIBMESH_NAME})
+
+set(FF_CONFIG_H_LIB config_h_lib)
+add_library(${FF_CONFIG_H_LIB} INTERFACE)
+target_include_directories(${FF_CONFIG_H_LIB}
+  INTERFACE ${CMAKE_CURRENT_BINARY_DIR})
+
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 
 # Dynamically loadable plugins

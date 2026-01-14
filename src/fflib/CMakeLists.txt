@@ -6,7 +6,6 @@ set_target_properties(${FF_LIBFF_NAME}
   CXX_STANDARD_REQUIRED ON
   BUILD_RPATH ${CMAKE_CURRENT_BINARY_DIR}/../../plugin/seq)
 
-
 target_sources(${FF_LIBFF_NAME}
   PRIVATE
   UMFPack_Solver.cpp
@@ -77,14 +76,24 @@ target_sources(${FF_LIBFF_NAME}
   ${PROJECT_BINARY_DIR}/strversionnumber.cpp
 )
 
-target_include_directories(${FF_LIBFF_NAME}
+target_sources(${FF_LIBFF_NAME}
   PRIVATE
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ../lglib
-  ../bamglib
-  ../femlib
-  ../Graphics
-  ${CMAKE_BINARY_DIR}
+    FILE_SET ff_libff_private_headers
+    TYPE HEADERS
+    BASE_DIRS
+      ../lglib
+      ../bamglib
+      ../femlib
+      ../Graphics
+  PUBLIC # To be completed when more info
+    FILE_SET ff_libff_pub_headers
+    TYPE HEADERS
+    FILES
+)
+
+target_link_libraries(${FF_LIBFF_NAME}
+  PRIVATE
+  ${FF_CONFIG_H_LIB}
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")

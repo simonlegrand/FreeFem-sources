@@ -9,19 +9,20 @@ target_sources(${FF_EXE_NW_NAME}
   ../fflib/compositeFESpace.cpp
 )
 
-target_include_directories(${FF_EXE_NW_NAME}
+target_sources(${FF_EXE_NW_NAME}
   PRIVATE
-  ../lglib 
-  ../fflib
-  ../femlib
-  ../Graphics
-  ${PROJECT_BINARY_DIR}
+    FILE_SET ff_exe_nw_private_headers
+    TYPE HEADERS
+    BASE_DIRS
+      ../femlib
+      ../Graphics
 )
 
 target_link_libraries(${FF_EXE_NW_NAME}
-  PUBLIC
+  PRIVATE
   ${FF_LIBLG_NAME}
   ${FF_LIBFF_NAME}
+  ${FF_CONFIG_H_LIB}
   PRIVATE
   BLAS::BLAS
 )
