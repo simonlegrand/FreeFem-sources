@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 3.26)
 include(CMakePrintHelpers)
 # Add the path containing FreeFEM CMake modules
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/modules)
@@ -24,8 +24,8 @@ ff_define_strversionnumber_library()
 
 option(ENABLE_FFCS "Build FreeFEM for use with FreeFem++-cs" OFF)
 option(WITH_MPI "Activate MPI support" ON)
-add_definitions(-DCHECK_KN)
-add_definitions(-DHAVE_CONFIG_H)
+add_definitions(-DCHECK_KN) # Don't know what it is
+add_definitions(-DHAVE_CONFIG_H) # Probably useless, config.h always present
 
 include(ff_check_required_dependencies)
 
@@ -61,13 +61,21 @@ set(FF_EXE_NW_NAME FreeFem++-nw)
 set(FF_LIBFF_NAME ff)
 set(FF_LIBLG_NAME lglib)
 #set(FF_LIBMESH_NAME Mesh)
-set(FF_LIBS ${FF_LIBFF_NAME} ${FF_LIBLG_NAME} ${FF_LIBMESH_NAME})
+set(FF_LIBS ${FF_LIBFF_NAME} ${FF_LIBLG_NAME})
 
+### config.h library
+#
+# config.h is considered a build product. It is encapsulated into the include
+# directory of an INTERFACE library (can have no source).
+# The library is 'forward' declared to be used by other FF targets. But the
+# config.h is configured at the end.
+#
 set(FF_CONFIG_H_LIB config_h_lib)
 add_library(${FF_CONFIG_H_LIB} INTERFACE)
 target_include_directories(${FF_CONFIG_H_LIB}
   INTERFACE ${CMAKE_CURRENT_BINARY_DIR})
 
+# FF sources
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 
 # Dynamically loadable plugins
@@ -131,7 +139,7 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/examples)
 # It must be know at build time. 
 set(FF_PREFIX_DIR ${CMAKE_INSTALL_PREFIX}/FreeFem++-nw.app/Contents/Resources)
 
-# Should be run at the end, after dependencies detection
+# Run at the end, after dependencies detection
 include(ff_configure_config_header)
 ff_configure_config_header()
 
@@ -152,6 +160,7 @@ if( NOT CMAKE_INSTALL_PREFIX OR ENV{CMAKE_INSTALL_PREFIX})
 endif()
 
 ### Installation
+#
 install(TARGETS
   ${FF_EXE_NW_NAME}
   BUNDLE DESTINATION .
