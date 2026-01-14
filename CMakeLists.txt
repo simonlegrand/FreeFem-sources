@@ -132,12 +132,12 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/examples)
 # FreeFEM install prefix for everything but bin and share
 # TODO Why is it installed this way?
 # Should it be different on MacOS?
-# This variable should be reset at install time to take into account
-# the possible use of --prefix option.
 #
 # This variable is used in source code to locate primary freefem++.pref file.
 # It must be know at build time. 
-set(FF_PREFIX_DIR ${CMAKE_INSTALL_PREFIX}/FreeFem++-nw.app/Contents/Resources)
+#set(FF_PREFIX_DIR ${CMAKE_INSTALL_PREFIX}/FreeFem++-nw.app/Contents/Resources)
+set(FF_PREFIX_DIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/ff++/${FREEFEM_VERSION})
+configure_file(${PROJECT_SOURCE_DIR}/cmake/freefem++.pref.in ${CMAKE_CURRENT_BINARY_DIR}/freefem++.pref)
 
 # Run at the end, after dependencies detection
 include(ff_configure_config_header)
@@ -174,27 +174,21 @@ install(TARGETS
 #   COMMAND ${CMAKE_COMMAND} -E echo "${genex}"
 #   VERBATIM)
 
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/freefem++.pref
+  DESTINATION ${FF_PREFIX_DIR}/etc/)
+
 file(GLOB FF_IDP_FILES
   idp/*.idp)
 
+# Installation
+#
+# If generator is Xcode, installation is supposed to be done in Xcode
+#
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   include(install_linux)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   include(install_darwin)
 endif()
-
-# Trick to get the PROJECT_SOURCE_DIR set in the install script and
-# evaluate FF_PREFIX_DIR at install time.
-# See https://stackoverflow.com/questions/73815300/how-do-i-get-project-root-dir-in-the-cmake-install-code-section
-string(CONFIGURE [[
-  set(PROJECT_SOURCE_DIR "@PROJECT_SOURCE_DIR@")
-  set(FF_PREFIX_DIR "@FF_PREFIX_DIR@")
-  message(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
-  message(STATUS "FF_PREFIX_DIR: ${FF_PREFIX_DIR}")
-  configure_file(${PROJECT_SOURCE_DIR}/cmake/freefem++.pref.in ${FF_PREFIX_DIR}/etc/freefem++.pref)
-  ]] install_script @ONLY)
-
-install(CODE "${install_script}")
 
 set(CPACK_VERBATIM_VARIABLES YES)
 set(CPACK_PACKAGE_DIRECTORY distribution)
@@ -203,6 +197,9 @@ set(CPACK_SOURCE_PACKAGE_FILE_NAME "${PROJECT_NAME}-${FREEFEM_VERSION}")
 set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_NAME})
 set(CPACK_MONOLITHIC_INSTALL TRUE)
+
+# Needed by CPack DEB generator
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "frederic.hecht@sorbonne-universite.fr")
 
 include(CPack)
 
