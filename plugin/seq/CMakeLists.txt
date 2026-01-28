@@ -71,6 +71,12 @@ set(SEQ_PLUGINS_LIST
   Element_P3pnc_3d
 )
 
+set(lgbmo_EXTRA_SOURCES bmo.cpp)
+set(FreeFemQA_EXTRA_SOURCES GeometryQA.cpp)
+set(ffnewuoa_EXTRA_SOURCES newuoa.f)
+set(ff-cmaes_EXTRA_SOURCES cmaes.cpp)
+set(ff-mmap-semaphore_EXTRA_SOURCES libff-mmap-semaphore.c)
+set(pcm2rnm_EXTRA_SOURCES pcm.cpp)
 
 set(PLUGINS_LIST ${SEQ_PLUGINS_LIST} PARENT_SCOPE)
 
@@ -81,7 +87,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 endif()
 
 foreach(plugin ${SEQ_PLUGINS_LIST})
-  add_library(${plugin} MODULE ${plugin}.cpp)
+  set(EXTRA_SOURCES ${${plugin}_EXTRA_SOURCES})
+  add_library(${plugin} MODULE ${plugin}.cpp ${EXTRA_SOURCES})
 
   target_include_directories(${plugin}
     PRIVATE
@@ -92,8 +99,13 @@ foreach(plugin ${SEQ_PLUGINS_LIST})
     ${CMAKE_SOURCE_DIR}/src/Graphics
     ${CMAKE_SOURCE_DIR}/src/libMesh
     ${CMAKE_SOURCE_DIR}/src/medit
-    ${CMAKE_BINARY_DIR})
+  )
 
+  target_link_libraries(${plugin}
+    PRIVATE
+    ${FF_CONFIG_H_LIB}
+  )
+  
   set_target_properties(${plugin}
     PROPERTIES
     CXX_STANDARD 14

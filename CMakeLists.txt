@@ -24,8 +24,10 @@ ff_define_strversionnumber_library()
 
 option(ENABLE_FFCS "Build FreeFEM for use with FreeFem++-cs" OFF)
 option(WITH_MPI "Activate MPI support" ON)
-add_definitions(-DCHECK_KN) # Don't know what it is
+
 add_definitions(-DHAVE_CONFIG_H) # Probably useless, config.h always present
+
+include(ff_configure_compilers)
 
 include(ff_check_required_dependencies)
 

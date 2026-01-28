@@ -3,6 +3,10 @@
 
 function(ff_configure_config_header)
 
+  if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+    set(PURE_WIN32 ON)
+  endif ()
+  
   # Check symbols
   include(CheckCXXSymbolExists)
   check_cxx_symbol_exists(erfc "cmath" HAVE_ERFC) # Uselss? Is in std lib

@@ -1,4 +1,4 @@
-add_library(${FF_LIBFF_NAME})
+add_library(${FF_LIBFF_NAME} SHARED)
 
 set_target_properties(${FF_LIBFF_NAME}
   PROPERTIES
@@ -75,6 +75,13 @@ target_sources(${FF_LIBFF_NAME}
   ../Algo/lgalgo.cpp
   ${PROJECT_BINARY_DIR}/strversionnumber.cpp
 )
+
+if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+  target_sources(${FF_LIBFF_NAME}
+    PRIVATE
+    compositeFESpace.cpp
+  )
+endif ()
 
 target_sources(${FF_LIBFF_NAME}
   PRIVATE

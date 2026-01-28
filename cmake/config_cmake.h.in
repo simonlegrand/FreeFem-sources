@@ -1,8 +1,11 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
+/* A pure windows application no cygwin dll */
+#cmakedefine PURE_WIN32
+
 /* If umfpack.h is located in UMFPACK subdir */
-#cmakedefine HAVE_BIG_UMFPACK_UMFPACK_H 1
+#cmakedefine HAVE_BIG_UMFPACK_UMFPACK_H
 
 /* freecadna is use to evalute the round-off error propagation */
 #cmakedefine HAVE_CADNA
