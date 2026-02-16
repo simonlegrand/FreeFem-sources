@@ -30,6 +30,7 @@ target_sources(${FF_LIBFF_NAME}
   glumesh2D.cpp
   msh3.cpp
   P1IsoValue.cpp
+  compositeFESpace.cpp
   ../bamglib/QuadTree.cpp
   ../bamglib/R2.cpp
   ../bamglib/Meshio.cpp
@@ -75,13 +76,6 @@ target_sources(${FF_LIBFF_NAME}
   ../Algo/lgalgo.cpp
   ${PROJECT_BINARY_DIR}/strversionnumber.cpp
 )
-
-if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
-  target_sources(${FF_LIBFF_NAME}
-    PRIVATE
-    compositeFESpace.cpp
-  )
-endif ()
 
 target_sources(${FF_LIBFF_NAME}
   PRIVATE

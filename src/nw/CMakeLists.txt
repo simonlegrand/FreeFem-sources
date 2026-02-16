@@ -6,7 +6,6 @@ target_sources(${FF_EXE_NW_NAME}
   ../Graphics/sansrgraph.cpp 
   ../mpi/parallelempi-empty.cpp 
   ../fflib/ffapi.cpp
-  ../fflib/compositeFESpace.cpp
 )
 
 target_sources(${FF_EXE_NW_NAME}
