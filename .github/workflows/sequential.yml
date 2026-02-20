@@ -5,7 +5,8 @@ on:
     branches:
       - develop
       - master
-
+      - FixSourcesFFlib
+      
   pull_request:
     branches:
       - develop
