@@ -86,7 +86,8 @@ libff_a_SOURCES2=  UMFPack_Solver.cpp \
 	../femlib/SolverSkyLine.hpp \
 	../femlib/VirtualSolverSparseSuite.hpp \
 	../femlib/VirtualSolverSkyLine.hpp \
-	msh3.cpp msh3.hpp renumb.hpp
+	msh3.cpp msh3.hpp renumb.hpp \
+        compositeFESpace.cpp
 
 libff_a_SOURCES=$(libff_a_SOURCES2)  strversionnumber.cpp
 
