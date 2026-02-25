@@ -46,7 +46,7 @@ jobs:
       
       - name: Download package
         run: |
-          wget https://github.com/FreeFem/FreeFem-sources/releases/download/${{ inputs.release_version }}/FreeFEM-${{ needs.extract_version.outputs.ff_version }}-amd64-ubuntu${{ matrix.version }}.deb
+          wget https://github.com/simonlegrand/FreeFem-sources/releases/download/${{ inputs.release_version }}/FreeFEM-${{ needs.extract_version.outputs.ff_version }}-amd64-ubuntu${{ matrix.version }}.deb
       
       - name: Install package
         run: |
@@ -80,7 +80,7 @@ jobs:
       
       - name: Download package
         run: |
-          Invoke-WebRequest https://github.com/FreeFem/FreeFem-sources/releases/download/${{ inputs.release_version }}/FreeFEM-${{ needs.extract_version.outputs.ff_version }}-amd64-win64.exe `
+          Invoke-WebRequest https://github.com/simonlegrand/FreeFem-sources/releases/download/${{ inputs.release_version }}/FreeFEM-${{ needs.extract_version.outputs.ff_version }}-amd64-win64.exe `
           -UseBasicParsing `
           -OutFile FreeFEM-${{ needs.extract_version.outputs.ff_version }}-amd64-win64.exe
       
