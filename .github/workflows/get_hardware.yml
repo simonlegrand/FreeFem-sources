@@ -1,0 +1,12 @@
+name: "Get runner hardware"
+
+on:
+  push:
+    branches:
+      - test_hardware
+
+jobs:
+  hardware_info:
+   runs-on: ubuntu-latest
+   steps:
+     - run: lscpu
