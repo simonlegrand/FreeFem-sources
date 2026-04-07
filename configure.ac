@@ -196,7 +196,7 @@ echo >config_LIB_INFO
 # Necessary compilers
 #  remove the flag -sdt=gnu++11 in the compileur CXX (FH jan 2024)
 ac_cv_prog_cxx_cxx11=no
-AC_PROG_CC
+# AC_PROG_CC
 AC_PROG_CXX
 #  echo " #### $CXX"
 AC_LANG(C++)
@@ -452,6 +452,17 @@ AC_ARG_ENABLE(c,AS_HELP_STRING([--disable-c],[No C compiler available (C BLAS ne
 if test "$enable_c" != no
 then
     AC_PROG_CC
+    # Move any standard flags from CC to CFLAGS
+    case "$CC" in
+      *-std=*)
+        AC_MSG_NOTICE([Moving -std flag from CC to CFLAGS])
+        cc_base=$(echo "$CC" | awk '{print $1}')
+        cc_std=$(echo "$CC" | grep -o -- '-std=[[^ ]]*')
+        CC="$cc_base"
+        CFLAGS="$cc_std $CFLAGS"
+        ;;
+    esac
+
     AM_PROG_CC_C_O
 else
 
