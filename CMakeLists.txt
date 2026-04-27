@@ -16,7 +16,7 @@ project(FreeFEM LANGUAGES C CXX)
 
 #include(ff_config_build_types)
 
-set(FREEFEM_VERSION 4.15)
+set(FREEFEM_VERSION 4.16)
 set(CMAKE_POSITION_INDEPENDENT_CODE 1)
 
 include(ff_define_strversionnumber_library)
