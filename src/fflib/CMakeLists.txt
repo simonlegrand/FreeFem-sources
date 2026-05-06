@@ -98,6 +98,13 @@ target_link_libraries(${FF_LIBFF_NAME}
   ${FF_CONFIG_H_LIB}
 )
 
+if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+  target_link_options(${FF_LIBFF_NAME}
+    PRIVATE
+    -Wl,--enable-auto-import
+  )
+endif ()
+
 if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 
   set_target_properties(
