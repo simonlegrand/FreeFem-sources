@@ -112,6 +112,17 @@ foreach(plugin ${SEQ_PLUGINS_LIST})
     CXX_STANDARD_REQUIRED ON
     PREFIX "")
 
+  if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  #   target_link_options(${plugin}
+  #     PRIVATE
+  #     -Wl,--enable-auto-import
+  #   )
+    target_link_libraries(${plugin}
+      PRIVATE
+      ${FF_LIBFF_NAME}
+    )
+  endif()
+
   if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     target_link_options(${plugin}
       PRIVATE
