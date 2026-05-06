@@ -4,7 +4,8 @@ set_target_properties(${FF_LIBFF_NAME}
   PROPERTIES
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON
-  BUILD_RPATH ${CMAKE_CURRENT_BINARY_DIR}/../../plugin/seq)
+)
+#  BUILD_RPATH ${CMAKE_CURRENT_BINARY_DIR}/../../plugin/seq) # Pq??
 
 target_sources(${FF_LIBFF_NAME}
   PRIVATE
