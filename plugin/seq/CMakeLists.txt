@@ -71,12 +71,17 @@ set(SEQ_PLUGINS_LIST
   Element_P3pnc_3d
 )
 
+# Extra source files needed by plugins
 set(lgbmo_EXTRA_SOURCES bmo.cpp)
 set(FreeFemQA_EXTRA_SOURCES GeometryQA.cpp)
 set(ffnewuoa_EXTRA_SOURCES newuoa.f)
 set(ff-cmaes_EXTRA_SOURCES cmaes.cpp)
 set(ff-mmap-semaphore_EXTRA_SOURCES libff-mmap-semaphore.c)
 set(pcm2rnm_EXTRA_SOURCES pcm.cpp)
+
+# Extra dependencies needed by plugins
+set(Element_Mixte_EXTRA_DEPS "BLAS::BLAS;LAPACK::LAPACK")
+set(IncompleteCholesky_EXTRA_DEPS "BLAS::BLAS;LAPACK::LAPACK")
 
 set(PLUGINS_LIST ${SEQ_PLUGINS_LIST} PARENT_SCOPE)
 
@@ -88,6 +93,7 @@ endif()
 
 foreach(plugin ${SEQ_PLUGINS_LIST})
   set(EXTRA_SOURCES ${${plugin}_EXTRA_SOURCES})
+  set(EXTRA_DEPS ${${plugin}_EXTRA_DEPS})
   add_library(${plugin} MODULE ${plugin}.cpp ${EXTRA_SOURCES})
 
   target_include_directories(${plugin}
@@ -104,6 +110,7 @@ foreach(plugin ${SEQ_PLUGINS_LIST})
   target_link_libraries(${plugin}
     PRIVATE
     ${FF_CONFIG_H_LIB}
+    ${EXTRA_DEPS}
   )
   
   set_target_properties(${plugin}
