@@ -99,6 +99,10 @@ target_link_libraries(${FF_LIBFF_NAME}
 )
 
 if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+  target_sources(${FF_LIBFF_NAME}
+    PRIVATE
+    ../lglib/lg.tab.cpp
+  )
   target_link_options(${FF_LIBFF_NAME}
     PRIVATE
     -Wl,--enable-auto-import
