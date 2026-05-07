@@ -31,6 +31,15 @@ include(ff_configure_compilers)
 
 include(ff_check_required_dependencies)
 
+# ==============================================================================
+# Ensure .exe and .dll are in the same directory to run the tests.
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  # Ensure it has not already been set by a parent project
+  if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin-win32)
+  endif()
+endif()
+  
 ### Portable install RPATH settings
 #
 # Must be done before targets creation
