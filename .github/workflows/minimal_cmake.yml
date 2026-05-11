@@ -121,7 +121,7 @@ jobs:
           -DCMAKE_INSTALL_PREFIX="${HOME}/freefem" -G Ninja
 
       - name: Build
-        run: cmake --build build --verbose
+        run: cmake --build build -j 4 --verbose
 
       - name: Check
         continue-on-error: true
