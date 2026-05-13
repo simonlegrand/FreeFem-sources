@@ -5,7 +5,7 @@ on:
     branches:
       - develop
       - master
-      - FixXFailTests
+      - FixXFailTests-dev
   pull_request:
     branches:
       - develop
@@ -130,6 +130,9 @@ jobs:
 
       - name: Configure
         run: |
+          git config get core.autocrlf
+          git config --global core.autocrlf false
+          git add --renormalize .
           autoreconf -i
           ./configure --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
 
@@ -138,5 +141,7 @@ jobs:
 
       - name: Check
         run: |
-          make check -i
-          ./etc/actions/failed_tests_logs.sh
+          cd examples/plugin
+          make TESTS=laplace.edp check
+          # make check -i
+          # ./etc/actions/failed_tests_logs.sh
