@@ -1,14 +1,9 @@
-add_library(${FF_LIBFF_NAME} SHARED)
+# On Windows, the executables link against the static lib AND dynamic lib, and plugins against
+# dynamic lib (that contains extra symbols of lg.tab.cpp).
 
-set_target_properties(${FF_LIBFF_NAME}
-  PROPERTIES
-  CXX_STANDARD 14
-  CXX_STANDARD_REQUIRED ON
-)
-#  BUILD_RPATH ${CMAKE_CURRENT_BINARY_DIR}/../../plugin/seq) # Pq??
-
-target_sources(${FF_LIBFF_NAME}
-  PRIVATE
+# Common object files used by both Windows static and dynamic libff. Avoid
+# compiling two times same files.
+set(libff_sources
   UMFPack_Solver.cpp
   AFunction.cpp
   AFunction2.cpp
@@ -78,39 +73,66 @@ target_sources(${FF_LIBFF_NAME}
   ${PROJECT_BINARY_DIR}/strversionnumber.cpp
 )
 
-target_sources(${FF_LIBFF_NAME}
-  PRIVATE
-    FILE_SET ff_libff_private_headers
+# Use to mutualize headers for both versions of libff
+add_library(_libff_options INTERFACE)
+
+target_sources(_libff_options
+  PUBLIC
+    FILE_SET ff_libff_public_headers
     TYPE HEADERS
     BASE_DIRS
       ../lglib
       ../bamglib
       ../femlib
       ../Graphics
-  PUBLIC # To be completed when more info
-    FILE_SET ff_libff_pub_headers
-    TYPE HEADERS
-    FILES
+      ./
+)
+
+# Common objects files on Windows between STATIC and SHARED version of libff.
+add_library(_libff_objects OBJECT
+  ${libff_sources}
+)
+
+set_target_properties(_libff_objects
+  PROPERTIES
+  CXX_STANDARD 14
+  CXX_STANDARD_REQUIRED ON
+)
+
+target_link_libraries(_libff_objects
+  PUBLIC
+  ${FF_CONFIG_H_LIB}
+  _libff_options
+)
+
+add_library(${FF_LIBFF_NAME} STATIC
+  $<TARGET_OBJECTS:_libff_objects>
 )
 
 target_link_libraries(${FF_LIBFF_NAME}
-  PRIVATE
-  ${FF_CONFIG_H_LIB}
+  PUBLIC
+  _libff_options
 )
 
 if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
-  target_sources(${FF_LIBFF_NAME}
-    PRIVATE
+  add_library(${FF_LIBFF_NAME}_shared SHARED
+    $<TARGET_OBJECTS:_libff_objects>
     ../lglib/lg.tab.cpp
   )
-  target_link_options(${FF_LIBFF_NAME}
-    PRIVATE
-    -Wl,--enable-auto-import
+
+  set_target_properties(${FF_LIBFF_NAME}_shared
+    PROPERTIES
+    OUTPUT_NAME ${FF_LIBFF_NAME}
   )
-endif ()
+  
+  target_link_libraries(${FF_LIBFF_NAME}_shared
+    PUBLIC
+    ${FF_CONFIG_H_LIB}
+    _libff_options
+  )
+endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-
   set_target_properties(
     ${FF_LIBFF_NAME}
     PROPERTIES

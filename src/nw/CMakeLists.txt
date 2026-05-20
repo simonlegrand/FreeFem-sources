@@ -19,12 +19,28 @@ target_sources(${FF_EXE_NW_NAME}
 
 target_link_libraries(${FF_EXE_NW_NAME}
   PRIVATE
-  ${FF_LIBLG_NAME}
-  ${FF_LIBFF_NAME}
   ${FF_CONFIG_H_LIB}
   PRIVATE
   BLAS::BLAS
 )
+
+if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+  target_sources(${FF_EXE_NW_NAME}
+    PRIVATE
+    ../lglib/mymain.cpp
+  )
+  
+  target_link_libraries(${FF_EXE_NW_NAME}
+    PRIVATE
+    ${FF_LIBFF_NAME}_shared
+  )
+else()
+  target_link_libraries(${FF_EXE_NW_NAME}
+    PRIVATE
+    ${FF_LIBLG_NAME}
+    ${FF_LIBFF_NAME}
+  )
+endif()
 
 set_target_properties(
   ${FF_EXE_NW_NAME}

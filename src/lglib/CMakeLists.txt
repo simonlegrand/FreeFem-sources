@@ -1,4 +1,4 @@
-add_library(${FF_LIBLG_NAME})
+add_library(${FF_LIBLG_NAME} STATIC)
 
 target_sources(${FF_LIBLG_NAME}
   PRIVATE
@@ -34,22 +34,17 @@ target_sources(${FF_LIBLG_NAME}
     FILES
       lg.tab.hpp
 )
-message(STATUS "${FF_LIBLG_NAME} links with ${FF_CONFIG_H_LIB}")
+
 target_link_libraries(${FF_LIBLG_NAME}
   PRIVATE
   ${FF_CONFIG_H_LIB}
 )
-# target_include_directories(${FF_LIBLG_NAME}
-#   PRIVATE
-#   ${CMAKE_BINARY_DIR}
-# )
 
 set_target_properties(${FF_LIBLG_NAME}
   PROPERTIES
   PREFIX ""
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON
-  BUILD_RPATH ${PROJECT_BINARY_DIR}/../../plugin/seq
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")

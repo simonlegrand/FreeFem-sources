@@ -120,13 +120,14 @@ foreach(plugin ${SEQ_PLUGINS_LIST})
     PREFIX "")
 
   if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-  #   target_link_options(${plugin}
-  #     PRIVATE
-  #     -Wl,--enable-auto-import
-  #   )
+    # target_link_options(${plugin}
+    #   PRIVATE
+    #   -Wl,--enable-auto-import
+    # )
     target_link_libraries(${plugin}
       PRIVATE
-      ${FF_LIBFF_NAME}
+      #${FF_EXE_NW_NAME}
+      ${FF_LIBFF_NAME}_shared
     )
   endif()
 
