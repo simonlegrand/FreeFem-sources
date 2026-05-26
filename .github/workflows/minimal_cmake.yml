@@ -19,72 +19,72 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # linux:
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       version: [24.04]
+  linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [24.04]
 
-  #   name: Ubuntu ${{ matrix.version }} CMake - ${{ github.workflow }}
-  #   runs-on: ubuntu-${{ matrix.version }}
+    name: Ubuntu ${{ matrix.version }} CMake - ${{ github.workflow }}
+    runs-on: ubuntu-${{ matrix.version }}
 
-  #   steps:
-  #     - uses: actions/checkout@main
+    steps:
+      - uses: actions/checkout@main
 
-  #     - name: Install
-  #       run: |
-  #         sudo apt update
-  #         sudo apt install cmake ninja-build gcc g++ gfortran patch git liblapack-dev flex bison
+      - name: Install
+        run: |
+          sudo apt update
+          sudo apt install cmake ninja-build gcc g++ gfortran patch git liblapack-dev flex bison
 
-  #     - name: Configure
-  #       run: |
-  #         cmake -B build -DWITH_MPI=OFF -DCMAKE_BUILD_TYPE=Release \
-  #         -DCMAKE_INSTALL_PREFIX="${HOME}/freefem" -G Ninja
+      - name: Configure
+        run: |
+          cmake -B build -DWITH_MPI=OFF -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_INSTALL_PREFIX="${HOME}/freefem" -G Ninja
 
-  #     - name: Build
-  #       run: cmake --build build --verbose
+      - name: Build
+        run: cmake --build build --verbose
 
-  #     - name: Check
-  #       continue-on-error: true
-  #       run: |
-  #         ctest --output-on-failure --test-dir build
+      - name: Check
+        continue-on-error: true
+        run: |
+          ctest --output-on-failure --test-dir build
 
-  #     - name: Install
-  #       run: cmake --install build
+      - name: Install
+        run: cmake --install build
 
-  # macos:
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       version: [26]
+  macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [26]
 
-  #   name: macOS ${{ matrix.version }} CMake - ${{ github.workflow }}
-  #   runs-on: macos-${{ matrix.version }}
+    name: macOS ${{ matrix.version }} CMake - ${{ github.workflow }}
+    runs-on: macos-${{ matrix.version }}
 
-  #   steps:
-  #     - uses: actions/checkout@main
+    steps:
+      - uses: actions/checkout@main
 
-  #     - name: Install
-  #       run: brew install cmake ninja flex bison
+      - name: Install
+        run: brew install cmake ninja flex bison
 
-  #     - name: Symlink GCC & Fortran
-  #       run: ./etc/actions/macos/link_fortran.sh "$(uname -p)"
+      - name: Symlink GCC & Fortran
+        run: ./etc/actions/macos/link_fortran.sh "$(uname -p)"
 
-  #     - name: Configure
-  #       run: |
-  #         cmake -B build -DWITH_MPI=OFF -DCMAKE_BUILD_TYPE=Release \
-  #         -DCMAKE_INSTALL_PREFIX="${HOME}/freefem" -G Ninja
+      - name: Configure
+        run: |
+          cmake -B build -DWITH_MPI=OFF -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_INSTALL_PREFIX="${HOME}/freefem" -G Ninja
 
-  #     - name: Build
-  #       run: cmake --build build --verbose
+      - name: Build
+        run: cmake --build build --verbose
 
-  #     - name: Check
-  #       continue-on-error: true
-  #       run: |
-  #         ctest --output-on-failure --test-dir build
+      - name: Check
+        continue-on-error: true
+        run: |
+          ctest --output-on-failure --test-dir build
 
-  #     - name: Install
-  #       run: cmake --install build
+      - name: Install
+        run: cmake --install build
 
   windows:
     strategy:
