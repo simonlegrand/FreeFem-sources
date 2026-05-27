@@ -17,11 +17,13 @@ if(NOT isMultiConfig)
   set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type")
 endif()
 
-project(FreeFEM LANGUAGES C CXX)
+set(FREEFEM_VERSION 4.16)
+project(FreeFEM
+  LANGUAGES C CXX
+  VERSION ${FREEFEM_VERSION}
+)
 
 #include(ff_config_build_types)
-
-set(FREEFEM_VERSION 4.16)
 
 include(ff_define_strversionnumber_library)
 ff_define_strversionnumber_library()
@@ -75,7 +77,8 @@ set(FF_LIBS ${FF_LIBFF_NAME} ${FF_LIBLG_NAME})
 set(FF_CONFIG_H_LIB config_h_lib)
 add_library(${FF_CONFIG_H_LIB} INTERFACE)
 target_include_directories(${FF_CONFIG_H_LIB}
-  INTERFACE ${CMAKE_CURRENT_BINARY_DIR})
+  INTERFACE ${CMAKE_CURRENT_BINARY_DIR}
+)
 
 # FF sources
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
@@ -182,18 +185,16 @@ install(DIRECTORY examples/
     PATTERN  "*.md"
 )
 
-set(CPACK_VERBATIM_VARIABLES YES)
-set(CPACK_PACKAGE_DIRECTORY distribution)
-set(CPACK_PACKAGE_VENDOR "LJLL")
-set(CPACK_SOURCE_PACKAGE_FILE_NAME "${PROJECT_NAME}-${FREEFEM_VERSION}")
 set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
-set(CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_NAME})
+set(CPACK_PACKAGE_VERSION "${FREEFEM_VERSION}")
+set(CPACK_VERBATIM_VARIABLES YES)
+set(CPACK_PACKAGE_DIRECTORY "distribution")
+set(CPACK_PACKAGE_VENDOR "LJLL")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}")
 set(CPACK_MONOLITHIC_INSTALL TRUE)
 
 # Needed by CPack DEB generator
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "frederic.hecht@sorbonne-universite.fr")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libopenblas0")
 
 include(CPack)
-
-# set(CPACK_PACKAGE_VERSION "4.15")
-# set(CPACK_PACKAGE_CONTACT "support@yourcompany.com")
