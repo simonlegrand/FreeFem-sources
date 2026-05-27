@@ -45,23 +45,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin-win32)
   endif()
 endif()
-  
-### Portable install RPATH settings
-#
-# Must be done before targets creation
-#
-include(GNUInstallDirs)
-if(APPLE)
-  set(base @loader_path)
-else()
-  set(base $ORIGIN)
-endif()
 
-file(RELATIVE_PATH relDir
-  ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}
-  ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}
-)
-set(CMAKE_INSTALL_RPATH ${base} ${base}/${relDir})
+### Setup installation variables
+#  
+include(ff_setup_install) # 
 cmake_print_variables(CMAKE_INSTALL_RPATH)
 
 ### Dependencies search
@@ -150,62 +137,52 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/examples)
 # TODO Why is it installed this way?
 # Should it be different on MacOS?
 #
+
+
+
 # This variable is used in source code to locate primary freefem++.pref file.
 # It must be know at build time. 
 #set(FF_PREFIX_DIR ${CMAKE_INSTALL_PREFIX}/FreeFem++-nw.app/Contents/Resources)
-set(FF_PREFIX_DIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/ff++/${FREEFEM_VERSION})
+set(FF_PREFIX_DIR ${FREEFEM_INSTALL_FULL_CONFIGDIR})
 configure_file(${PROJECT_SOURCE_DIR}/cmake/freefem++.pref.in ${CMAKE_CURRENT_BINARY_DIR}/freefem++.pref)
 
 # Run at the end, after dependencies detection
 include(ff_configure_config_header)
 ff_configure_config_header()
 
-# Once dependencies found, try to locate them by first looking in PETSC_DIR and
-# PETSC_COMPLEX_DIR.
-
 ### Installation
-
-# Explicitly set DOCDIR location each time, to avoid other calls to project()
-# to change it
-set(CMAKE_INSTALL_DOCDIR ${CMAKE_INSTALL_DATAROOTDIR}/doc/${PROJECT_NAME})
-
-# To respect FHS recommandations
-if( NOT CMAKE_INSTALL_PREFIX OR ENV{CMAKE_INSTALL_PREFIX})
-  if(NOT WIN32 AND CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-    set(CMAKE_INSTALL_PREFIX "/opt/${PROJECT_NAME}")
-  endif()
-endif()
-
-### Installation
+#
+# Remark: If generator is Xcode, installation is supposed to be done in Xcode
 #
 install(TARGETS
-  ${FF_EXE_NW_NAME}
-  BUNDLE DESTINATION .
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+  ${FF_EXE_NW_NAME} ${FF_MD2EDP_EXE_NAME}
+  RUNTIME DESTINATION "${FREEFEM_INSTALL_BINDIR}"
+)
 
-# set(genex "$<TARGET_FILE_DIR:${FF_EXE_NW_NAME}>")
-# add_custom_target(printGenex
-#   COMMENT "Result of generator expression:"
-#   COMMAND ${CMAKE_COMMAND} -E echo "${genex}"
-#   VERBATIM)
+install(TARGETS ${FF_PLUGINS_LIST}  LIBRARY DESTINATION "${FREEFEM_INSTALL_PLUGINDIR}")
+#install(TARGETS mydsl_lib   LIBRARY DESTINATION "${MYDSL_INSTALL_LIBDIR}")
+
+# install(TARGETS
+#   ${FF_EXE_NW_NAME}
+#   BUNDLE DESTINATION .
+#   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+#   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+#   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/freefem++.pref
-  DESTINATION ${FF_PREFIX_DIR}/etc/)
+  DESTINATION ${FF_PREFIX_DIR})
 
-file(GLOB FF_IDP_FILES
-  idp/*.idp)
+install(DIRECTORY idp/
+  DESTINATION "${FREEFEM_INSTALL_DATADIR}/idp"
+  FILES_MATCHING PATTERN "*.idp"
+)
 
-# Installation
-#
-# If generator is Xcode, installation is supposed to be done in Xcode
-#
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  include(install_linux)
-elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-  include(install_darwin)
-endif()
+install(DIRECTORY examples/
+  DESTINATION "${FREEFEM_INSTALL_DATADIR}/examples"
+  FILES_MATCHING
+    PATTERN "*.edp"
+    PATTERN  "*.md"
+)
 
 set(CPACK_VERBATIM_VARIABLES YES)
 set(CPACK_PACKAGE_DIRECTORY distribution)
