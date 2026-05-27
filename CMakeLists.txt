@@ -10,20 +10,18 @@ include(CMakePrintHelpers)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/modules)
 
 ### Build types
-
+#
 # Ensure non-empty (Debug) default build type for single-config generators
 get_property(isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if(NOT isMultiConfig)
   set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type")
 endif()
-#include(ff_single_config_build_types)
 
 project(FreeFEM LANGUAGES C CXX)
 
 #include(ff_config_build_types)
 
 set(FREEFEM_VERSION 4.16)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 include(ff_define_strversionnumber_library)
 ff_define_strversionnumber_library()
