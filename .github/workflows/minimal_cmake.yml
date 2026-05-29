@@ -42,7 +42,7 @@ jobs:
           -DCMAKE_INSTALL_PREFIX="${HOME}/freefem" -G Ninja
 
       - name: Build
-        run: cmake --build build --verbose
+        run: cmake --build build -j 4 --verbose
 
       - name: Check
         continue-on-error: true
@@ -72,19 +72,18 @@ jobs:
 
       - name: Configure
         run: |
-          cmake -B build -DWITH_MPI=OFF -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_INSTALL_PREFIX="${HOME}/freefem" -G Ninja
+          cmake -B build -DWITH_MPI=OFF -DCMAKE_INSTALL_PREFIX="${HOME}/freefem" -G Xcode
 
       - name: Build
-        run: cmake --build build --verbose
+        run: cmake --build build --config Debug -j 3 --verbose
 
       - name: Check
         continue-on-error: true
         run: |
-          ctest --output-on-failure --test-dir build
+          ctest --output-on-failure -C Debug --test-dir build
 
       - name: Install
-        run: cmake --install build
+        run: cmake --install build --config Debug
 
   windows:
     strategy:
