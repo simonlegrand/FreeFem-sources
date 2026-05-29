@@ -1,6 +1,8 @@
 # On Windows, the executables link against the static lib AND dynamic lib, and plugins against
 # dynamic lib (that contains extra symbols of lg.tab.cpp).
-
+# Remark: On MacOS, the Xcode generator messes with object library. Instead of
+# factorizing, we have two complete pieces of CMake code, one for Windows, one
+# for the rest.
 # Common object files used by both Windows static and dynamic libff. Avoid
 # compiling two times same files.
 set(libff_sources
@@ -73,51 +75,51 @@ set(libff_sources
   ${PROJECT_BINARY_DIR}/strversionnumber.cpp
 )
 
-# Use to mutualize headers for both versions of libff
-add_library(_libff_options INTERFACE)
-
-target_sources(_libff_options
-  PUBLIC
-    FILE_SET ff_libff_public_headers
-    TYPE HEADERS
-    BASE_DIRS
-      ../lglib
-      ../bamglib
-      ../femlib
-      ../Graphics
-      ./
-)
-
-# Common objects files on Windows between STATIC and SHARED version of libff.
-add_library(_libff_objects OBJECT
-  ${libff_sources}
-)
-
-set_target_properties(_libff_objects
-  PROPERTIES
-  CXX_STANDARD 14
-  CXX_STANDARD_REQUIRED ON
-)
-
-target_link_libraries(_libff_objects
-  PUBLIC
-  ${FF_CONFIG_H_LIB}
-  _libff_options
-)
-
-add_library(${FF_LIBFF_NAME} STATIC
-  $<TARGET_OBJECTS:_libff_objects>
-)
-
-target_link_libraries(${FF_LIBFF_NAME}
-  PUBLIC
-  _libff_options
-)
-
 if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
-  add_library(${FF_LIBFF_NAME}_shared SHARED
-    $<TARGET_OBJECTS:_libff_objects>
+  add_library(ff_objects OBJECT)
+  target_sources(ff_objects
+    PRIVATE
+    ${libff_sources}
+    PUBLIC
+    FILE_SET ff_libff_public_headers
+      TYPE HEADERS
+      BASE_DIRS
+        ../lglib
+        ../bamglib
+        ../femlib
+        ../Graphics
+        ./
+  )
+
+  set_target_properties(ff_objects
+    PROPERTIES
+    CXX_STANDARD 14
+    CXX_STANDARD_REQUIRED ON
+  )
+
+  target_link_libraries(ff_objects
+    PUBLIC
+    ${FF_CONFIG_H_LIB}
+  )
+  
+  add_library(${FF_LIBFF_NAME} STATIC
+    $<TARGET_OBJECTS:ff_objects>
+  )
+  
+  add_library(${FF_LIBFF_NAME}_shared SHARED)
+  target_sources(${FF_LIBFF_NAME}_shared
+    PRIVATE
+    $<TARGET_OBJECTS:ff_objects>
     ../lglib/lg.tab.cpp
+    PUBLIC
+    FILE_SET ff_libff_public_headers
+      TYPE HEADERS
+      BASE_DIRS
+        ../lglib
+        ../bamglib
+        ../femlib
+        ../Graphics
+        ./
   )
 
   set_target_properties(${FF_LIBFF_NAME}_shared
@@ -128,7 +130,32 @@ if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
   target_link_libraries(${FF_LIBFF_NAME}_shared
     PUBLIC
     ${FF_CONFIG_H_LIB}
-    _libff_options
+  )
+else()
+  add_library(${FF_LIBFF_NAME})
+  target_sources(${FF_LIBFF_NAME}
+    PRIVATE
+    ${libff_sources}
+    PUBLIC
+    FILE_SET ff_libff_public_headers
+      TYPE HEADERS
+      BASE_DIRS
+        ../lglib
+        ../bamglib
+        ../femlib
+        ../Graphics
+        ./
+  )
+
+  set_target_properties(${FF_LIBFF_NAME}
+    PROPERTIES
+    CXX_STANDARD 14
+    CXX_STANDARD_REQUIRED ON
+  )
+
+  target_link_libraries(${FF_LIBFF_NAME}
+    PUBLIC
+    ${FF_CONFIG_H_LIB}
   )
 endif()
 
@@ -140,14 +167,15 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   
   target_link_options(${FF_LIBFF_NAME}
     PRIVATE
-    -undefined dynamic_lookup)
+    -undefined dynamic_lookup
+  )
 
-  # If using XCode, copy libs and plugins in the bundle of the binary dir.
-  #
-  add_custom_command(TARGET ${FF_LIBFF_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    $<TARGET_FILE:${FF_LIBFF_NAME}>
-    $<TARGET_FILE_DIR:${FF_EXE_NW_NAME}>/../Frameworks/$<TARGET_FILE_NAME:${FF_LIBFF_NAME}>)
+  # # If using XCode, copy libs and plugins in the bundle of the binary dir.
+  # #
+  # add_custom_command(TARGET ${FF_LIBFF_NAME} POST_BUILD
+  #   COMMAND ${CMAKE_COMMAND} -E copy_if_different
+  #   $<TARGET_FILE:${FF_LIBFF_NAME}>
+  #   $<TARGET_FILE_DIR:${FF_EXE_NW_NAME}>/../Frameworks/$<TARGET_FILE_NAME:${FF_LIBFF_NAME}>)
 endif()
 # set_target_properties(
 #   ff
