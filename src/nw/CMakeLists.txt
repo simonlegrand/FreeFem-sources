@@ -1,5 +1,5 @@
 add_executable(${FF_EXE_NW_NAME}
-WIN32 MACOSX_BUNDLE)
+WIN32)
 
 target_sources(${FF_EXE_NW_NAME}
   PRIVATE
