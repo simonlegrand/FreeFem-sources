@@ -169,13 +169,6 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     PRIVATE
     -undefined dynamic_lookup
   )
-
-  # # If using XCode, copy libs and plugins in the bundle of the binary dir.
-  # #
-  # add_custom_command(TARGET ${FF_LIBFF_NAME} POST_BUILD
-  #   COMMAND ${CMAKE_COMMAND} -E copy_if_different
-  #   $<TARGET_FILE:${FF_LIBFF_NAME}>
-  #   $<TARGET_FILE_DIR:${FF_EXE_NW_NAME}>/../Frameworks/$<TARGET_FILE_NAME:${FF_LIBFF_NAME}>)
 endif()
 # set_target_properties(
 #   ff

@@ -64,7 +64,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   add_custom_command(TARGET ${FF_LIBLG_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     $<TARGET_FILE:${FF_LIBLG_NAME}>
-    $<TARGET_FILE_DIR:${FF_EXE_NW_NAME}>/../Frameworks/$<TARGET_FILE_NAME:${FF_LIBLG_NAME}>)
+    $<TARGET_FILE_DIR:${FF_EXE_NAME}>/../Frameworks/$<TARGET_FILE_NAME:${FF_LIBLG_NAME}>)
 endif()
 
 # TODO: remove this line as soon as autoconf is removed (only here for config.h and config-wrapper.h)

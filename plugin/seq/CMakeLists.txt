@@ -126,7 +126,6 @@ foreach(plugin ${SEQ_PLUGINS_LIST})
     # )
     target_link_libraries(${plugin}
       PRIVATE
-      #${FF_EXE_NW_NAME}
       ${FF_LIBFF_NAME}_shared
     )
   endif()
@@ -140,7 +139,7 @@ foreach(plugin ${SEQ_PLUGINS_LIST})
     add_custom_command(TARGET ${plugin} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy_if_different
       $<TARGET_FILE:${plugin}>
-      $<TARGET_FILE_DIR:${FF_EXE_NW_NAME}>/../PlugIns/$<TARGET_FILE_NAME:${plugin}>)
+      $<TARGET_FILE_DIR:${FF_EXE_NAME}>/../PlugIns/$<TARGET_FILE_NAME:${plugin}>)
   endif()
 endforeach()
 
