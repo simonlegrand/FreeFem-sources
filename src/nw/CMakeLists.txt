@@ -70,7 +70,7 @@ endif()
 ### FFGLUT
 if(TARGET GLUT::GLUT AND TARGET OpenGL::GLU)
   add_executable(${FF_GLUT_EXE_NAME}
-    WIN32 MACOSX_BUNDLE)
+    WIN32)
 
   set_target_properties(${FF_GLUT_EXE_NAME}
     PROPERTIES

@@ -4,9 +4,14 @@
 # Check for unzip is not necessary since CMake can handle the decompression
 # of zip (and other formats) with find(ARCHIVE EXTRACT INPUT ...)
 # https://cmake.org/cmake/help/latest/command/file.html#archive-extract
+set(ff_required_deps
+  BISON
+  FLEX
+  Patch
+  BLAS
+  LAPACK
+)
 
-find_package(BISON REQUIRED)
-find_package(FLEX REQUIRED)
-find_package(Patch REQUIRED)
-find_package(BLAS REQUIRED)
-find_package(LAPACK REQUIRED)
+foreach(dep ${ff_required_deps})
+  find_package(${dep} REQUIRED)
+endforeach()

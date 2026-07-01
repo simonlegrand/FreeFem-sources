@@ -38,7 +38,7 @@ jobs:
 
       - name: Configure
         run: |
-          cmake -B build -DWITH_MPI=OFF -DCMAKE_BUILD_TYPE=Release \
+          cmake -B build -DFF_WITH_MPI=OFF -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_INSTALL_PREFIX="${HOME}/freefem" -G Ninja
 
       - name: Build
@@ -72,7 +72,7 @@ jobs:
 
       - name: Configure
         run: |
-          cmake -B build -DWITH_MPI=OFF -DCMAKE_INSTALL_PREFIX="${HOME}/freefem" -G Xcode
+          cmake -B build -DFF_WITH_MPI=OFF -DCMAKE_INSTALL_PREFIX="${HOME}/freefem" -G Xcode
 
       - name: Build
         run: cmake --build build --config Debug -j 3 --verbose
@@ -116,7 +116,7 @@ jobs:
 
       - name: Configure
         run: |
-          cmake -B build -DWITH_MPI=OFF -DCMAKE_BUILD_TYPE=Release \
+          cmake -B build -DFF_WITH_MPI=OFF -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_INSTALL_PREFIX="${HOME}/freefem" -G Ninja
 
       - name: Build

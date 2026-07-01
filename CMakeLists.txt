@@ -30,6 +30,7 @@ ff_define_strversionnumber_library()
 
 option(ENABLE_FFCS "Build FreeFEM for use with FreeFem++-cs" OFF)
 option(WITH_MPI "Activate MPI support" ON)
+option(WITH_GLUT "Activate GLUT (graphical) support" ON)
 
 add_definitions(-DHAVE_CONFIG_H) # Probably useless, config.h always present
 
@@ -53,11 +54,7 @@ cmake_print_variables(CMAKE_INSTALL_RPATH)
 
 ### Dependencies search
 #
-if (WITH_MPI)
-  find_package(MPI REQUIRED COMPONENTS CXX)
-endif()
-find_package(OpenGL REQUIRED)
-find_package(GLUT REQUIRED)
+include(ff_check_optional_dependencies)
 
 # md2edp
 set(FF_MD2EDP_EXE_NAME md2edp)
