@@ -47,7 +47,7 @@ message(STATUS "  Plugins   : ${FREEFEM_INSTALL_FULL_PLUGINDIR}")
 message(STATUS "  Idps      : ${FREEFEM_INSTALL_FULL_DATADIR}")
 message(STATUS "  Config    : ${FREEFEM_INSTALL_FULL_CONFIGDIR}")
 
-### RPATH settings
+### INSTALL_RPATH settings
 #
 if(APPLE)
   set(base @loader_path)

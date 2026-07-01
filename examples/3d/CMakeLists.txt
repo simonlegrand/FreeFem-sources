@@ -35,7 +35,7 @@ set(SEQ_TESTS_TIMEOUT 60)
 
 foreach(TEST ${TEST_NAMES})
   add_test(NAME ${TEST}
-    COMMAND $<TARGET_FILE:${FF_EXE_NAME}> ${CMAKE_SOURCE_DIR}/examples/3d/${TEST}
+    COMMAND $<TARGET_FILE:${FF_EXE_NAME}> -nw ${CMAKE_SOURCE_DIR}/examples/3d/${TEST}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/examples/3d)
   set_tests_properties(${TEST}
     PROPERTIES

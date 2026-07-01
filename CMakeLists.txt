@@ -56,16 +56,30 @@ cmake_print_variables(CMAKE_INSTALL_RPATH)
 if (WITH_MPI)
   find_package(MPI REQUIRED COMPONENTS CXX)
 endif()
+find_package(OpenGL REQUIRED)
+find_package(GLUT REQUIRED)
 
 # md2edp
 set(FF_MD2EDP_EXE_NAME md2edp)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/etc/tools)
-# libff, lglib, libMesh, FreeFem++(-nw)
-set(FF_EXE_NW_NAME FreeFem++-nw)
+
+set(FF_EXE_NAME FreeFem++)
+set(FF_GLUT_EXE_NAME ffglut)
 set(FF_LIBFF_NAME ff)
 set(FF_LIBLG_NAME lglib)
-#set(FF_LIBMESH_NAME Mesh)
-set(FF_LIBS ${FF_LIBFF_NAME} ${FF_LIBLG_NAME})
+set(FF_LIBMESH_NAME Mesh)
+set(FF_LIBS
+  ${FF_LIBFF_NAME}
+  ${FF_LIBLG_NAME}
+)
+if (TARGET GLUT::GLUT)
+  list(APPEND FF_LIBS ${FF_LIBMESH_NAME})
+endif()
+
+set(FF_EXES ${FF_MD2EDP_EXE_NAME} ${FF_EXE_NAME})
+if (TARGET GLUT::GLUT)# AND OpenGL::GLU)
+  list(APPEND FF_EXES ${FF_GLUT_EXE_NAME})
+endif()
 
 ### config.h library
 #
@@ -155,9 +169,11 @@ ff_configure_config_header()
 #
 # Remark: If generator is Xcode, installation is supposed to be done in Xcode
 #
+message(STATUS "Installing ${FF_EXES}")
 install(TARGETS
-  ${FF_EXE_NAME} ${FF_MD2EDP_EXE_NAME}
+  ${FF_EXES} ${FF_LIBS}
   RUNTIME DESTINATION "${FREEFEM_INSTALL_BINDIR}"
+  LIBRARY DESTINATION "${FREEFEM_INSTALL_LIBDIR}"
 )
 
 install(TARGETS ${FF_PLUGINS_LIST}  LIBRARY DESTINATION "${FREEFEM_INSTALL_PLUGINDIR}")

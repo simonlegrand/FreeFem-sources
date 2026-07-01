@@ -19,6 +19,9 @@
 /* Access environement variables with geteenv function */
 #cmakedefine HAVE_GETENV
 
+/* the ffglut application for graphics */
+#define PROG_FFGLUT "@FF_GLUT_EXE_NAME@@CMAKE_EXECUTABLE_SUFFIX@"
+
 /* Version number of package */
 #define VERSION "@FREEFEM_VERSION@"
 

@@ -1,4 +1,4 @@
-add_library(${FF_LIBMESH_NAME})
+add_library(${FF_LIBMESH_NAME} SHARED)
 
 target_sources(${FF_LIBMESH_NAME}
   PRIVATE
