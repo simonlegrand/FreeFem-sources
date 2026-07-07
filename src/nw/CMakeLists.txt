@@ -48,7 +48,6 @@ set_target_properties(
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON	
   ENABLE_EXPORTS 1
-  #BUILD_RPATH ${PROJECT_BINARY_DIR}/../../plugin/seq)
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")

@@ -156,7 +156,8 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/examples)
 # It must be know at build time. 
 #set(FF_PREFIX_DIR ${CMAKE_INSTALL_PREFIX}/FreeFem++-nw.app/Contents/Resources)
 set(FF_PREFIX_DIR ${FREEFEM_INSTALL_FULL_CONFIGDIR})
-configure_file(${PROJECT_SOURCE_DIR}/cmake/freefem++.pref.in ${CMAKE_CURRENT_BINARY_DIR}/freefem++.pref)
+configure_file(${PROJECT_SOURCE_DIR}/cmake/freefem++.pref.in
+  ${CMAKE_CURRENT_BINARY_DIR}/freefem++.pref)
 
 # Run at the end, after dependencies detection
 include(ff_configure_config_header)
@@ -173,7 +174,8 @@ install(TARGETS
   LIBRARY DESTINATION "${FREEFEM_INSTALL_LIBDIR}"
 )
 
-install(TARGETS ${FF_PLUGINS_LIST}  LIBRARY DESTINATION "${FREEFEM_INSTALL_PLUGINDIR}")
+install(TARGETS ${FF_PLUGINS_LIST}
+  LIBRARY DESTINATION "${FREEFEM_INSTALL_PLUGINDIR}")
 #install(TARGETS mydsl_lib   LIBRARY DESTINATION "${MYDSL_INSTALL_LIBDIR}")
 
 # install(TARGETS
