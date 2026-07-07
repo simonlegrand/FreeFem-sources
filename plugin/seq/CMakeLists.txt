@@ -83,6 +83,12 @@ set(pcm2rnm_EXTRA_SOURCES pcm.cpp)
 set(Element_Mixte_EXTRA_DEPS "BLAS::BLAS;LAPACK::LAPACK")
 set(IncompleteCholesky_EXTRA_DEPS "BLAS::BLAS;LAPACK::LAPACK")
 
+# Plugin depending on optional dependencies
+if(TARGET TETGEN::TETGEN)
+  list(APPEND SEQ_PLUGINS_LIST tetgen)
+  set(tetgen_EXTRA_DEPS "TETGEN::TETGEN")
+endif()
+
 set(PLUGINS_LIST ${SEQ_PLUGINS_LIST} PARENT_SCOPE)
 
 # This doesn't seem standard, this dylib extension should be reserved

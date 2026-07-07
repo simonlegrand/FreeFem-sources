@@ -14,7 +14,7 @@ set(TESTS_NAME
   buildmeshS.edp
 )
 
-if(TETGEN_FOUND)
+if(TARGET TETGEN::TETGEN)
   list(APPEND TESTS_NAME HeatTorus.edp)
 endif()
 

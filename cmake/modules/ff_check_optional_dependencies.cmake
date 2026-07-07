@@ -10,6 +10,7 @@ set(ff_optional_deps
   OpenGL
   GLUT
   MPI
+  TETGEN
 )
 
 function(required_or_not _dep)
