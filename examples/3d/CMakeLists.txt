@@ -1,4 +1,4 @@
-set(TEST_NAMES
+set(TESTS_NAME
   3d-leman.md
   ArrayFE-3d.edp
   beam-3d.md
@@ -30,15 +30,13 @@ set(TEST_NAMES
   Connectivity-3d.md
   Elasticity-simple-support-BC.md)
 
-# Timeout for sequential tests
-set(SEQ_TESTS_TIMEOUT 60)
-
-foreach(TEST ${TEST_NAMES})
+foreach(TEST ${TESTS_NAME})
   add_test(NAME ${TEST}
     COMMAND $<TARGET_FILE:${FF_EXE_NAME}> -nw ${CMAKE_SOURCE_DIR}/examples/3d/${TEST}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/examples/3d)
   set_tests_properties(${TEST}
     PROPERTIES
     TIMEOUT ${SEQ_TESTS_TIMEOUT}
-    ENVIRONMENT "FF_INCLUDEPATH=../../idp;FF_LOADPATH=${PROJECT_BINARY_DIR}/plugin/seq")
+    ENVIRONMENT "FF_INCLUDEPATH=../../idp;FF_LOADPATH=${PROJECT_BINARY_DIR}/plugin/seq"
+    LABELS "3d")
 endforeach()
