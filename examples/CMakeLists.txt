@@ -6,4 +6,5 @@ set(SEQ_TESTS_TIMEOUT 60)
 add_subdirectory(3d)
 add_subdirectory(3dSurf)
 add_subdirectory(misc)
+add_subdirectory(eigen)
 

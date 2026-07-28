@@ -40,6 +40,13 @@ target_link_libraries(${FF_LIBLG_NAME}
   ${FF_CONFIG_H_LIB}
 )
 
+if(TARGET ARPACK::ARPACK)
+  target_link_libraries(${FF_LIBLG_NAME}
+    PRIVATE
+    ARPACK::ARPACK
+  )
+endif()
+
 set_target_properties(${FF_LIBLG_NAME}
   PROPERTIES
   PREFIX ""

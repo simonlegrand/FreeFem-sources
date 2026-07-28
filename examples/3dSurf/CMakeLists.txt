@@ -18,6 +18,10 @@ if(TARGET TETGEN::TETGEN)
   list(APPEND TESTS_NAME HeatTorus.edp)
 endif()
 
+if(TARGET MMG::mmg)
+  list(APPEND TESTS_NAME Pinocchio.edp)
+endif()
+
 # TODO
 # Add other conditional tests
 

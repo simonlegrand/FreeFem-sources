@@ -89,6 +89,11 @@ if(TARGET TETGEN::TETGEN)
   set(tetgen_EXTRA_DEPS "TETGEN::TETGEN")
 endif()
 
+if(TARGET MMG::mmg)
+  list(APPEND SEQ_PLUGINS_LIST mmg)
+  set(mmg_EXTRA_DEPS "MMG::mmg")
+endif()
+
 set(PLUGINS_LIST ${SEQ_PLUGINS_LIST} PARENT_SCOPE)
 
 # This doesn't seem standard, this dylib extension should be reserved

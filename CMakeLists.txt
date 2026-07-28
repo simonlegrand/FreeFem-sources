@@ -23,8 +23,6 @@ project(FreeFEM
   VERSION ${FREEFEM_VERSION}
 )
 
-#include(ff_config_build_types)
-
 include(ff_define_strversionnumber_library)
 ff_define_strversionnumber_library()
 
@@ -50,7 +48,6 @@ endif()
 ### Setup installation variables
 #  
 include(ff_setup_install) # 
-cmake_print_variables(CMAKE_INSTALL_RPATH)
 
 ### Dependencies search
 #

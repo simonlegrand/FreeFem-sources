@@ -75,6 +75,12 @@ set(libff_sources
   ${PROJECT_BINARY_DIR}/strversionnumber.cpp
 )
 
+if(TARGET ARPACK::ARPACK)
+  list(APPEND libff_sources
+    ../Eigen/eigenvalue.cpp
+  )
+endif()
+
 if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
   add_library(ff_objects OBJECT)
   target_sources(ff_objects

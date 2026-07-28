@@ -33,6 +33,10 @@ set(TESTS_NAME
   bug-macro-on-win32.edp
 )
 
+# Take longer than the default 60s timeout.
+# It allows to skip those tests in CI with the ctest "-LE long" option.
+set(lap3-cpu.edp_EXTRA_LABELS "long")
+
 foreach(TEST ${TESTS_NAME})
   add_test(NAME ${TEST}
     COMMAND $<TARGET_FILE:${FF_EXE_NAME}> -nw ${CMAKE_SOURCE_DIR}/examples/misc/${TEST}
@@ -41,6 +45,6 @@ foreach(TEST ${TESTS_NAME})
     PROPERTIES
     TIMEOUT ${SEQ_TESTS_TIMEOUT}
     ENVIRONMENT "FF_INCLUDEPATH=../../idp;FF_LOADPATH=${PROJECT_BINARY_DIR}/plugin/seq"
-    LABELS "misc"
+    LABELS "misc;${${TEST}_EXTRA_LABELS}"
   )
 endforeach()

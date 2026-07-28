@@ -10,7 +10,12 @@ set(ff_optional_deps
   OpenGL
   GLUT
   MPI
+  GSL
+  METIS
   TETGEN
+  MMG
+  # MSHMET
+  arpackng
 )
 
 function(required_or_not _dep)
@@ -47,3 +52,8 @@ foreach(dep ${ff_optional_deps})
   endif()
 endforeach()
 
+# Extra definitions, for retrocompatibility with autotools version
+#
+if(arpackng_FOUND)
+  set(HAVE_LIBARPACK ON)
+endif()

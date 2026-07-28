@@ -5,7 +5,10 @@
 #cmakedefine PURE_WIN32
 
 /* If umfpack.h is located in UMFPACK subdir */
-#cmakedefine HAVE_BIG_UMFPACK_UMFPACK_H
+// #cmakedefine HAVE_BIG_UMFPACK_UMFPACK_H
+
+/* Arpack is used for eigenvalue computation */
+#cmakedefine HAVE_LIBARPACK
 
 /* freecadna is use to evalute the round-off error propagation */
 #cmakedefine HAVE_CADNA

@@ -1,17 +1,33 @@
-FILE(GLOB EDP_FILES *.edp)
+set(TESTS_NAME "")
 
-IF(NOT FREEFEM_MSH3_INSTALLED)
-  LIST(REMOVE_ITEM EDP_FILES ${CMAKE_SOURCE_DIR}/examples/eigen/Lap3dEigenValue.edp)
-ENDIF(NOT FREEFEM_MSH3_INSTALLED)
+if(TARGET ARPACK::ARPACK)
+  list(APPEND TESTS_NAME
+    BeamEigenValue.edp
+    BeamEigenValueperio.edp
+    condition-number.edp
+    free-cyl-axi.edp
+    Lap3dEigenValue.edp
+    LapComplexEigenValue.edp
+    LapEigenValue.edp
+    LapEigenValueFunc.edp
+    LapEigenValueFuncV2.edp
+    LapnosymComplexEigenValue.edp
+    LapnosymEigenValue.edp
+    neuman.edp
+    Stokes-eigen.edp
+    VP-Steklov-Poincare.edp
+    WGM-sphere.edp
+    LapEigenBeltrami.edp
+    LapEigenValueFuncComplex.edp)
+endif()
 
-IF(NOT FREEFEM_LAPACK_INSTALLED)
-  LIST(REMOVE_ITEM EDP_FILES ${CMAKE_SOURCE_DIR}/examples/eigen/LapnosymComplexEigenValue.edp)
-ENDIF(NOT FREEFEM_LAPACK_INSTALLED)
-
-
-FOREACH(EDP_FILE ${EDP_FILES})
-  GET_FILENAME_COMPONENT(FILENAME ${EDP_FILE} NAME_WE)
-  ADD_TEST(NAME ${FILENAME} COMMAND "${CMAKE_BINARY_DIR}/src/FreeFem++" ${EDP_FILE}
-                            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/examples/eigen)
-ENDFOREACH(EDP_FILE)
-
+foreach(TEST ${TESTS_NAME})
+  add_test(NAME ${TEST}
+    COMMAND $<TARGET_FILE:${FF_EXE_NAME}> -nw ${CMAKE_SOURCE_DIR}/examples/eigen/${TEST}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/examples/eigen)
+  set_tests_properties(${TEST}
+    PROPERTIES
+    TIMEOUT ${SEQ_TESTS_TIMEOUT}
+    ENVIRONMENT "FF_INCLUDEPATH=../../idp;FF_LOADPATH=${PROJECT_BINARY_DIR}/plugin/seq"
+    LABELS "eigen")
+endforeach()
