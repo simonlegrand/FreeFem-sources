@@ -94,6 +94,20 @@ if(TARGET MMG::mmg)
   set(mmg_EXTRA_DEPS "MMG::mmg")
 endif()
 
+if(TARGET FFTW::Double)
+  list(APPEND SEQ_PLUGINS_LIST dfft)
+  set(dfft_EXTRA_DEPS "FFTW::Double")
+endif()
+
+if(TARGET METIS::METIS)
+  list(APPEND SEQ_PLUGINS_LIST metis)
+  set(metis_EXTRA_DEPS "METIS::METIS")
+endif()
+
+if(TARGET GSL::GSL)
+  list(APPEND SEQ_PLUGINS_LIST gsl)
+  set(gsl_EXTRA_DEPS "GSL::GSL")
+endif()
 set(PLUGINS_LIST ${SEQ_PLUGINS_LIST} PARENT_SCOPE)
 
 # This doesn't seem standard, this dylib extension should be reserved

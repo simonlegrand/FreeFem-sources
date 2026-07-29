@@ -69,10 +69,10 @@ set(NSI3d-carac.md_EXTRA_LABELS "long")
 set(periodic-3d.md_EXTRA_LABELS "long")
 
 foreach(TEST ${TESTS_NAME})
-  add_test(NAME ${TEST}
+  add_test(NAME 3d/${TEST}
     COMMAND $<TARGET_FILE:${FF_EXE_NAME}> -nw ${CMAKE_SOURCE_DIR}/examples/3d/${TEST}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/examples/3d)
-  set_tests_properties(${TEST}
+  set_tests_properties(3d/${TEST}
     PROPERTIES
     TIMEOUT ${SEQ_TESTS_TIMEOUT}
     ENVIRONMENT "FF_INCLUDEPATH=../../idp;FF_LOADPATH=${PROJECT_BINARY_DIR}/plugin/seq"

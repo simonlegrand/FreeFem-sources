@@ -21,11 +21,14 @@ if(TARGET ARPACK::ARPACK)
     LapEigenValueFuncComplex.edp)
 endif()
 
+set(Stokes-eigen.edp_EXTRA_LABELS "long")
+set(LapEigenBeltrami.edp_EXTRA_LABELS "long")
+
 foreach(TEST ${TESTS_NAME})
-  add_test(NAME ${TEST}
+  add_test(NAME eigen/${TEST}
     COMMAND $<TARGET_FILE:${FF_EXE_NAME}> -nw ${CMAKE_SOURCE_DIR}/examples/eigen/${TEST}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/examples/eigen)
-  set_tests_properties(${TEST}
+  set_tests_properties(eigen/${TEST}
     PROPERTIES
     TIMEOUT ${SEQ_TESTS_TIMEOUT}
     ENVIRONMENT "FF_INCLUDEPATH=../../idp;FF_LOADPATH=${PROJECT_BINARY_DIR}/plugin/seq"

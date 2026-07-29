@@ -15,7 +15,8 @@ set(ff_optional_deps
   TETGEN
   MMG
   # MSHMET
-  arpackng
+  ARPACK
+  FFTW
 )
 
 function(required_or_not _dep)

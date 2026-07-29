@@ -38,10 +38,10 @@ set(TESTS_NAME
 set(lap3-cpu.edp_EXTRA_LABELS "long")
 
 foreach(TEST ${TESTS_NAME})
-  add_test(NAME ${TEST}
+  add_test(NAME misc/${TEST}
     COMMAND $<TARGET_FILE:${FF_EXE_NAME}> -nw ${CMAKE_SOURCE_DIR}/examples/misc/${TEST}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/examples/misc)
-  set_tests_properties(${TEST}
+  set_tests_properties(misc/${TEST}
     PROPERTIES
     TIMEOUT ${SEQ_TESTS_TIMEOUT}
     ENVIRONMENT "FF_INCLUDEPATH=../../idp;FF_LOADPATH=${PROJECT_BINARY_DIR}/plugin/seq"

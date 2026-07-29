@@ -26,10 +26,10 @@ endif()
 # Add other conditional tests
 
 foreach(TEST ${TESTS_NAME})
-  add_test(NAME ${TEST}
+  add_test(NAME 3dSurf/${TEST}
     COMMAND $<TARGET_FILE:${FF_EXE_NAME}> -nw ${CMAKE_SOURCE_DIR}/examples/3dSurf/${TEST}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/examples/3dSurf)
-  set_tests_properties(${TEST}
+  set_tests_properties(3dSurf/${TEST}
     PROPERTIES
     TIMEOUT ${SEQ_TESTS_TIMEOUT}
     ENVIRONMENT "FF_INCLUDEPATH=../../idp;FF_LOADPATH=${PROJECT_BINARY_DIR}/plugin/seq"

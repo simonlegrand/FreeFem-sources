@@ -1,0 +1,58 @@
+name: Sequential CMake version
+
+on:
+  push:
+    branches:
+      - develop
+      - master
+      - cmake
+      
+  pull_request:
+    branches:
+      - develop
+
+  # For development phase
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [26.04]
+
+    name: Ubuntu ${{ matrix.version }} CMake - ${{ github.workflow }}
+    runs-on: ubuntu-${{ matrix.version }}
+
+    steps:
+      - uses: actions/checkout@main
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install gcc g++ gfortran m4 patch \
+            git libblas-dev liblapack-dev libhdf5-dev libgsl-dev flex bison \
+            wget cmake autoconf automake autotools-dev libmetis-dev \
+            libfftw3-dev freeglut3-dev libtet-dev libarpack2-dev
+
+      - name: Configure
+        run: |
+          CFLAGS="-mtune=generic" CXXFLAGS="-mtune=generic" cmake -B build \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DFF_WITH_MPI=OFF -DFF_WITH_FFTW=ON -DFF_WITH_METIS=ON \
+          -DFF_WITH_TETGEN=ON -DFF_WITH_ARPACK=ON \
+          -DCMAKE_INSTALL_PREFIX="${HOME}/freefem" -G Ninja
+
+      - name: Build
+        run: cmake --build ./build -j 4 --verbose
+
+      - name: Check
+        run: |
+          ctest --test-dir ./build -LE long --output-on-failure
+
+      - name: Install
+        run: cmake --install --build
