@@ -7,10 +7,6 @@ on:
         description: 'FreeFEM release version'
         required: true
         type: string
-      docker_versions:
-        description: 'Ubuntu runner versions as a JSON array'
-        required: true
-        type: string
       docker_arch:
         description: 'Docker architectures as a JSON array'
         required: true
@@ -22,12 +18,11 @@ on:
 
 jobs:
   build_docker:
-    name: Docker ${{ matrix.version }} ${{ matrix.arch }}
-    runs-on: ${{ matrix.arch == 'arm64' && format('ubuntu-{0}-arm', matrix.version) || format('ubuntu-{0}', matrix.version) }}
+    name: Build Docker image ${{ matrix.arch }}
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     strategy:
       fail-fast: false
       matrix:
-        version: ${{ fromJSON(inputs.docker_versions) }}
         arch: ${{ fromJSON(inputs.docker_arch) }}
     permissions:
       contents: read
@@ -112,75 +107,75 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  publish_docker:
-    name: Publish multi-platform Docker image
-    needs: build_docker
-    runs-on: ubuntu-${{ fromJSON(inputs.docker_versions)[0] }}
-    permissions:
-      contents: read
-    env:
-      REGISTRY_IMAGE: docker.io/freefem/freefem
-    steps:
-      - name: Generate Docker tags
-        id: meta
-        uses: docker/metadata-action@v6
-        with:
-          images: ${{ env.REGISTRY_IMAGE }}
-          tags: |
-            type=raw,value=${{ github.ref_name }}
-            type=raw,value=latest,enable=${{ inputs.publish_latest }}
+  # publish_docker:
+  #   name: Publish multi-platform Docker image
+  #   needs: build_docker
+  #   runs-on: ubuntu-${{ fromJSON(inputs.docker_versions)[0] }}
+  #   permissions:
+  #     contents: read
+  #   env:
+  #     REGISTRY_IMAGE: docker.io/freefem/freefem
+  #   steps:
+  #     - name: Generate Docker tags
+  #       id: meta
+  #       uses: docker/metadata-action@v6
+  #       with:
+  #         images: ${{ env.REGISTRY_IMAGE }}
+  #         tags: |
+  #           type=raw,value=${{ github.ref_name }}
+  #           type=raw,value=latest,enable=${{ inputs.publish_latest }}
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v4
-        with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+  #     - name: Log in to Docker Hub
+  #       uses: docker/login-action@v4
+  #       with:
+  #         username: ${{ vars.DOCKERHUB_USERNAME }}
+  #         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v4
 
-      - name: Download image digests
-        uses: actions/download-artifact@v4
-        with:
-          path: ${{ runner.temp }}/digests
-          pattern: docker-digest-*
-          merge-multiple: true
+  #     - name: Download image digests
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         path: ${{ runner.temp }}/digests
+  #         pattern: docker-digest-*
+  #         merge-multiple: true
 
-      - name: Create and push multi-platform manifest
-        working-directory: ${{ runner.temp }}/digests
-        env:
-          DOCKER_ARCH: ${{ inputs.docker_arch }}
-          DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
-        run: |
-          set -euxo pipefail
-          shopt -s nullglob
-          digest_files=(*)
-          expected_digests=$(jq length <<< "${DOCKER_ARCH}")
+  #     - name: Create and push multi-platform manifest
+  #       working-directory: ${{ runner.temp }}/digests
+  #       env:
+  #         DOCKER_ARCH: ${{ inputs.docker_arch }}
+  #         DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
+  #       run: |
+  #         set -euxo pipefail
+  #         shopt -s nullglob
+  #         digest_files=(*)
+  #         expected_digests=$(jq length <<< "${DOCKER_ARCH}")
 
-          if (( ${#digest_files[@]} != expected_digests )); then
-            echo "Expected ${expected_digests} image digests, found ${#digest_files[@]}" >&2
-            exit 1
-          fi
+  #         if (( ${#digest_files[@]} != expected_digests )); then
+  #           echo "Expected ${expected_digests} image digests, found ${#digest_files[@]}" >&2
+  #           exit 1
+  #         fi
 
-          mapfile -t tags < <(jq -r '.tags[]' <<< "${DOCKER_METADATA_OUTPUT_JSON}")
-          tag_args=()
-          for tag in "${tags[@]}"; do
-            tag_args+=(--tag "${tag}")
-          done
+  #         mapfile -t tags < <(jq -r '.tags[]' <<< "${DOCKER_METADATA_OUTPUT_JSON}")
+  #         tag_args=()
+  #         for tag in "${tags[@]}"; do
+  #           tag_args+=(--tag "${tag}")
+  #         done
 
-          digest_args=()
-          for digest in "${digest_files[@]}"; do
-            digest_args+=("${REGISTRY_IMAGE}@sha256:${digest}")
-          done
+  #         digest_args=()
+  #         for digest in "${digest_files[@]}"; do
+  #           digest_args+=("${REGISTRY_IMAGE}@sha256:${digest}")
+  #         done
 
-          docker buildx imagetools create "${tag_args[@]}" "${digest_args[@]}"
+  #         docker buildx imagetools create "${tag_args[@]}" "${digest_args[@]}"
 
-      - name: Verify multi-platform image
-        env:
-          DOCKER_ARCH: ${{ inputs.docker_arch }}
-        run: |
-          set -euxo pipefail
-          docker buildx imagetools inspect "${REGISTRY_IMAGE}:${GITHUB_REF_NAME}"
-          docker buildx imagetools inspect --raw "${REGISTRY_IMAGE}:${GITHUB_REF_NAME}" \
-            | jq --exit-status --argjson expected "${DOCKER_ARCH}" \
-                '([.manifests[] | select(.platform.os == "linux") | .platform.architecture] | unique | sort) == ($expected | unique | sort)'
+  #     - name: Verify multi-platform image
+  #       env:
+  #         DOCKER_ARCH: ${{ inputs.docker_arch }}
+  #       run: |
+  #         set -euxo pipefail
+  #         docker buildx imagetools inspect "${REGISTRY_IMAGE}:${GITHUB_REF_NAME}"
+  #         docker buildx imagetools inspect --raw "${REGISTRY_IMAGE}:${GITHUB_REF_NAME}" \
+  #           | jq --exit-status --argjson expected "${DOCKER_ARCH}" \
+  #               '([.manifests[] | select(.platform.os == "linux") | .platform.architecture] | unique | sort) == ($expected | unique | sort)'

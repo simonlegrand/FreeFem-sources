@@ -31,7 +31,6 @@ jobs:
         run: |
           echo "ubuntu_versions=[22.04, 24.04, 26.04]" >> $GITHUB_OUTPUT
           echo "windows_versions=[2025]" >> $GITHUB_OUTPUT
-          echo "docker_versions=[24.04]" >> $GITHUB_OUTPUT
           echo 'docker_arch=["amd64", "arm64"]' >> $GITHUB_OUTPUT
 
       - name: Check if tag is on master
@@ -67,7 +66,6 @@ jobs:
     uses: ./.github/workflows/release_docker.yml
     with:
       release_version: ${{ needs.set_versions.outputs.ff_version }}
-      docker_versions: ${{ needs.set_versions.outputs.docker_versions }}
       docker_arch: ${{ needs.set_versions.outputs.docker_arch }}
       publish_latest: ${{ needs.set_versions.outputs.is_master == 'true' }}
     secrets: inherit
