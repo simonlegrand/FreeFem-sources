@@ -80,7 +80,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: ./release-assets
-          pattern: "!docker-digest-*"
+          pattern: "!(docker-digest-*|install_tree*)"
           merge-multiple: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
