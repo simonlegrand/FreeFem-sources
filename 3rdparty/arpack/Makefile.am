@@ -14,14 +14,14 @@
 # You should have received a copy of the GNU Lesser General Public License #
 # along with FreeFEM. If not, see <http://www.gnu.org/licenses/>.          #
 ############################################################################
-# SUMMARY : Makefile for downloaded ARPACK
+# SUMMARY : Makefile for downloaded arpack-ng
 # LICENSE : LGPLv3
 # ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
 # AUTHORS : ...
 # E-MAIL  : ...
 
 all-local:$(DOWNLOAD_ARPACK)
-EXTRA_DIST=ARmake.m4 arpack-patch-lapack.tar.gz veclib_zdotc.f veclib_cdotc.f 
+EXTRA_DIST=
 
 PKGCOMMON_PACKTITLE=ARPACK
 include ../common.mak
@@ -30,77 +30,70 @@ include ../common.mak
 
 reinstall::install
 
-# Downloading and compiling ARPACK
-# --------------------------------
+# Downloading and compiling arpack-ng
+# -----------------------------------
+# arpack-ng (https://github.com/opencollab/arpack-ng) is the maintained
+# fork of the original 1996 ARPACK. It keeps the same F77 interface, so
+# src/Eigen/arpackff.hpp works unchanged. The library is built with its
+# own CMake build system (as done for mmg) into a static libarpack.a
+# copied to ../lib, where configure.ac expects it (ARPACKLIB).
+
 .NOTPARALLEL:
 
-# set in configure 
+# set in configure
 #ARPACKLIB=ARPACK/libarpack_ff++.a
 DIRPKG=../pkg
-ARPACK96_TAR_GZ=$(DIRPKG)/arpack96.tar.gz
-PATCH_TAR_GZ=$(DIRPKG)/patch.tar.gz
+ARPACKNG_TAR_GZ=$(DIRPKG)/arpack-ng-3.9.1.tar.gz
 
-PKGCOMMON_PACKAGES=$(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ)
-
-# FFCS: need to add $(RANLIB) under mingw64 to avoid "archive has no index" error
+PKGCOMMON_PACKAGES=$(ARPACKNG_TAR_GZ)
 
 compilepkg::$(ARPACKLIB)
 
-ARPACK/ARmake.inc:ARPACK/ARmake.incnew
-	if diff -q ARPACK/ARmake.incnew ARPACK/ARmake.inc ; then echo No Modif skip compile of arpack ; else cp ARPACK/ARmake.incnew ARPACK/ARmake.inc; fi
-	
-$(ARPACKLIB):ARPACK/ARmake.inc
-	case '$(BLASLIBS)' in *vecLib*|*Accelerate*|*mkl*) $(F77) -c $(FFLAGS) veclib_zdotc.f -o ARPACK/SRC/veclib_zdotc.o ;; esac; 
-	case '$(BLASLIBS)' in *vecLib*|*Accelerate*|*mkl*) $(F77) -c $(FFLAGS) veclib_cdotc.f -o ARPACK/SRC/veclib_cdotc.o ;; esac; 
-	mkdir -p ../include ../lib
-	if [ -n '@FF_LAPACKdir@' ] ; then \
-	$(F77) -c `echo $(FFLAGS)\ |sed -e s/-O.\*\ // ` ARPACK/LAPACK/dlamch.f -o ARPACK/LAPACK/dlamch.o; \
-	fi; \
-	cd ARPACK && $(MAKE) lib 
-	if test -n '@FF_LAPACKdir@' ; then \
-	$(AR) $(ARFLAGS) $(LAPACK_arpack_LIB)  ARPACK/SRC/*.o  ARPACK/UTIL/*.o ARPACK/LAPACK/*.o ;\
-	$(RANLIB) $(LAPACK_arpack_LIB) ;\
-	else \
-	$(AR) $(ARFLAGS) $(ARPACKLIB)  ARPACK/SRC/*.o  ARPACK/UTIL/*.o ;\
-	fi
-	
-ARPACK/ARmake.incnew: $(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ) ARmake.m4 Makefile 
-	-rm -rf ARPACK
-	gunzip -c $(ARPACK96_TAR_GZ) | tar xf -
-	gunzip -c $(PATCH_TAR_GZ) | tar xf -
-	gunzip -c arpack-patch-lapack.tar.gz | tar xf -
-	case '$(BLASLIBS)' in *vecLib*|*Accelerate*|*mkl*) \
-         for i in  ARPACK/LAPACK/zlatrs.f ARPACK/LAPACK/ztrsyl.f ARPACK/SRC/zgetv0.f ARPACK/SRC/znaitr.f ARPACK/SRC/znaup2.f ARPACK/SRC/zneupd.f;\
-	   do  mv  $$i $$i.cpy; sed -e 's/ZDOTC/ZZDOTC/' -e 's/zdotc/zzdotc/' <$$i.cpy >$$i;rm $$i.cpy; \
-	    done; \
-         for i in  ARPACK/LAPACK/clatrs.f ARPACK/LAPACK/ctrsyl.f ARPACK/SRC/cgetv0.f ARPACK/SRC/cnaitr.f ARPACK/SRC/cnaup2.f ARPACK/SRC/cneupd.f;\
-	   do  mv  $$i $$i.cpy; sed -e 's/CDOTC/CCDOTC/' -e 's/cdotc/ccdotc/' <$$i.cpy >$$i;rm $$i.cpy; \
-	    done; \
-	 esac 
-	for i in ARPACK/SRC/*.f ; do \
-	    mv  $$i $$i.cpy; sed -e 's/, second/, secnd2/' -e 's/call *second/call secnd2/' <$$i.cpy >$$i;rm $$i.cpy; done 
-	for i in  ARPACK/UTIL/second.f;  do  \
-	   mv  $$i $$i.cpy; cat $$i.cpy| sed 's/ SECOND *(/ secnd2(/'|grep -v EXTERNAL  >$$i;rm $$i.cpy; done 
-	m4  -DFF_BLASLIB="$(BLASLIB)" \
-	    -DFF_ARPACKLIB="$(ARPACKLIB)" \
-            -DFF_LAPACK_arpack_LIB="$(LAPACK_arpack_LIB)" \
-	    -DFF_FC="@F77@" \
-            -DFF_FFLAGS="@FFLAGS@" \
-	    -DFF_LAPACKdir='@FF_LAPACKdir@' \
-            -DFF_LDFLAGS="@LDFLAGS@" \
-            -DFF_HOME=`pwd`/ARPACK \
-	    -DFF_SECOND="@FF_SECOND@" \
-	    -DFF_AR="@AR@" \
-	    -DFF_ARFLAGS="@ARFLAGS@" \
-	    -DFF_RANLIB="@RANLIB@" \
-	    ARmake.m4 >ARPACK/ARmake.incnew
-	
+$(ARPACKLIB):ARPACK/install.done
+	mkdir -p ../lib
+	cp prefix/lib/libarpack.a $(ARPACKLIB)
 
-$(ARPACK96_TAR_GZ) $(PATCH_TAR_GZ):download
+ARPACK/install.done:ARPACK/configure.done
+	cd ARPACK/build && $(MAKE)
+	cd ARPACK/build && $(MAKE) install
+	touch $@
+
+# BLAS/LAPACK come from FreeFEM's configure (@BLASLIBS@/@LAPACKLIBS@);
+# pass them explicitly so CMake's FindBLAS/FindLAPACK cannot pick
+# different ones than the rest of the build.
+
+ARPACK/configure.done:$(ARPACKNG_TAR_GZ)
+	rm -rf ARPACK
+	mkdir -p ARPACK
+	cd ARPACK && tar xzf ../$(ARPACKNG_TAR_GZ) --strip-components=1
+	mkdir -p ARPACK/build
+	set -- ; \
+	if test -n '$(WIN32DLLTARGET)' ; then set -- -G "MSYS Makefiles" ; fi ; \
+	prefix="`cd ARPACK; pwd`/../prefix"; \
+	cd ARPACK/build && cmake .. \
+	 -DCMAKE_Fortran_COMPILER='$(F77)' \
+	 -DCMAKE_Fortran_FLAGS='$(FFLAGS)' \
+	 -DCMAKE_C_COMPILER='$(CC)' \
+	 -DCMAKE_C_FLAGS='$(CFLAGS)' \
+	 -DCMAKE_INSTALL_PREFIX="$$prefix" \
+	 -DCMAKE_INSTALL_LIBDIR=lib \
+	 -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+	 -DBUILD_SHARED_LIBS=OFF \
+	 -DTESTS=OFF \
+	 -DEXAMPLES=OFF \
+	 -DICB=OFF \
+	 -DMPI=OFF \
+	 -DBLAS_LIBRARIES='$(BLASLIBS)' \
+	 -DLAPACK_LIBRARIES='$(LAPACKLIBS)' \
+	 "$$@"
+	touch $@
+
+$(ARPACKNG_TAR_GZ):download
 #	../getall -o ARPACK -a
 
 clean-local::
-	-rm -r ARPACK ../lib/libarpack.a
+	-rm -rf ARPACK prefix
+	-rm -f ../lib/libarpack.a
 
 # Local Variables:
 # mode:makefile
