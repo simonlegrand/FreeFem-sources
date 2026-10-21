@@ -64,8 +64,11 @@ m4_define([AC_FF_WHERELIB],
     [  	if test -z "$ff_where_lib_conf_$1" -a "$enable_download_$1"  != "yes" ; then
         AC_MSG_CHECKING(check $1)
 	ff_save_libs=$LIBS
+	ff_save_cppflags=$CPPFLAGS
 	LIBS="$LIBS $2 $4"
+	CPPFLAGS="$CPPFLAGS $5"
 	AC_LINK_IFELSE([AC_LANG_PROGRAM([m4_if($3,,,[#include <$3>])],[])], [ff_WHERE=yes],[ff_WHERE=no])
+	CPPFLAGS=$ff_save_cppflags
 	if test "$ff_WHERE" = "yes" ; then
 	    echo "$1 LD $2"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`AS_DIRNAME(["$3"])`
@@ -2261,8 +2264,8 @@ m4_map([AC_FF_WHERELIB],[
 	[[superlu],[-lsuperlu],[${inc_usr_include}superlu/superlu_enum_consts.h],[]],
         [[blacs],[ -lblacsCinit$ff_with_mpi	-lblacsF77init$ff_with_mpi	-lblacs$ff_with_mpi],[]],
         [[scalapack],[-lscalapack$ff_with_mpi],[]],
-        [[scotch],[-lscotch -lscotcherr],[scotch.h]],
-        [[ptscotch],[-lptscotch -lptscotcherr],[ptscotch.h]],
+        [[scotch],[-lscotch -lscotcherr],[scotch.h],[],[-include stdint.h -include stdio.h]],
+        [[ptscotch],[-lptscotch -lptscotcherr],[ptscotch.h],[],[-include stdint.h -include stdio.h]],
 	[[metis],[-lmetis],[${inc_usr_include}metis/metis.h],[]],
 	[[metis],[-lmetis],[metis.h],[]],
 	[[parmetis],[-lparmetis -lmetis],[],[]],
