@@ -5,6 +5,7 @@ on:
     branches:
       - develop
       - master
+      - agent/clean-deps
 
   pull_request:
     branches:
@@ -44,10 +45,10 @@ jobs:
         run: |
           autoreconf -i
           extra_configure_opts=()
-          if [[ "${{ matrix.version }}" == "26.04" ]]; then
-            extra_configure_opts+=(--disable-scotch)
-          fi
-          ./configure --enable-download --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem" "${extra_configure_opts[@]}"
+          # if [[ "${{ matrix.version }}" == "26.04" ]]; then
+          #   extra_configure_opts+=(--disable-scotch)
+          # fi
+          ./configure --enable-download-scotch --enable-download-fftw --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem" "${extra_configure_opts[@]}"
 
       - name: Build
         run: make -j 4
@@ -84,7 +85,7 @@ jobs:
       - name: Configure
         run: |
           autoreconf -i
-          ./configure --enable-download --disable-scotch --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
+          ./configure --enable-download-scotch --enable-download-fftw --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
 
       - name: Build
         run: make -j 3
@@ -139,7 +140,7 @@ jobs:
       - name: Configure
         run: |
           autoreconf -i
-          ./configure --enable-download --disable-scotch --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
+          ./configure --enable-download-scotch --enable-download-fftw --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
 
       - name: Build
         run: make -j 4
