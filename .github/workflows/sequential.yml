@@ -51,11 +51,11 @@ jobs:
           ./configure --enable-download-scotch --enable-download-fftw --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem" "${extra_configure_opts[@]}"
 
       - name: Build
-        run: make -j 4
+        run: make -j $(nproc)
 
       - name: Check
         run: |
-          make check -i
+          make check -i -j $(nproc)
           ./etc/actions/failed_tests_logs.sh
 
       - name: Install
@@ -88,11 +88,11 @@ jobs:
           ./configure --enable-download-scotch --enable-download-fftw --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
 
       - name: Build
-        run: make -j 3
+        run:   make -j $(sysctl -n hw.logicalcpu)
 
       - name: Check
         run: |
-          make check -i
+          make check -i -j $(sysctl -n hw.logicalcpu)
           ./etc/actions/failed_tests_logs.sh
 
       - name: Install
@@ -143,9 +143,9 @@ jobs:
           ./configure --enable-download-scotch --enable-download-fftw --without-mpi ${{ matrix.cfg.opts }} --prefix="${HOME}/freefem"
 
       - name: Build
-        run: make -j 4
+        run: make -j $NUMBER_OF_PROCESSORS
 
       - name: Check
         run: |
-          make check -i
+          make check -i -j $NUMBER_OF_PROCESSORS
           ./etc/actions/failed_tests_logs.sh
