@@ -20,7 +20,7 @@
 # AUTHORS : ...
 # E-MAIL  : ...
 
-SUBDIRS=blas arpack umfpack
+SUBDIRS=blas arpack umfpack scotch
 EXTRA_DIST= \
 ./nlopt/Make.inc ./nlopt/Makefile \
 ./f2c/Makefile \
@@ -54,9 +54,6 @@ EXTRA_DIST= \
 ./parmetis/parmetis-4.0.3.patch \
 ./scalapack/Makefile \
 ./scalapack/SLmake-scalapack.inc \
-./scotch/Makefile \
-./scotch/Makefile-scotch.inc \
-./scotch/scotch_6.0.4.patch \
 ./superlu/Makefile \
 ./superlu/patch-superlu-5.2.2 \
 ./superlu/make.inc \
@@ -83,7 +80,7 @@ getall
 MPI_SOFT= @TOOL_COMPILE_scalapack@ @TOOL_COMPILE_parmetis@ @TOOL_COMPILE_parmmg@ @TOOL_COMPILE_mumps@
 
 LIST_SOFT= @DOWNLOAD_FFTW@ @TOOL_COMPILE_tetgen@ @TOOL_COMPILE_metis@ @TOOL_COMPILE_superlu@ \
-	@TOOL_COMPILE_scotch@ @TOOL_COMPILE_mshmet@			\
+	@TOOL_COMPILE_mshmet@			\
 	@TOOL_COMPILE_yams@ @TOOL_COMPILE_mmg3d@ @TOOL_COMPILE_mmg@ @TOOL_COMPILE_gmm@	\
 	@TOOL_COMPILE_nlopt@ @TOOL_COMPILE_mumps_seq@			\
 	@TOOL_COMPILE_ipopt@ @TOOL_COMPILE_libpthread_google@

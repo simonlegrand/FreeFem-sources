@@ -164,8 +164,7 @@ AppDir/
 3rdparty/scalapack/FAIRE
 3rdparty/scalapack/SLmake.inc
 3rdparty/scalapack/scalapack-*
-3rdparty/scotch/FAIRE
-3rdparty/scotch/Makefile.inc
+3rdparty/scotch/prefix/
 3rdparty/scotch/scotch-v*/
 3rdparty/share/coin/doc/Ipopt/AUTHORS
 3rdparty/share/coin/doc/Ipopt/LICENSE

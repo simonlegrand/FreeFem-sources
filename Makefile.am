@@ -414,6 +414,7 @@ LIST_GENERATE_FILE= configure config.h.in \
     3rdparty/Makefile.in \
     3rdparty/blas/Makefile.in \
     3rdparty/arpack/Makefile.in \
+    3rdparty/scotch/Makefile.in \
     3rdparty/umfpack/Makefile.in \
     3rdparty/fftw/Makefile.in \
     src/Makefile.in \
@@ -455,6 +456,7 @@ LIST_GENERATE_FILE_AM= \
     3rdparty/Makefile.am \
     3rdparty/blas/Makefile.am \
     3rdparty/arpack/Makefile.am \
+    3rdparty/scotch/Makefile.am \
     3rdparty/umfpack/Makefile.am \
     3rdparty/fftw/Makefile.am \
     src/Makefile.am \
