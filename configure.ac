@@ -1377,10 +1377,13 @@ then
 else
     if test "$enable_download" = yes -o "$enable_download_fftw" = yes
     then
-        ff_DOWNLOAD_FFTW=fftw
+        ff_DOWNLOAD_FFTW=install
+        AC_SUBST(FFTWLIB,${curdir}/3rdparty/lib/libfftw3.a)
 
-        # The generic fftw3 probe below must not add a system library when
-        # the download was explicitly requested.
+        # 3rdparty/fftw is an automake subdirectory, like 3rdparty/arpack and
+        # 3rdparty/scotch: only build the downloaded library when configure
+        # selected it. The generic fftw3 probe below must not add a system
+        # library when the download was explicitly requested.
         enable_download_fftw3=yes
     fi
 fi

@@ -113,6 +113,7 @@ AppDir/
 3rdparty/fftw/FAIRE
 3rdparty/fftw/FAIT
 3rdparty/fftw/cxxflags
+3rdparty/fftw/prefix/
 3rdparty/fftw/fftw-
 3rdparty/gmm/FAIRE
 3rdparty/gmm/FAIT

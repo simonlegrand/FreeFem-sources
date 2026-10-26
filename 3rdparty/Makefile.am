@@ -20,7 +20,7 @@
 # AUTHORS : ...
 # E-MAIL  : ...
 
-SUBDIRS=blas arpack umfpack scotch
+SUBDIRS=blas arpack umfpack scotch fftw
 EXTRA_DIST= \
 ./nlopt/Make.inc ./nlopt/Makefile \
 ./f2c/Makefile \
@@ -28,8 +28,6 @@ EXTRA_DIST= \
 ./f2c/f2c.h-int \
 ./f2c/fort77.sed \
 ./f2c/tt.f \
-./fftw/Makefile.am \
-./fftw/Makefile.in \
 ./gmm/Makefile \
 ./gmm/cxxflags \
 ./headers-sparsesolver.inc \
@@ -79,7 +77,7 @@ getall
 
 MPI_SOFT= @TOOL_COMPILE_scalapack@ @TOOL_COMPILE_parmetis@ @TOOL_COMPILE_parmmg@ @TOOL_COMPILE_mumps@
 
-LIST_SOFT= @DOWNLOAD_FFTW@ @TOOL_COMPILE_tetgen@ @TOOL_COMPILE_metis@ @TOOL_COMPILE_superlu@ \
+LIST_SOFT= @TOOL_COMPILE_tetgen@ @TOOL_COMPILE_metis@ @TOOL_COMPILE_superlu@ \
 	@TOOL_COMPILE_mshmet@			\
 	@TOOL_COMPILE_yams@ @TOOL_COMPILE_mmg3d@ @TOOL_COMPILE_mmg@ @TOOL_COMPILE_gmm@	\
 	@TOOL_COMPILE_nlopt@ @TOOL_COMPILE_mumps_seq@			\
