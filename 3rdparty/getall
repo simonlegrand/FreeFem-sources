@@ -98,10 +98,9 @@ download('OpenBLAS','http://github.com/xianyi/OpenBLAS/archive/v0.3.6.tar.gz',
 	'OpenBLAS.tar.gz',
 	'8a110a25b819a4b94e8a9580702b6495',
 	'BAD_CERT');
-download('FFTW','http://www.fftw.org/fftw-3.3.8.tar.gz',
+download('FFTW','http://www.fftw.org/fftw-3.3.11.tar.gz',
 	'http://www.fftw.org',
-	'fftw-3.3.8.tar.gz','8aac833c943d8e90d51b697b27d4384d');
-# 3.3.2	'6977ee770ed68c85698c7168ffa6e178');
+	'fftw-3.3.11.tar.gz','40ec8d0447d03b8f01f8c90aa77bd16f');
 download('freeYams','https://raw.githubusercontent.com/FreeFem/FreeFEM-3rdparties/main/freeyams.2012.02.05.tgz',
 	'https://www.ljll.fr/frey/software.html',
 	'freeyams.2012.02.05.tgz',
