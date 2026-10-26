@@ -64,6 +64,7 @@ compilepkg::$(SCOTCHLIB)
 
 # Download and extract
 $(PKG_SRCDIR):$(PKG_TARBALL)
+	rm -rf $(PKG_SRCDIR)
 	tar xzf $(PKG_TARBALL)
 	touch $(PKG_SRCDIR)
 
