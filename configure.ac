@@ -1358,7 +1358,11 @@ fi
 
 # ALH - 18/9/13 - deactivates FFTW detection for testing purposes
 AC_ARG_ENABLE(system_fftw,AS_HELP_STRING([--disable-system-fftw],[Disable the automatic detection of FFTW]))
-if test "$enable_system_fftw" != no
+AC_ARG_ENABLE(download-fftw,AS_HELP_STRING([--enable-download-fftw],[force the download of fftw]))
+
+ff_fftw_ok=no
+ff_fftw_h=no
+if test "$enable_download_fftw" != yes -a "$enable_system_fftw" != no
 then
 
     # ALH - 4/9/13 - avoid recompiling FFTW if a copy was found on the system (request from Helmut Jarausch, 1/8/13)
@@ -1371,10 +1375,13 @@ if test "$ff_fftw_ok" = yes -a "$ff_fftw_h" = yes
 then
     AC_FF_ADDWHERELIB(fftw3,-lfftw3,)
 else
-    AC_ARG_ENABLE(download-fftw,AS_HELP_STRING([--enable-download_fftw],[force the download of fftw]))
-    if test "$enable_download_fftw" != no -a "$enable_download" = yes
+    if test "$enable_download" = yes -o "$enable_download_fftw" = yes
     then
         ff_DOWNLOAD_FFTW=fftw
+
+        # The generic fftw3 probe below must not add a system library when
+        # the download was explicitly requested.
+        enable_download_fftw3=yes
     fi
 fi
 
@@ -2640,10 +2647,11 @@ if test "$ff_arpack_download" = yes -a  -n "$TOOL_COMPILE_arpack"  ; then
     AC_MSG_NOTICE([      use of download ARPACK see  3rdparty/arpack/ARPACK/README  no License ])
 fi
 
+if test -n "$ff_DOWNLOAD_FFTW"; then
+  AC_MSG_NOTICE([      use of download fftw   see  3rdparty/fftw/fftw-3.3.11/COPYRIGHT ])
+fi
+
 if test "$enable_download" = yes; then
-  if test -n "$ff_DOWNLOAD_FFTW"; then
-    AC_MSG_NOTICE([      use of download fftw   see  3rdparty/fftw/fftw-3.2/COPYRIGHT ])
-  fi
   if test -n "$TOOL_COMPILE_tetgen"; then
     AC_MSG_NOTICE([      use of download tetgen  see 3rdparty/tetgen/tetgen1.5.1-beta/LICENSE ])
   fi

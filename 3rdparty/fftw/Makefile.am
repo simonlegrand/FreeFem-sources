@@ -7,7 +7,7 @@ all-local: $(DOWNLOAD_FFTW)
 # ------------------------------
 
 # FFTW information
-FFTW_VERSION=3.3.8
+FFTW_VERSION=3.3.11
 SRCDIR=fftw-$(FFTW_VERSION)
 PACKAGE=fftw-$(FFTW_VERSION).tar.gz
 SERVER=http://www.fftw.org
@@ -28,7 +28,7 @@ $(SRCDIR)/FAIT-1:../pkg/$(PACKAGE)
 
 ../pkg/$(PACKAGE):
 	-mkdir ../pkg
-	cd ../pkg;@WGET@ -N $(SERVER)/$(PACKAGE)
+	../getall -o FFTW -a
 
 WHERE:$(SRCDIR)/FAIT
 	-if [ $(SRCDIR)/FAIT ] ; then \
