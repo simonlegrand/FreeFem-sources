@@ -6,6 +6,7 @@ on:
     branches:
       - develop
       - master
+      - update_msys2_env_local
 
   pull_request:
     branches:

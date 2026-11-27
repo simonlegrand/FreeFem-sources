@@ -18,21 +18,35 @@
 <!----------------------------------------------------------------------------------->
 
 # How to compile FreeFem++ on Microsoft Windows
-_april 2017_
 
-Visit this [web page](http://www.freefem.org/ff++/windows.php)
+FreeFEM can be built on Windows using [MSYS2](https://www.msys2.org/). Use one MSYS2 environment consistently, do not mix packages from UCRT64, MINGW64, or CLANG64 environments
 
-Bug warning (Windows 64): if you launch FreeFem++ without script by double clicking
-on the icon, you get an error (it is due to a bug in GetOpenFileName).
+The environment-specific installation prefix is available as `MSYSTEM_PREFIX` in an MSYS2 shell. Build and packaging commands should use that prefix rather than assuming a path such as `/ucrt64`.
 
-From version 3.52 onwards, the Windows 64 version is built with MPI support and
-with the following options
+## Select an MSYS2 environment
+
+Open the MSYS2 shell for the environment you intend to use. UCRT64 is the reference environment for the package examples below.
+
+Other environments, like CLANG64, could work but have not been tested.
+
+## Install build dependencies
+
+Update MSYS2, then install the tools and libraries required for the build. For UCRT64, for example:
+
 ```bash
-./configure '--enable-download'
+pacman -Syu
+pacman -S --needed \
+  mingw-w64-ucrt-x86_64-toolchain \
+  mingw-w64-ucrt-x86_64-freeglut \
+  mingw-w64-ucrt-x86_64-gcc-fortran \
+  mingw-w64-ucrt-x86_64-autotools \
+  mingw-w64-ucrt-x86_64-openblas \
+  mingw-w64-ucrt-x86_64-msmpi \
+  mingw-w64-ucrt-x86_64-cmake \
+  mingw-w64-ucrt-x86_64-ntldd \
+  m4 patch git flex bison unzip pkg-config pkgfile tar python
 ```
-
-Then, execute and follow the instructions.
-
+For another environment, install the corresponding packages from that environment’s MSYS2 repository. Package names and compiler availability may differ.
 ## To test the MPI usage: in windows terminal (cmd, shell, PowerShell)
 
 Go to the directory `C:\Program Files (86)\FreeFem++\examples\mpi`
