@@ -6,7 +6,8 @@ on:
     branches:
       - develop
       - master
-
+      - update_dependencies_local
+      
   pull_request:
     branches:
       - develop
@@ -59,7 +60,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y gcc g++ gfortran m4 patch git wget cmake \
-          liblapack-dev libhdf5-dev flex bison autoconf automake unzip patch \
+          libopenblas-dev libhdf5-dev flex bison autoconf automake unzip patch \
           autotools-dev libopenmpi-dev python3 freeglut3-dev
 
       - name: Set configure flags and variables
